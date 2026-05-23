@@ -1,0 +1,1526 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COCO · Mi Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --blush:      #f2e0dc;
+  --rose:       #d4968a;
+  --rose-deep:  #b87060;
+  --rose-dark:  #8a4a3a;
+  --cream:      #faf6f3;
+  --sand:       #e8ddd6;
+  --mink:       #8a7168;
+  --espresso:   #3d2b25;
+  --white:      #ffffff;
+  --success:    #7aab6e;
+  --warning:    #d4a050;
+  --error:      #c0614f;
+  --serif:      'Cormorant Garamond', serif;
+  --sans:       'Jost', sans-serif;
+  --sidebar-w:  260px;
+  --topbar-h:   64px;
+  --ease:       cubic-bezier(0.4, 0, 0.2, 1);
+}
+body { font-family: var(--sans); background: var(--cream); color: var(--espresso); min-height: 100vh; display: flex; }
+.sidebar { width: var(--sidebar-w); min-height: 100vh; background: var(--espresso); display: flex; flex-direction: column; position: fixed; left: 0; top: 0; bottom: 0; z-index: 100; overflow-y: auto; }
+.sidebar-brand { padding: 1.5rem 1.5rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.sidebar-salon { font-size: 0.6rem; font-weight: 300; color: var(--mink); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 0.5rem; }
+.sidebar-nombre { font-family: var(--serif); font-size: 1.4rem; font-weight: 300; color: var(--white); letter-spacing: 0.04em; line-height: 1.2; margin-bottom: 0.2rem; }
+.sidebar-rol { font-size: 0.68rem; font-weight: 300; color: var(--rose); letter-spacing: 0.1em; }
+.sidebar-deco { display: flex; align-items: center; gap: 6px; margin-top: 0.5rem; }
+.sidebar-deco-line { flex: 1; height: 0.5px; background: var(--rose); opacity: 0.3; }
+.sidebar-deco-diamond { width: 4px; height: 4px; background: var(--rose); transform: rotate(45deg); opacity: 0.5; }
+.sidebar-nav { flex: 1; padding: 1.25rem 0; }
+.nav-group-label { font-size: 0.6rem; font-weight: 400; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.25); padding: 1rem 1.5rem 0.4rem; }
+.nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 1.5rem; cursor: pointer; transition: all 0.2s var(--ease); border-left: 2px solid transparent; }
+.nav-item:hover { background: rgba(255,255,255,0.04); }
+.nav-item.active { background: rgba(212,150,138,0.12); border-left-color: var(--rose); }
+.nav-item svg { width: 16px; height: 16px; stroke: rgba(255,255,255,0.4); fill: none; stroke-width: 1.5; flex-shrink: 0; transition: stroke 0.2s; }
+.nav-item:hover svg, .nav-item.active svg { stroke: var(--rose); }
+.nav-item span { font-size: 0.78rem; font-weight: 300; color: rgba(255,255,255,0.5); transition: color 0.2s; flex: 1; }
+.nav-item:hover span, .nav-item.active span { color: var(--white); }
+.nav-badge { font-size: 0.6rem; font-weight: 500; padding: 0.15rem 0.45rem; border-radius: 10px; min-width: 18px; text-align: center; background: var(--rose-deep); color: white; }
+.sidebar-footer { padding: 1.25rem 1.5rem; border-top: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 0.75rem; }
+.avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--rose-deep); display: flex; align-items: center; justify-content: center; font-family: var(--serif); font-size: 0.9rem; color: white; flex-shrink: 0; }
+.avatar-info { flex: 1; min-width: 0; }
+.avatar-name { font-size: 0.78rem; font-weight: 400; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.avatar-role { font-size: 0.62rem; font-weight: 300; color: var(--mink); }
+.btn-logout { background: none; border: none; cursor: pointer; padding: 0.3rem; }
+.btn-logout svg { width: 15px; height: 15px; stroke: rgba(255,255,255,0.3); fill: none; stroke-width: 1.5; transition: stroke 0.2s; }
+.btn-logout:hover svg { stroke: var(--rose); }
+.main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+.topbar { height: var(--topbar-h); background: var(--white); border-bottom: 1px solid var(--sand); display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; position: sticky; top: 0; z-index: 50; }
+.topbar-left { display: flex; flex-direction: column; }
+.topbar-title { font-family: var(--serif); font-size: 1.4rem; font-weight: 300; color: var(--espresso); line-height: 1; }
+.topbar-sub { font-size: 0.68rem; font-weight: 300; color: var(--mink); margin-top: 0.15rem; }
+.topbar-btn { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 2px; font-family: var(--sans); font-size: 0.7rem; font-weight: 400; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; border: 1px solid var(--espresso); background: var(--espresso); color: white; transition: all 0.2s; }
+.topbar-btn:hover { background: var(--rose-deep); border-color: var(--rose-deep); }
+.topbar-btn svg { width: 14px; height: 14px; stroke: white; fill: none; stroke-width: 1.5; }
+.content { flex: 1; padding: 2rem; }
+.section { display: none; animation: fadeUp 0.35s var(--ease); }
+.section.active { display: block; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+.section-header { margin-bottom: 1.5rem; }
+.section-header h2 { font-family: var(--serif); font-size: 1.8rem; font-weight: 300; color: var(--espresso); margin-bottom: 0.2rem; }
+.section-header p { font-size: 0.78rem; font-weight: 300; color: var(--mink); }
+.stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1.25rem; margin-bottom: 1.75rem; }
+.stat-card { background: var(--white); border: 1px solid var(--sand); border-radius: 4px; overflow: hidden; }
+.stat-bar { height: 3px; }
+.stat-bar.rose  { background: var(--rose-deep); }
+.stat-bar.blush { background: var(--rose); }
+.stat-bar.sand  { background: var(--warning); }
+.stat-bar.green { background: var(--success); }
+.stat-body { padding: 1.25rem; }
+.stat-label { font-size: 0.65rem; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mink); margin-bottom: 0.5rem; }
+.stat-value { font-family: var(--serif); font-size: 2rem; font-weight: 300; color: var(--espresso); line-height: 1; margin-bottom: 0.3rem; }
+.stat-sub { font-size: 0.7rem; font-weight: 300; color: var(--mink); }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.5rem; }
+.card { background: var(--white); border: 1px solid var(--sand); border-radius: 4px; padding: 1.5rem; margin-bottom: 1.25rem; }
+.card-title { font-family: var(--serif); font-size: 1.1rem; font-weight: 400; color: var(--espresso); margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--sand); }
+.badge { font-size: 0.62rem; font-weight: 400; letter-spacing: 0.08em; padding: 0.2rem 0.6rem; border-radius: 20px; white-space: nowrap; }
+.badge-green { background:#f0f7ee; color:#4a7a40; }
+.badge-amber { background:#fdf5e8; color:#8a6020; }
+.badge-rose  { background:var(--blush); color:var(--rose-dark); }
+.badge-gray  { background:#f0efed; color:var(--mink); }
+.badge-error { background:#fdf0ee; color:var(--error); }
+.tabla { width: 100%; border-collapse: collapse; }
+.tabla th { font-size: 0.62rem; font-weight: 400; letter-spacing: 0.12em; text-transform: uppercase; color: var(--mink); text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--sand); }
+.tabla td { font-size: 0.78rem; font-weight: 300; color: var(--espresso); padding: 0.65rem 0.75rem; border-bottom: 1px solid var(--sand); vertical-align: middle; }
+.tabla tr:last-child td { border-bottom: none; }
+.tabla tr:hover td { background: var(--cream); }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+.form-field { margin-bottom: 0; }
+.form-field.full { grid-column: 1/-1; }
+.form-field label { display: block; font-size: 0.65rem; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mink); margin-bottom: 0.5rem; }
+.form-field input, .form-field textarea, .form-field select { width: 100%; padding: 0.75rem 0; background: none; border: none; border-bottom: 1px solid var(--sand); font-family: var(--sans); font-size: 0.88rem; font-weight: 300; color: var(--espresso); outline: none; transition: border-color 0.2s; resize: none; }
+.form-field input:focus, .form-field textarea:focus, .form-field select:focus { border-bottom-color: var(--rose-deep); }
+.form-actions { display: flex; gap: 1rem; margin-top: 1.5rem; }
+.btn-primary { padding: 0.75rem 2rem; background: var(--espresso); color: white; border: none; font-family: var(--sans); font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; cursor: pointer; border-radius: 2px; transition: background 0.2s; }
+.btn-primary:hover { background: var(--rose-deep); }
+.btn-secondary { padding: 0.75rem 2rem; background: none; color: var(--mink); border: 1px solid var(--sand); font-family: var(--sans); font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; cursor: pointer; border-radius: 2px; transition: all 0.2s; }
+.btn-secondary:hover { border-color: var(--rose); color: var(--rose-deep); }
+.btn-sm { padding: 0.3rem 0.7rem; font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; border-radius: 2px; cursor: pointer; font-family: var(--sans); transition: all 0.2s; white-space: nowrap; }
+.btn-sm.outline { background: none; border: 1px solid var(--sand); color: var(--mink); }
+.btn-sm.outline:hover { border-color: var(--rose); color: var(--rose-deep); }
+.btn-sm.solid { background: var(--espresso); border: none; color: white; }
+.btn-sm.solid:hover { background: var(--rose-deep); }
+.btn-sm.danger { background: none; border: 1px solid rgba(192,97,79,0.3); color: var(--error); }
+.btn-sm.danger:hover { background: var(--error); color: white; border-color: var(--error); }
+/* Filtros de fecha */
+.filtros-fecha { display: flex; align-items: flex-end; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.filtros-fecha .form-field { width: 180px; margin-bottom: 0; }
+.filtros-fecha .form-field label { margin-bottom: 0.35rem; }
+.filtros-fecha .form-field input { padding: 0.5rem 0; }
+/* Wizard */
+.wizard-steps { display: flex; align-items: center; margin-bottom: 2rem; }
+.wizard-step { display: flex; align-items: center; gap: 0.75rem; }
+.step-circle { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--sand); display: flex; align-items: center; justify-content: center; font-size: 0.72rem; color: var(--mink); background: var(--white); flex-shrink: 0; transition: all 0.2s; }
+.step-circle.active { background: var(--espresso); border-color: var(--espresso); color: white; }
+.step-circle.done { background: var(--success); border-color: var(--success); color: white; }
+.step-label { font-size: 0.68rem; color: var(--mink); white-space: nowrap; }
+.step-label.active { color: var(--espresso); font-weight: 400; }
+.step-line { flex: 1; height: 1px; background: var(--sand); margin: 0 0.75rem; }
+.wizard-panel { display: none; }
+.wizard-panel.active { display: block; animation: fadeUp 0.3s var(--ease); }
+.servicio-card { border: 1px solid var(--sand); border-radius: 4px; padding: 1rem; cursor: pointer; transition: all 0.2s; background: var(--white); display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem; }
+.servicio-card:hover { border-color: var(--rose); }
+.servicio-card.selected { border-color: var(--rose-deep); background: var(--blush); }
+.servicio-check { width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--sand); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s; }
+.servicio-card.selected .servicio-check { background: var(--rose-deep); border-color: var(--rose-deep); }
+.servicio-check svg { width: 10px; height: 10px; stroke: white; fill: none; stroke-width: 2.5; opacity: 0; transition: opacity 0.2s; }
+.servicio-card.selected .servicio-check svg { opacity: 1; }
+.servicio-info { flex: 1; }
+.servicio-nombre { font-size: 0.85rem; font-weight: 400; color: var(--espresso); margin-bottom: 0.2rem; }
+.servicio-meta { font-size: 0.7rem; font-weight: 300; color: var(--mink); }
+.servicio-precio { font-family: var(--serif); font-size: 1rem; color: var(--rose-deep); white-space: nowrap; }
+.empleado-card { border: 1px solid var(--sand); border-radius: 4px; padding: 1rem; cursor: pointer; transition: all 0.2s; background: var(--white); display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
+.empleado-card:hover { border-color: var(--rose); }
+.empleado-card.selected { border-color: var(--rose-deep); background: var(--blush); }
+.empleado-avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--rose-deep); display: flex; align-items: center; justify-content: center; font-family: var(--serif); font-size: 0.9rem; color: white; flex-shrink: 0; }
+.slots-grid { display: grid; grid-template-columns: repeat(6,1fr); gap: 0.5rem; }
+.slot { padding: 0.5rem; text-align: center; border: 1px solid var(--sand); border-radius: 2px; font-size: 0.72rem; color: var(--espresso); cursor: pointer; transition: all 0.2s; background: var(--white); }
+.slot:hover { border-color: var(--rose); }
+.slot.selected { background: var(--espresso); border-color: var(--espresso); color: white; }
+.cita-card { border: 1px solid var(--sand); border-radius: 4px; padding: 1.25rem; background: var(--white); margin-bottom: 0.75rem; display: flex; align-items: flex-start; gap: 1rem; position: relative; overflow: hidden; }
+.cita-card::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; }
+.cita-card.confirmada::before { background: var(--success); }
+.cita-card.programada::before { background: var(--warning); }
+.cita-card.completada::before { background: var(--mink); }
+.cita-card.cancelada::before  { background: var(--error); }
+.cita-fecha { text-align: center; min-width: 50px; }
+.cita-dia { font-family: var(--serif); font-size: 1.8rem; font-weight: 300; color: var(--espresso); line-height: 1; }
+.cita-mes { font-size: 0.62rem; font-weight: 400; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mink); }
+.cita-info { flex: 1; }
+.cita-servicio { font-size: 0.88rem; font-weight: 400; color: var(--espresso); margin-bottom: 0.2rem; }
+.cita-detalle { font-size: 0.72rem; font-weight: 300; color: var(--mink); margin-bottom: 0.3rem; }
+.cita-precio { font-family: var(--serif); font-size: 1.1rem; color: var(--rose-deep); white-space: nowrap; }
+/* Facturas layout igual que Atención */
+.factura-layout { display: grid; grid-template-columns: 1fr 360px; gap: 1.25rem; }
+.factura-preview { background: var(--white); border: 1px solid var(--sand); border-radius: 4px; padding: 2rem; }
+/* Pagos layout mejorado */
+.pago-row-total { font-family: var(--serif); font-size: 1rem; color: var(--rose-deep); font-weight: 400; }
+/* Promo cards */
+.promo-card { border: 1px solid var(--sand); border-radius: 4px; overflow: hidden; background: var(--white); }
+.promo-banner { padding: 1.5rem; text-align: center; background: var(--blush); }
+.promo-pct { font-family: var(--serif); font-size: 3rem; font-weight: 300; color: var(--rose-deep); line-height: 1; margin-bottom: 0.2rem; }
+.promo-off { font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--mink); }
+.promo-body { padding: 1.25rem; }
+.promo-name { font-family: var(--serif); font-size: 1.1rem; font-weight: 400; color: var(--espresso); margin-bottom: 0.3rem; }
+.promo-desc { font-size: 0.72rem; font-weight: 300; color: var(--mink); line-height: 1.6; margin-bottom: 0.5rem; }
+.promo-fechas { font-size: 0.65rem; color: var(--mink); }
+.notif-item { display: flex; gap: 1rem; padding: 1rem 1.25rem; border-bottom: 1px solid var(--sand); background: var(--white); cursor: pointer; transition: background 0.15s; }
+.notif-item:last-child { border-bottom: none; }
+.notif-item.leida { opacity: 0.5; }
+.notif-item:hover { background: var(--cream); }
+.notif-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; background: var(--rose-deep); }
+.notif-dot.leida { background: var(--mink); }
+.perfil-header { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1.5rem; background: var(--white); border: 1px solid var(--sand); border-radius: 4px; padding: 1.5rem; }
+.perfil-avatar { width: 64px; height: 64px; border-radius: 50%; background: var(--blush); border: 2px solid var(--rose); display: flex; align-items: center; justify-content: center; font-family: var(--serif); font-size: 1.6rem; font-weight: 300; color: var(--rose-deep); flex-shrink: 0; }
+.chip { display: inline-flex; align-items: center; padding: 0.25rem 0.75rem; border: 1px solid var(--rose); border-radius: 20px; font-size: 0.68rem; color: var(--rose-dark); background: var(--blush); margin: 0.2rem; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(61,43,37,0.45); display: none; align-items: center; justify-content: center; z-index: 200; }
+.modal-overlay.open { display: flex; }
+.modal-box { background: var(--white); border-radius: 4px; padding: 2rem; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; }
+.modal-title { font-family: var(--serif); font-size: 1.4rem; font-weight: 300; color: var(--espresso); margin-bottom: 1.5rem; }
+.modal-actions { display: flex; gap: 1rem; margin-top: 1.5rem; }
+.empty { text-align: center; padding: 3rem; color: var(--mink); font-size: 0.82rem; }
+.empty-icon { font-family: var(--serif); font-size: 3rem; color: var(--sand); margin-bottom: 0.75rem; }
+.loading { text-align: center; padding: 2rem; color: var(--mink); font-size: 0.78rem; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="sidebar-salon">COCO · Salón de Belleza</div>
+    <div class="sidebar-nombre" id="sb-nombre">Bienvenida</div>
+    <div class="sidebar-rol">Portal Cliente</div>
+    <div class="sidebar-deco"><div class="sidebar-deco-line"></div><div class="sidebar-deco-diamond"></div><div class="sidebar-deco-line"></div></div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-group-label">Mi espacio</div>
+    <div class="nav-item active" onclick="nav('inicio',this)">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Inicio</span>
+    </div>
+    <div class="nav-item" onclick="nav('perfil',this)">
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Mi perfil</span>
+    </div>
+    <div class="nav-group-label">Citas</div>
+    <div class="nav-item" onclick="nav('reservar',this)">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span>Reservar cita</span>
+    </div>
+    <div class="nav-item" onclick="nav('citas',this)">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="8.01" y2="14"/></svg>
+      <span>Mis citas</span>
+    </div>
+    <div class="nav-group-label">Historial</div>
+    <div class="nav-item" onclick="nav('compras',this)">
+      <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
+      <span>Mis compras</span>
+    </div>
+    <div class="nav-item" onclick="nav('facturas',this)">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <span>Mis facturas</span>
+    </div>
+    <div class="nav-item" onclick="nav('pagos',this)">
+      <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+      <span>Mis pagos</span>
+    </div>
+    <div class="nav-group-label">Más</div>
+    <div class="nav-item" onclick="nav('catalogo',this)">
+      <svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/></svg>
+      <span>Catálogo</span>
+    </div>
+    <div class="nav-item" onclick="nav('promociones',this)">
+      <svg viewBox="0 0 24 24"><polyline points="21 15 21 21 15 21"/><path d="M21 21L9 9"/><polyline points="3 9 3 3 9 3"/></svg>
+      <span>Promociones</span>
+    </div>
+    <div class="nav-item" onclick="nav('notificaciones',this)">
+      <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+      <span>Notificaciones</span>
+      <span class="nav-badge" id="badge-notif" style="display:none">0</span>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="avatar" id="sb-avatar">?</div>
+    <div class="avatar-info">
+      <div class="avatar-name" id="sb-avatar-nombre">Cliente</div>
+      <div class="avatar-role">Cliente</div>
+    </div>
+    <button class="btn-logout" onclick="cerrarSesion()">
+      <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    </button>
+  </div>
+</aside>
+
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-title" id="topbar-title">Inicio</div>
+      <div class="topbar-sub" id="topbar-sub"></div>
+    </div>
+    <button class="topbar-btn" onclick="nav('reservar',null)">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Reservar cita
+    </button>
+  </header>
+
+  <div class="content">
+
+    <!-- ═══ INICIO ═══ -->
+    <div class="section active" id="sec-inicio">
+      <div class="section-header">
+        <h2>Bienvenida, <em style="font-style:italic;color:var(--rose-deep)" id="saludo-nombre">—</em></h2>
+        <p>Resumen de tu cuenta</p>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-bar rose"></div><div class="stat-body"><div class="stat-label">Próxima cita</div><div class="stat-value" id="stat-proxima" style="font-size:1.1rem">—</div><div class="stat-sub" id="stat-proxima-sub">Sin citas próximas</div></div></div>
+        <div class="stat-card"><div class="stat-bar blush"></div><div class="stat-body"><div class="stat-label">Visitas este año</div><div class="stat-value" id="stat-visitas">0</div><div class="stat-sub">Servicios completados</div></div></div>
+        <div class="stat-card"><div class="stat-bar sand"></div><div class="stat-body"><div class="stat-label">Total gastado</div><div class="stat-value" id="stat-gastado" style="font-size:1.2rem">Bs 0</div><div class="stat-sub">Histórico</div></div></div>
+        <div class="stat-card"><div class="stat-bar green"></div><div class="stat-body"><div class="stat-label">Promociones</div><div class="stat-value" id="stat-promos">0</div><div class="stat-sub">Activas para ti</div></div></div>
+      </div>
+      <div class="grid-2">
+        <div>
+          <div class="card-title" style="font-family:var(--serif);font-size:1.1rem;font-weight:400;color:var(--espresso);margin-bottom:1rem">Próximas citas</div>
+          <div id="inicio-citas"><div class="loading">Cargando...</div></div>
+        </div>
+        <div>
+          <div class="card-title" style="font-family:var(--serif);font-size:1.1rem;font-weight:400;color:var(--espresso);margin-bottom:1rem">Promociones activas</div>
+          <div id="inicio-promos"><div class="loading">Cargando...</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ MI PERFIL ═══ -->
+    <div class="section" id="sec-perfil">
+      <div class="section-header"><h2>Mi <em style="font-style:italic;color:var(--rose-deep)">perfil</em></h2><p>Datos personales y preferencias</p></div>
+      <div class="perfil-header">
+        <div class="perfil-avatar" id="perfil-avatar">?</div>
+        <div>
+          <div style="font-family:var(--serif);font-size:1.4rem;font-weight:300;color:var(--espresso)" id="perfil-nombre-display">—</div>
+          <div style="font-size:0.75rem;font-weight:300;color:var(--mink);margin-top:0.2rem" id="perfil-email-display">—</div>
+          <span class="chip" style="margin-top:0.5rem;display:inline-block">Cliente</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Datos personales</div>
+        <div class="form-grid">
+          <div class="form-field"><label>Nombre *</label><input type="text" id="p-nombre"></div>
+          <div class="form-field"><label>Apellido *</label><input type="text" id="p-apellido"></div>
+          <div class="form-field"><label>Teléfono *</label><input type="tel" id="p-telefono"></div>
+          <div class="form-field"><label>Correo electrónico *</label><input type="email" id="p-email"></div>
+          <div class="form-field"><label>Fecha de nacimiento</label><input type="date" id="p-nacimiento"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Información médica</div>
+        <div class="form-grid">
+          <div class="form-field full"><label>Alergias conocidas</label><textarea id="p-alergias" rows="2"></textarea></div>
+          <div class="form-field full"><label>Contraindicaciones</label><textarea id="p-contraindicaciones" rows="2"></textarea></div>
+          <div class="form-field full"><label>Notas técnicas</label><textarea id="p-notas" rows="2"></textarea></div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-primary" onclick="guardarPerfil()">Guardar cambios</button>
+          <button class="btn-secondary" onclick="cargarPerfil()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ RESERVAR CITA ═══ -->
+    <div class="section" id="sec-reservar">
+      <div class="section-header"><h2>Reservar <em style="font-style:italic;color:var(--rose-deep)">cita</em></h2><p>Elige tus servicios y horario</p></div>
+      <div class="wizard-steps">
+        <div class="wizard-step"><div class="step-circle active" id="step1-circle">1</div><div class="step-label active" id="step1-label">Servicios</div></div>
+        <div class="step-line"></div>
+        <div class="wizard-step"><div class="step-circle" id="step2-circle">2</div><div class="step-label" id="step2-label">Fecha y hora</div></div>
+        <div class="step-line"></div>
+        <div class="wizard-step"><div class="step-circle" id="step3-circle">3</div><div class="step-label" id="step3-label">Personal</div></div>
+        <div class="step-line"></div>
+        <div class="wizard-step"><div class="step-circle" id="step4-circle">4</div><div class="step-label" id="step4-label">Confirmar</div></div>
+      </div>
+      <div class="wizard-panel active" id="wizard-1">
+        <div class="card">
+          <div class="card-title">Selecciona uno o más servicios</div>
+          <div style="display:flex;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap" id="filtros-cat"></div>
+          <div id="lista-srv"><div class="loading">Cargando...</div></div>
+          <div style="margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--sand);display:flex;justify-content:space-between;align-items:center">
+            <div id="resumen-sel" style="font-size:0.78rem;color:var(--mink)">Ningún servicio seleccionado</div>
+            <button class="btn-primary" onclick="wNext(2)" id="btn-p2" disabled style="opacity:0.4">Siguiente →</button>
+          </div>
+        </div>
+      </div>
+      <div class="wizard-panel" id="wizard-2">
+        <div class="card">
+          <div class="card-title">Elige fecha y hora</div>
+          <div class="form-grid" style="margin-bottom:1.5rem">
+            <div class="form-field"><label>Fecha *</label><input type="date" id="r-fecha" onchange="cargarSlots()" min=""></div>
+            <div class="form-field"><label>Duración estimada</label><input type="text" id="r-duracion" disabled style="opacity:0.6"></div>
+          </div>
+          <div class="stat-label" id="label-horario" style="margin-bottom:0.75rem">Horarios disponibles · 09:00 – 19:00</div>
+          <div id="slots"><div style="font-size:0.78rem;color:var(--mink)">Selecciona una fecha</div></div>
+          <div id="btn-solicitud" style="display:none;margin-top:1rem">
+            <div style="font-size:0.75rem;color:var(--mink);margin-bottom:0.5rem">¿Necesitas un horario especial?</div>
+            <button class="btn-secondary" onclick="abrirModalSolicitud()" >Solicitar horario especial</button>
+          </div>
+          <div style="margin-top:1.25rem;display:flex;justify-content:space-between">
+            <button class="btn-secondary" onclick="wNext(1)">← Atrás</button>
+            <button class="btn-primary" onclick="wNext(3)" id="btn-p3" disabled style="opacity:0.4">Siguiente →</button>
+          </div>
+        </div>
+      </div>
+      <div class="wizard-panel" id="wizard-3">
+        <div class="card">
+          <div class="card-title">Elige tu personal (opcional)</div>
+          <div style="background:var(--cream);border-radius:4px;padding:1rem;margin-bottom:1.25rem">
+            <div style="font-size:0.78rem;font-weight:400;color:var(--espresso);margin-bottom:0.3rem">¿Sin preferencia?</div>
+            <div style="font-size:0.72rem;color:var(--mink);margin-bottom:0.75rem">Asignaremos automáticamente el personal disponible.</div>
+            <button class="btn-secondary" onclick="wNext(4)">Asignar automáticamente →</button>
+          </div>
+          <div id="lista-emp"><div class="loading">Cargando personal...</div></div>
+          <div style="margin-top:1.25rem;display:flex;justify-content:space-between">
+            <button class="btn-secondary" onclick="wNext(2)">← Atrás</button>
+            <button class="btn-primary" onclick="wNext(4)">Siguiente →</button>
+          </div>
+        </div>
+      </div>
+      <div class="wizard-panel" id="wizard-4">
+        <div class="card">
+          <div class="card-title">Confirma tu reserva</div>
+          <div id="resumen-cita" style="margin-bottom:1.5rem"></div>
+          <div style="display:flex;justify-content:space-between">
+            <button class="btn-secondary" onclick="wNext(3)">← Atrás</button>
+            <button class="btn-primary" onclick="confirmarReserva()">Confirmar reserva</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ MIS CITAS ═══ -->
+    <div class="section" id="sec-citas">
+      <div class="section-header"><h2>Mis <em style="font-style:italic;color:var(--rose-deep)">citas</em></h2><p>Próximas y pasadas</p></div>
+      <div class="card-title" style="font-family:var(--serif);font-size:1.1rem;font-weight:400;margin-bottom:1rem">Próximas citas</div>
+      <div id="citas-proximas"><div class="loading">Cargando...</div></div>
+      <div class="card-title" style="font-family:var(--serif);font-size:1.1rem;font-weight:400;margin-top:2rem;margin-bottom:1rem">Historial</div>
+      <div id="citas-historial"><div class="loading">Cargando...</div></div>
+    </div>
+
+    <!-- ═══ MIS COMPRAS ═══ -->
+    <div class="section" id="sec-compras">
+      <div class="section-header">
+        <h2>Mis <em style="font-style:italic;color:var(--rose-deep)">compras</em></h2>
+        <p>Historial de servicios y productos</p>
+      </div>
+      <div class="filtros-fecha">
+        <div class="form-field">
+          <label>Desde</label>
+          <input type="date" id="compras-desde">
+        </div>
+        <div class="form-field">
+          <label>Hasta</label>
+          <input type="date" id="compras-hasta">
+        </div>
+        <button class="btn-primary" onclick="cargarCompras()">Filtrar</button>
+        <button class="btn-secondary" onclick="limpiarFiltrosCompras()">Limpiar</button>
+      </div>
+      <div class="card">
+        <table class="tabla">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Ítem</th>
+              <th>Tipo</th>
+              <th>Cant.</th>
+              <th>Precio unit.</th>
+              <th>Total</th>
+              <th>Factura</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-compras">
+            <tr><td colspan="8"><div class="loading">Cargando...</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══ MIS FACTURAS ═══ (igual que Atención: 2 columnas) -->
+    <div class="section" id="sec-facturas">
+      <div class="section-header">
+        <h2>Mis <em style="font-style:italic;color:var(--rose-deep)">facturas</em></h2>
+        <p>Historial de documentos de venta</p>
+      </div>
+      <div class="factura-layout">
+        <!-- Listado -->
+        <div class="card" style="margin-bottom:0">
+          <div class="card-title">Listado de mis facturas</div>
+          <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.25rem;flex-wrap:wrap">
+            <input type="date" id="filtro-factura-desde" style="padding:0.4rem 0.75rem;border:1px solid var(--sand);border-radius:2px;font-family:var(--sans);font-size:0.72rem;color:var(--espresso);background:var(--white);outline:none;cursor:pointer" onchange="cargarFacturas()">
+            <input type="date" id="filtro-factura-hasta" style="padding:0.4rem 0.75rem;border:1px solid var(--sand);border-radius:2px;font-family:var(--sans);font-size:0.72rem;color:var(--espresso);background:var(--white);outline:none;cursor:pointer" onchange="cargarFacturas()">
+            <button class="btn-sm outline" onclick="limpiarFiltrosFacturas()">Limpiar</button>
+          </div>
+          <div id="tabla-facturas-listado"><div class="loading">Cargando facturas...</div></div>
+        </div>
+        <!-- Vista previa -->
+        <div>
+          <div class="factura-preview" id="factura-detalle" style="display:none">
+            <div style="text-align:center;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--sand)">
+              <div style="font-family:var(--serif);font-size:1.6rem;font-weight:300;color:var(--espresso)">COCO</div>
+              <div style="font-size:0.68rem;color:var(--mink)">Salón de Belleza · Santa Cruz, Bolivia</div>
+            </div>
+            <div id="factura-preview-contenido"></div>
+          </div>
+          <div class="factura-preview" id="factura-placeholder">
+            <div class="empty">Selecciona una factura para ver su detalle</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ MIS PAGOS ═══ -->
+    <div class="section" id="sec-pagos">
+      <div class="section-header">
+        <h2>Mis <em style="font-style:italic;color:var(--rose-deep)">pagos</em></h2>
+        <p>Registro de transacciones realizadas</p>
+      </div>
+      <div class="filtros-fecha">
+        <div class="form-field">
+          <label>Desde</label>
+          <input type="date" id="pagos-desde">
+        </div>
+        <div class="form-field">
+          <label>Hasta</label>
+          <input type="date" id="pagos-hasta">
+        </div>
+        <button class="btn-primary" onclick="cargarPagos()">Filtrar</button>
+        <button class="btn-secondary" onclick="limpiarFiltrosPagos()">Limpiar</button>
+      </div>
+      <div class="card">
+        <table class="tabla">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Factura</th>
+              <th>Método de pago</th>
+              <th>Monto</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-pagos">
+            <tr><td colspan="5"><div class="loading">Cargando...</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══ CATÁLOGO ═══ -->
+    <div class="section" id="sec-catalogo">
+      <div class="section-header"><h2>Catálogo de <em style="font-style:italic;color:var(--rose-deep)">servicios</em></h2></div>
+      <div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap" id="filtros-cat2"></div>
+      <div id="catalogo-srv"><div class="loading">Cargando...</div></div>
+    </div>
+
+    <!-- ═══ PROMOCIONES ═══ -->
+    <div class="section" id="sec-promociones">
+      <div class="section-header"><h2>Promociones <em style="font-style:italic;color:var(--rose-deep)">activas</em></h2></div>
+      <div id="lista-promos" style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem">
+        <div class="loading">Cargando...</div>
+      </div>
+    </div>
+
+    <!-- ═══ NOTIFICACIONES ═══ -->
+    <div class="section" id="sec-notificaciones">
+      <div class="section-header"><h2>Notificaciones</h2></div>
+      <div style="border:1px solid var(--sand);border-radius:4px;overflow:hidden;background:var(--white)" id="lista-notifs">
+        <div class="loading">Cargando...</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal editar cita -->
+<div class="modal-overlay" id="modal-editar-cita">
+  <div class="modal-box">
+    <div class="modal-title">Editar cita</div>
+    <input type="hidden" id="edit-cita-id">
+    <div class="form-grid">
+      <div class="form-field full"><label>Nueva fecha y hora *</label><input type="datetime-local" id="edit-nueva-fecha"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="guardarEdicion()">Guardar cambios</button>
+      <button class="btn-secondary" onclick="cerrarModal('modal-editar-cita')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal solicitud especial -->
+<div class="modal-overlay" id="modal-solicitud">
+  <div class="modal-box" style="max-width:560px">
+    <div class="modal-title">Solicitud de horario especial</div>
+    <div style="font-size:0.78rem;color:var(--mink);margin-bottom:1.25rem;line-height:1.6">
+      Solicita atención fuera del horario regular. La recepcionista revisará tu solicitud y te notificaremos.
+    </div>
+    <div class="form-grid">
+      <div class="form-field full">
+        <label>Tipo de solicitud *</label>
+        <select id="sol-tipo">
+          <option value="">Seleccionar...</option>
+          <option value="antes_9am">Antes de las 9:00 am</option>
+          <option value="despues_7pm">Después de las 7:00 pm</option>
+          <option value="domingo">Domingo</option>
+        </select>
+      </div>
+      <div class="form-field full">
+        <label>Fecha y hora solicitada *</label>
+        <input type="datetime-local" id="sol-fecha">
+      </div>
+      <div class="form-field full">
+        <label>Servicios deseados</label>
+        <div id="sol-servicios-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:0.4rem;max-height:180px;overflow-y:auto;border:1px solid var(--sand);border-radius:2px;padding:0.75rem;margin-top:0.5rem">
+          <div class="loading" style="grid-column:1/-1;padding:1rem">Cargando servicios...</div>
+        </div>
+      </div>
+      <div class="form-field full">
+        <label>Motivo</label>
+        <textarea id="sol-motivo" rows="2" placeholder="¿Por qué necesitas este horario especial?"></textarea>
+      </div>
+    </div>
+    <!-- Mis solicitudes anteriores -->
+    <div style="margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--sand)">
+      <div style="font-size:0.65rem;font-weight:400;letter-spacing:0.14em;text-transform:uppercase;color:var(--mink);margin-bottom:0.75rem">Mis solicitudes anteriores</div>
+      <div id="sol-historial"><div class="loading" style="padding:0.5rem">Cargando...</div></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="enviarSolicitud()">Enviar solicitud</button>
+      <button class="btn-secondary" onclick="cerrarModal('modal-solicitud')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── INIT ──────────────────────────────────────────────
+var token  = localStorage.getItem('token');
+var nombre = localStorage.getItem('nombre') || 'Cliente';
+if (!token) window.location.href = '/coco-auth.html';
+
+document.getElementById('sb-nombre').textContent        = nombre;
+document.getElementById('sb-avatar').textContent        = nombre.charAt(0).toUpperCase();
+document.getElementById('sb-avatar-nombre').textContent = nombre;
+document.getElementById('saludo-nombre').textContent    = nombre;
+
+var hoy   = new Date();
+var DIAS  = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+var MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+document.getElementById('topbar-sub').textContent = DIAS[hoy.getDay()] + ', ' + hoy.getDate() + ' de ' + MESES[hoy.getMonth()] + ' de ' + hoy.getFullYear();
+
+var manana = new Date(); manana.setDate(manana.getDate() + 1);
+var rfecha = document.getElementById('r-fecha');
+if (rfecha) rfecha.min = manana.toISOString().split('T')[0];
+
+// ── API ───────────────────────────────────────────────
+async function api(url, opts) {
+    opts = opts || {};
+    var cfg = Object.assign({}, opts, {
+        headers: Object.assign({ 'Content-Type':'application/json', 'Authorization':'Bearer '+token }, opts.headers||{})
+    });
+    var res = await fetch(url, cfg);
+    if (!res.ok) { var e = await res.json().catch(function(){ return {error:'Error'}; }); throw new Error(e.error||'Error '+res.status); }
+    return res.json();
+}
+
+// ── HELPERS ───────────────────────────────────────────
+function fFecha(f) {
+    if (!f) return '—';
+    var d = new Date(f);
+    return d.getDate() + '/' + (d.getMonth()+1) + '/' + d.getFullYear();
+}
+function fHora(f){
+    if(!f) return '—';
+    var s = typeof f === 'string' ? f : f.toISOString();
+    var t = s.indexOf('T') >= 0 ? s.split('T')[1] : s;
+    return t.substring(0,5);
+}
+function dedup(arr, key) {
+    var seen = {}, out = [];
+    arr.forEach(function(x) { var k = x[key]; if (!seen[k]) { seen[k]=true; out.push(x); } });
+    return out;
+}
+function badgeEstado(e) {
+    if (!e) return '<span class="badge badge-gray">—</span>';
+    var m = { pagada:'badge-green', emitida:'badge-amber', anulada:'badge-error' };
+    return '<span class="badge '+(m[e.toLowerCase()]||'badge-gray')+'">'+e+'</span>';
+}
+
+// ── NAVEGACIÓN ────────────────────────────────────────
+var SECS = {
+    inicio:'Inicio', perfil:'Mi perfil', reservar:'Reservar cita',
+    citas:'Mis citas', compras:'Mis compras', facturas:'Mis facturas',
+    pagos:'Mis pagos', catalogo:'Catálogo', promociones:'Promociones',
+    notificaciones:'Notificaciones'
+};
+
+function nav(id, el) {
+    document.querySelectorAll('.section').forEach(function(s){ s.classList.remove('active'); });
+    document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
+    document.getElementById('sec-'+id).classList.add('active');
+    document.getElementById('topbar-title').textContent = SECS[id] || id;
+    if (el) el.classList.add('active');
+    else document.querySelectorAll('.nav-item').forEach(function(n){
+        var o = n.getAttribute('onclick');
+        if (o && o.indexOf("'"+id+"'") !== -1) n.classList.add('active');
+    });
+    var fns = {
+        inicio:cargarInicio, perfil:cargarPerfil, reservar:iniciarWizard,
+        citas:cargarCitas, compras:cargarCompras, facturas:cargarFacturas,
+        pagos:cargarPagos, catalogo:cargarCatalogo, promociones:cargarPromociones,
+        notificaciones:cargarNotificaciones
+    };
+    if (fns[id]) fns[id]();
+}
+
+function cerrarSesion() {
+    ['token','nombre','rol'].forEach(function(k){ localStorage.removeItem(k); });
+    window.location.href = '/coco-auth.html';
+}
+function abrirModal(id) { document.getElementById(id).classList.add('open'); }
+function cerrarModal(id){ document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(function(m){
+    m.addEventListener('click', function(e){ if(e.target===this) this.classList.remove('open'); });
+});
+
+// ── INICIO ────────────────────────────────────────────
+async function cargarInicio() {
+    try {
+        var d = await api('/api/cliente/estadisticas');
+        if (d.proximaCita) {
+            document.getElementById('stat-proxima').textContent     = fHora(d.proximaCita.FechaInicio);
+            document.getElementById('stat-proxima-sub').textContent = fFecha(d.proximaCita.FechaInicio) + ' · ' + d.proximaCita.Servicio;
+        }
+        document.getElementById('stat-visitas').textContent = d.visitasAnio || 0;
+        document.getElementById('stat-gastado').textContent = 'Bs ' + parseFloat(d.totalGastado || 0).toFixed(2);
+        document.getElementById('stat-promos').textContent  = d.promocionesActivas || 0;
+    } catch(e) { console.error(e); }
+
+    try {
+        var citas = await api('/api/cliente/citas');
+        var prox  = citas.proximas || [];
+        var div   = document.getElementById('inicio-citas');
+        if (!prox.length) {
+            div.innerHTML = '<div class="empty"><div class="empty-icon">✦</div>Sin citas próximas<br><a href="#" onclick="nav(\'reservar\',null)" style="color:var(--rose-deep);font-size:0.78rem">Reservar →</a></div>';
+        } else {
+            var grupos = agruparCitas(prox);
+            div.innerHTML = Object.values(grupos).slice(0,3).map(function(g){
+                var d2 = new Date(g.cita.FechaInicio);
+                return '<div class="cita-card '+(g.cita.Estado||'').toLowerCase()+'">' +
+                    '<div class="cita-fecha"><div class="cita-dia">'+d2.getDate()+'</div><div class="cita-mes">'+MESES[d2.getMonth()].substring(0,3)+'</div></div>' +
+                    '<div class="cita-info"><div class="cita-servicio">'+g.servicios.map(function(s){ return s.Servicio; }).join(', ')+'</div>' +
+                    '<div class="cita-detalle">'+fHora(g.cita.FechaInicio)+'h</div></div></div>';
+            }).join('');
+        }
+    } catch(e) { document.getElementById('inicio-citas').innerHTML='<div class="empty">Error al cargar</div>'; }
+
+    try {
+        var promos = await api('/api/cliente/promociones');
+        var divP   = document.getElementById('inicio-promos');
+        if (!promos || !promos.length) {
+            divP.innerHTML = '<div class="empty"><div class="empty-icon">✦</div>Sin promociones activas</div>';
+            return;
+        }
+        // dedup por PromocionID (viene del SP como campo)
+        var unicas = dedupPromos(promos);
+        divP.innerHTML = unicas.map(function(p){
+            return '<div style="display:flex;align-items:center;gap:1rem;padding:0.75rem;border:1px solid var(--sand);border-radius:4px;background:var(--white);margin-bottom:0.75rem">' +
+                '<div style="font-family:var(--serif);font-size:1.8rem;font-weight:300;color:var(--rose-deep);min-width:56px;text-align:center">'+p.Descuento+'%</div>' +
+                '<div><div style="font-family:var(--serif);font-size:1rem;font-weight:400;color:var(--espresso)">'+p.Nombre+'</div>' +
+                (p.TipoPromocion==='cumpleaños' ? '<div style="font-size:0.68rem;color:var(--rose-deep)">🎂 ¡Feliz cumpleaños!</div>' : '') +
+                '<div style="font-size:0.68rem;color:var(--mink)">'+p.Descripcion+'</div></div></div>';
+        }).join('');
+    } catch(e) { document.getElementById('inicio-promos').innerHTML='<div class="empty">Error</div>'; }
+}
+
+// dedup seguro para promociones (PromocionID puede no existir → usa Nombre+Descuento)
+function dedupPromos(arr) {
+    var seen = {}, out = [];
+    arr.forEach(function(p){
+        var k = (p.PromocionID || p.Nombre || '') + '_' + (p.Descuento || '');
+        if (!seen[k]) { seen[k] = true; out.push(p); }
+    });
+    return out;
+}
+
+// ── PERFIL ────────────────────────────────────────────
+async function cargarPerfil() {
+    try {
+        var d = await api('/api/cliente/perfil');
+        document.getElementById('p-nombre').value             = d.Nombre || '';
+        document.getElementById('p-apellido').value           = d.Apellido || '';
+        document.getElementById('p-telefono').value           = d.Telefono || '';
+        document.getElementById('p-email').value              = d.Email || '';
+        document.getElementById('p-nacimiento').value         = d.FechaNacimiento ? d.FechaNacimiento.split('T')[0] : '';
+        document.getElementById('p-alergias').value           = d.Alergias || '';
+        document.getElementById('p-contraindicaciones').value = d.Contraindicaciones || '';
+        document.getElementById('p-notas').value              = d.NotasTecnicas || '';
+        document.getElementById('perfil-nombre-display').textContent = d.Nombre + ' ' + d.Apellido;
+        document.getElementById('perfil-email-display').textContent  = d.Email;
+        document.getElementById('perfil-avatar').textContent = d.Nombre.charAt(0).toUpperCase();
+    } catch(e) { console.error(e); }
+}
+
+async function guardarPerfil() {
+    try {
+        await api('/api/cliente/perfil', { method:'PUT', body:JSON.stringify({
+            nombre: document.getElementById('p-nombre').value,
+            apellido: document.getElementById('p-apellido').value,
+            telefono: document.getElementById('p-telefono').value,
+            email: document.getElementById('p-email').value,
+            fechaNacimiento: document.getElementById('p-nacimiento').value || null,
+            alergias: document.getElementById('p-alergias').value || null,
+            contraindicaciones: document.getElementById('p-contraindicaciones').value || null,
+            notasTecnicas: document.getElementById('p-notas').value || null
+        })});
+        alert('Perfil actualizado correctamente.');
+        cargarPerfil();
+    } catch(e) { alert('Error: '+e.message); }
+}
+
+// ── WIZARD ────────────────────────────────────────────
+var WD = { servicios:[], fecha:null, hora:null, empleados:{} };
+var TODOS_SRVS = [];
+
+function wNext(p) {
+    document.querySelectorAll('.wizard-panel').forEach(function(x){ x.classList.remove('active'); });
+    document.getElementById('wizard-'+p).classList.add('active');
+    for (var i=1; i<=4; i++) {
+        var c = document.getElementById('step'+i+'-circle');
+        var l = document.getElementById('step'+i+'-label');
+        c.classList.remove('active','done'); l.classList.remove('active');
+        if (i < p)  { c.classList.add('done'); c.textContent='✓'; }
+        else if (i===p) { c.classList.add('active'); c.textContent=i; l.classList.add('active'); }
+        else { c.textContent = i; }
+    }
+    if (p === 2) {
+        var dur = WD.servicios.reduce(function(s,x){ return s+x.DuracionMin; }, 0);
+        document.getElementById('r-duracion').value = dur + ' min aproximadamente';
+    }
+    if (p === 3) cargarEmpleados();
+    if (p === 4) mostrarResumen();
+}
+
+async function iniciarWizard() {
+    WD = { servicios:[], fecha:null, hora:null, empleados:{} };
+    wNext(1);
+    try {
+        var data = await api('/api/cliente/catalogo');
+        TODOS_SRVS = data;
+        var cats = {};
+        data.forEach(function(s){ cats[s.CategoriaID] = s.Categoria; });
+        var f = '<button class="btn-sm solid" onclick="filtSrv(null,this)" style="margin:2px">Todos</button>';
+        Object.keys(cats).forEach(function(id){
+            f += '<button class="btn-sm outline" onclick="filtSrv('+id+',this)" style="margin:2px">'+cats[id]+'</button>';
+        });
+        document.getElementById('filtros-cat').innerHTML = f;
+        renderSrv(data);
+    } catch(e) { document.getElementById('lista-srv').innerHTML='<div class="empty">Error al cargar servicios</div>'; }
+}
+
+function filtSrv(catID, btn) {
+    document.querySelectorAll('#filtros-cat .btn-sm').forEach(function(b){ b.className='btn-sm outline'; });
+    btn.className = 'btn-sm solid';
+    renderSrv(catID ? TODOS_SRVS.filter(function(s){ return s.CategoriaID==catID; }) : TODOS_SRVS);
+}
+
+function renderSrv(data) {
+    document.getElementById('lista-srv').innerHTML = data.map(function(s){
+        var sel = WD.servicios.find(function(x){ return x.ServicioID===s.ServicioID; }) ? 'selected' : '';
+        return '<div class="servicio-card '+sel+'" onclick="toggleSrv('+s.ServicioID+',this)" data-srv=\''+JSON.stringify(s).replace(/'/g,"&#39;")+'\'>' +
+            '<div class="servicio-check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>' +
+            '<div class="servicio-info"><div class="servicio-nombre">'+s.Nombre+'</div><div class="servicio-meta">'+s.DuracionMin+' min · '+s.Categoria+'</div></div>' +
+            '<div class="servicio-precio">Bs '+s.Precio+'</div></div>';
+    }).join('') || '<div class="empty">Sin servicios</div>';
+}
+
+function toggleSrv(id, el) {
+    var s   = TODOS_SRVS.find(function(x){ return x.ServicioID===id; });
+    var idx = WD.servicios.findIndex(function(x){ return x.ServicioID===id; });
+    if (idx >= 0) { WD.servicios.splice(idx,1); el.classList.remove('selected'); }
+    else { WD.servicios.push(s); el.classList.add('selected'); }
+    var n   = WD.servicios.length;
+    var tot = WD.servicios.reduce(function(s,x){ return s+parseFloat(x.Precio); }, 0);
+    var dur = WD.servicios.reduce(function(s,x){ return s+x.DuracionMin; }, 0);
+    var btn = document.getElementById('btn-p2');
+    if (n > 0) {
+        document.getElementById('resumen-sel').textContent = n + ' servicio(s) · ' + dur + ' min · Bs ' + tot.toFixed(2);
+        btn.disabled = false; btn.style.opacity = '1';
+    } else {
+        document.getElementById('resumen-sel').textContent = 'Ningún servicio seleccionado';
+        btn.disabled = true; btn.style.opacity = '0.4';
+    }
+}
+
+async function cargarSlots() {
+    var fecha = document.getElementById('r-fecha').value;
+    if (!fecha) return;
+    WD.fecha = fecha; WD.hora = null;
+    var d   = new Date(fecha + 'T12:00:00'), dia = d.getDay();
+    var dur = WD.servicios.reduce(function(s,x){ return s+x.DuracionMin; }, 0);
+    document.getElementById('btn-solicitud').style.display = 'block';
+    if (dia === 0) {
+        document.getElementById('slots').innerHTML = '<div style="font-size:0.78rem;color:var(--error)">El salón no atiende los domingos. Puedes hacer una solicitud especial abajo.</div>';
+        document.getElementById('btn-p3').disabled = true;
+        document.getElementById('btn-p3').style.opacity = '0.4';
+        return;
+    }
+    var esSabado = (dia === 6);
+    var ini = 9*60, fin = esSabado ? 14*60 : 19*60;
+    var limiteSlot = fin - 30;
+    document.getElementById('label-horario').textContent =
+        'Horarios disponibles · 09:00 – ' + (esSabado ? '14:00 (sábado)' : '19:00');
+    document.getElementById('slots').innerHTML = '<div style="font-size:0.72rem;color:var(--mink)">Verificando disponibilidad...</div>';
+
+    // Obtener slots ocupados
+    var ocupados = {};
+    try {
+        var srvIDs = WD.servicios.map(function(s){ return s.ServicioID; }).join(',');
+        var data   = await api('/api/cliente/slots-ocupados?fecha='+fecha+'&servicioIDs='+srvIDs);
+        data.forEach(function(s){
+            var t = s.HoraInicio.substring(0,5); // HH:MM
+            ocupados[t] = s.EmpleadosOcupados;
+        });
+    } catch(e) { /* si falla igual mostramos slots */ }
+
+    var slots = [];
+    for (var m = ini; m <= limiteSlot; m += 10) {
+        var hh = Math.floor(m/60).toString().padStart(2,'0');
+        var mm = (m%60).toString().padStart(2,'0');
+        slots.push(hh+':'+mm);
+    }
+
+    document.getElementById('slots').innerHTML = '<div class="slots-grid">' +
+        slots.map(function(s){
+            var occ = ocupados[s] || 0;
+            var estilo, titulo;
+            if (occ === 0) {
+                estilo = '';
+                titulo = '';
+            } else if (occ <= 2) {
+                estilo = 'background:#fdf5e8;border-color:var(--warning);color:var(--warning)';
+                titulo = 'title="Alta ocupación"';
+            } else {
+                estilo = 'background:#f0efed;border-color:var(--mink);color:var(--mink);opacity:0.6';
+                titulo = 'title="Poca disponibilidad"';
+            }
+            return '<div class="slot" '+titulo+' style="'+estilo+'" onclick="selSlot(\''+s+'\',this)">'+s+'</div>';
+        }).join('') +
+        '</div>' +
+        '<div style="display:flex;gap:1rem;margin-top:0.75rem;font-size:0.65rem;color:var(--mink)">' +
+        '<span style="display:flex;align-items:center;gap:0.3rem"><span style="width:10px;height:10px;border:1px solid var(--sand);border-radius:2px;display:inline-block"></span>Disponible</span>' +
+        '<span style="display:flex;align-items:center;gap:0.3rem"><span style="width:10px;height:10px;background:#fdf5e8;border:1px solid var(--warning);border-radius:2px;display:inline-block"></span>Alta ocupación</span>' +
+        '<span style="display:flex;align-items:center;gap:0.3rem"><span style="width:10px;height:10px;background:#f0efed;border:1px solid var(--mink);border-radius:2px;display:inline-block"></span>Poca disponibilidad</span>' +
+        '</div>';
+}
+
+function selSlot(hora, el) {
+    document.querySelectorAll('.slot').forEach(function(s){ s.classList.remove('selected'); });
+    el.classList.add('selected'); WD.hora = hora;
+    document.getElementById('btn-p3').disabled = false;
+    document.getElementById('btn-p3').style.opacity = '1';
+}
+
+async function cargarEmpleados() {
+    if (!WD.fecha || !WD.hora) return;
+    var fi = WD.fecha + 'T' + WD.hora + ':00';
+    var div = document.getElementById('lista-emp');
+    div.innerHTML = '<div class="loading">Cargando personal...</div>';
+    try {
+        var resultados = await Promise.all(WD.servicios.map(function(s){
+            return api('/api/cliente/empleados-disponibles?servicioID='+s.ServicioID+'&fechaInicio='+encodeURIComponent(fi))
+                .then(function(emps){ return { servicio:s, emps:emps||[] }; })
+                .catch(function(){ return { servicio:s, emps:[] }; });
+        }));
+
+        div.innerHTML = resultados.map(function(r, idx){
+            var s = r.servicio;
+            var empOpts = r.emps.length ?
+                r.emps.map(function(e){
+                    var ini = (e.Nombre||'').charAt(0)+(e.Apellido||'').charAt(0);
+                    var selClass = WD.empleados[s.ServicioID]===e.EmpleadoID ? 'selected' : '';
+                    return '<div class="empleado-card '+selClass+'" onclick="selEmpParaSrv('+s.ServicioID+','+e.EmpleadoID+',this,'+idx+')">' +
+                        '<div class="empleado-avatar">'+ini.toUpperCase()+'</div>' +
+                        '<div><div style="font-size:0.85rem;font-weight:400;color:var(--espresso)">'+e.Nombre+' '+e.Apellido+'</div>' +
+                        '<div style="font-size:0.7rem;color:var(--mink)">'+e.NombreRol+'</div></div>' +
+                        '</div>';
+                }).join('') :
+                '<div style="font-size:0.75rem;color:var(--mink);padding:0.5rem 0">Sin preferencia — asignación automática</div>';
+
+            return '<div style="margin-bottom:1.25rem;padding-bottom:1.25rem;border-bottom:1px solid var(--sand)">' +
+                '<div style="font-size:0.65rem;font-weight:400;letter-spacing:0.14em;text-transform:uppercase;color:var(--mink);margin-bottom:0.5rem">'+s.Nombre+'</div>' +
+                '<div id="emps-srv-'+idx+'">'+empOpts+'</div>' +
+                '</div>';
+        }).join('');
+    } catch(e) {
+        div.innerHTML = '<div style="font-size:0.78rem;color:var(--error)">'+e.message+'</div>';
+    }
+}
+
+function selEmpParaSrv(servicioID, empleadoID, el, idx) {
+    var container = document.getElementById('emps-srv-'+idx);
+    if (container) container.querySelectorAll('.empleado-card').forEach(function(c){ c.classList.remove('selected'); });
+    if (WD.empleados[servicioID] === empleadoID) {
+        delete WD.empleados[servicioID];
+    } else {
+        WD.empleados[servicioID] = empleadoID;
+        el.classList.add('selected');
+    }
+}
+
+function mostrarResumen() {
+    var total = WD.servicios.reduce(function(s,x){ return s+parseFloat(x.Precio); }, 0);
+    var dur   = WD.servicios.reduce(function(s,x){ return s+x.DuracionMin; }, 0);
+    var srvRows = WD.servicios.map(function(s){
+        var empID  = WD.empleados[s.ServicioID];
+        var empNom = empID ? 'Personal seleccionado' : 'Asignación automática';
+        return '<tr>'+
+            '<td style="color:var(--espresso);font-weight:400">'+s.Nombre+'</td>'+
+            '<td style="color:var(--mink);font-size:0.72rem">'+empNom+'</td>'+
+            '<td style="font-family:var(--serif);color:var(--rose-deep)">Bs '+parseFloat(s.Precio).toFixed(2)+'</td>'+
+            '</tr>';
+    }).join('');
+    document.getElementById('resumen-cita').innerHTML =
+        '<table class="tabla"><tbody>' +
+        '<tr><td style="color:var(--mink);width:130px">Fecha</td><td colspan="2">'+WD.fecha+'</td></tr>' +
+        '<tr><td style="color:var(--mink)">Hora inicio</td><td colspan="2">'+WD.hora+'</td></tr>' +
+        '<tr><td style="color:var(--mink)">Duración est.</td><td colspan="2">'+dur+' min aprox.</td></tr>' +
+        '</tbody></table>' +
+        '<div style="margin-top:1rem"><table class="tabla"><thead><tr>'+
+        '<th>Servicio</th><th>Personal</th><th>Precio</th>'+
+        '</tr></thead><tbody>'+srvRows+'</tbody>'+
+        '<tfoot><tr>'+
+        '<td colspan="2" style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--mink)">Total estimado</td>'+
+        '<td style="font-family:var(--serif);font-size:1.1rem;color:var(--rose-deep)">Bs '+total.toFixed(2)+'</td>'+
+        '</tr></tfoot></table></div>';
+}
+
+async function confirmarReserva() {
+    if (!WD.fecha || !WD.hora) { alert('Selecciona fecha y hora.'); return; }
+    var fi     = WD.fecha + 'T' + WD.hora + ':00';
+    var srvIDs = WD.servicios.map(function(s){ return s.ServicioID; }).join(',');
+    var empIDs = WD.servicios.map(function(s){ return WD.empleados[s.ServicioID] || 0; }).join(',');
+    try {
+        await api('/api/cliente/citas', { method:'POST', body:JSON.stringify({
+            fechaInicio: fi,
+            servicioIDs: srvIDs,
+            empleadoIDs: empIDs
+        })});
+        alert('¡Cita reservada exitosamente!');
+        nav('citas', null);
+    } catch(e) { alert('Error: '+e.message); }
+}
+
+async function abrirModalSolicitud() {
+    abrirModal('modal-solicitud');
+    // Cargar servicios
+    try {
+        var data = await api('/api/cliente/catalogo');
+        document.getElementById('sol-servicios-grid').innerHTML = data.map(function(s){
+            return '<label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-size:0.72rem">' +
+                '<input type="checkbox" value="'+s.ServicioID+'" style="accent-color:var(--rose-deep)">' +
+                '<span>'+s.Nombre+'</span></label>';
+        }).join('');
+    } catch(e) {
+        document.getElementById('sol-servicios-grid').innerHTML = '<div style="font-size:0.72rem;color:var(--mink)">No se pudieron cargar los servicios</div>';
+    }
+    // Cargar historial
+    try {
+        var sols = await api('/api/cliente/solicitudes');
+        var div  = document.getElementById('sol-historial');
+        if (!sols || !sols.length) {
+            div.innerHTML = '<div style="font-size:0.72rem;color:var(--mink)">Sin solicitudes anteriores</div>';
+            return;
+        }
+        div.innerHTML = sols.slice(0,3).map(function(s){
+            var badge = s.Estado==='Aprobada'?'badge-green':s.Estado==='Rechazada'?'badge-error':'badge-amber';
+            return '<div style="display:flex;align-items:center;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid var(--sand);font-size:0.72rem">' +
+                '<div><div style="font-weight:400">'+fFecha(s.FechaSolicitada)+' · '+(s.TipoSolicitud||'—')+'</div>' +
+                (s.MotivoRechazo ? '<div style="font-size:0.65rem;color:var(--error)">'+s.MotivoRechazo+'</div>' : '') +
+                '</div>' +
+                '<span class="badge '+badge+'">'+s.Estado+'</span>' +
+                '</div>';
+        }).join('');
+    } catch(e) { document.getElementById('sol-historial').innerHTML='<div style="font-size:0.72rem;color:var(--mink)">—</div>'; }
+}
+
+async function enviarSolicitud() {
+    var tipo  = document.getElementById('sol-tipo').value;
+    var fecha = document.getElementById('sol-fecha').value;
+    var motivo= document.getElementById('sol-motivo').value;
+    if (!tipo)  { alert('Selecciona el tipo de solicitud.'); return; }
+    if (!fecha) { alert('Ingresa la fecha y hora solicitada.'); return; }
+    var checks = document.querySelectorAll('#sol-servicios-grid input:checked');
+    var srvIDs = Array.from(checks).map(function(c){ return c.value; }).join(',');
+    try {
+        await api('/api/cliente/solicitud-especial', { method:'POST', body:JSON.stringify({
+            fechaSolicitada: fecha,
+            tipoSolicitud:   tipo,
+            servicioIDs:     srvIDs || null,
+            motivo:          motivo || null
+        })});
+        cerrarModal('modal-solicitud');
+        alert('Solicitud enviada. Te notificaremos cuando sea revisada.');
+    } catch(e) { alert('Error: '+e.message); }
+}
+
+// ── MIS CITAS ─────────────────────────────────────────
+function agruparCitas(citas) {
+    var g = {};
+    citas.forEach(function(c){
+        if (!g[c.CitaID]) g[c.CitaID] = { cita:c, servicios:[] };
+        g[c.CitaID].servicios.push(c);
+    });
+    return g;
+}
+
+async function cargarCitas() {
+    try {
+        var data = await api('/api/cliente/citas');
+        renderCitas(data.proximas  || [], 'citas-proximas',  false);
+        renderCitas(data.historial || [], 'citas-historial', true);
+    } catch(e) {
+        document.getElementById('citas-proximas').innerHTML  = '<div class="empty">Error</div>';
+        document.getElementById('citas-historial').innerHTML = '<div class="empty">Error</div>';
+    }
+}
+
+function renderCitas(citas, divID, esHist) {
+    var div = document.getElementById(divID);
+    if (!citas.length) {
+        div.innerHTML = '<div class="empty"><div class="empty-icon">✦</div>' + (esHist ? 'Sin historial' : 'Sin citas próximas') + '</div>';
+        return;
+    }
+
+    // Agrupar por CitaID
+    var grupos = {};
+    citas.forEach(function(c){
+        if (!grupos[c.CitaID]) grupos[c.CitaID] = { cita:c, servicios:[] };
+        grupos[c.CitaID].servicios.push(c);
+    });
+
+    var lista = Object.values(grupos).sort(function(a,b){
+        return esHist ?
+            new Date(b.cita.FechaInicio) - new Date(a.cita.FechaInicio) :
+            new Date(a.cita.FechaInicio) - new Date(b.cita.FechaInicio);
+    });
+
+    div.innerHTML = lista.map(function(g){
+        var c      = g.cita;
+        var d      = new Date(c.FechaInicio);
+        var estado = (c.Estado || '').toLowerCase();
+        var eBadge = c.EstadoID===9?'badge-green':c.EstadoID===12?'badge-error':c.EstadoID===11?'badge-gray':'badge-amber';
+
+        var srvRows = g.servicios.map(function(s){
+            var horaS   = fHora(s.FechaInicioServicio || s.FechaInicio);
+            var horaF   = fHora(s.FechaFinServicio    || s.FechaInicio);
+            var paralelo = s.EsParalelo ?
+                '<span style="font-size:0.6rem;background:var(--blush);color:var(--rose-deep);border-radius:2px;padding:0.1rem 0.35rem;margin-left:0.25rem">simultáneo</span>' : '';
+            return '<div style="display:flex;align-items:center;gap:0.4rem;margin:0.2rem 0;font-size:0.72rem">'+
+                '<span style="color:var(--mink);min-width:90px;font-size:0.65rem">'+horaS+' – '+horaF+'</span>'+
+                '<span style="font-weight:400">'+s.Servicio+'</span>'+
+                '<span style="color:var(--mink)">· '+s.Empleado+' '+s.EmpleadoApellido+'</span>'+
+                paralelo+'</div>';
+        }).join('');
+
+        var total = g.servicios.reduce(function(s,x){ return s+parseFloat(x.Precio||0); }, 0);
+
+        var acciones = !esHist ?
+            '<div style="margin-top:0.5rem;display:flex;gap:0.5rem">'+
+            '<button class="btn-sm outline" onclick="abrirEditar('+c.CitaID+',\''+c.FechaInicio+'\')">Editar</button>'+
+            '<button class="btn-sm danger" onclick="cancelarCita('+c.CitaID+')">Cancelar</button>'+
+            '</div>' : '';
+
+        return '<div class="cita-card '+estado+'">' +
+            '<div class="cita-fecha">'+
+            '<div class="cita-dia">'+d.getDate()+'</div>'+
+            '<div class="cita-mes">'+MESES[d.getMonth()].substring(0,3).toUpperCase()+'</div>'+
+            '<div style="font-size:0.6rem;color:var(--mink)">'+d.getFullYear()+'</div>'+
+            '</div>'+
+            '<div class="cita-info">'+
+            srvRows+
+            '<div style="margin-top:0.3rem"><span class="badge '+eBadge+'">'+c.Estado+'</span></div>'+
+            acciones+
+            '</div>'+
+            '<div class="cita-precio">Bs '+total.toFixed(2)+'</div>'+
+            '</div>';
+    }).join('');
+}
+
+async function cancelarCita(id) {
+    if (!confirm('¿Cancelar esta cita?')) return;
+    try { await api('/api/cliente/citas/'+id+'/cancelar', {method:'PUT'}); alert('Cita cancelada.'); cargarCitas(); }
+    catch(e) { alert('Error: '+e.message); }
+}
+
+function abrirEditar(id, fecha) {
+    document.getElementById('edit-cita-id').value = id;
+    var d = new Date(fecha);
+    document.getElementById('edit-nueva-fecha').value =
+        d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0')+'-'+d.getDate().toString().padStart(2,'0') +
+        'T'+d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');
+    abrirModal('modal-editar-cita');
+}
+
+async function guardarEdicion() {
+    var id = document.getElementById('edit-cita-id').value;
+    var f  = document.getElementById('edit-nueva-fecha').value;
+    if (!f) { alert('Ingresa la nueva fecha.'); return; }
+    try {
+        await api('/api/cliente/citas/'+id+'/editar', {method:'PUT', body:JSON.stringify({nuevaFecha:f})});
+        cerrarModal('modal-editar-cita'); alert('Cita actualizada.'); cargarCitas();
+    } catch(e) { alert('Error: '+e.message); }
+}
+
+// ── MIS COMPRAS ───────────────────────────────────────
+async function cargarCompras() {
+    var desde = document.getElementById('compras-desde').value || null;
+    var hasta = document.getElementById('compras-hasta').value || null;
+    var url   = '/api/cliente/compras';
+    var params = [];
+    if (desde) params.push('fechaDesde='+desde);
+    if (hasta) params.push('fechaHasta='+hasta);
+    if (params.length) url += '?' + params.join('&');
+    var tb = document.getElementById('tabla-compras');
+    tb.innerHTML = '<tr><td colspan="8"><div class="loading">Cargando...</div></td></tr>';
+    try {
+        var data = await api(url);
+        if (!data || !data.length) {
+            tb.innerHTML = '<tr><td colspan="8"><div class="empty">Sin compras en el período seleccionado</div></td></tr>';
+            return;
+        }
+        tb.innerHTML = data.map(function(c){
+            var tipoBadge = c.Tipo === 'Servicio' ? 'badge-rose' : 'badge-amber';
+            return '<tr>' +
+                '<td>'+fFecha(c.Fecha)+'</td>' +
+                '<td style="font-weight:400">'+c.Item+'</td>' +
+                '<td><span class="badge '+tipoBadge+'">'+c.Tipo+'</span></td>' +
+                '<td style="text-align:center">'+c.Cantidad+'</td>' +
+                '<td>Bs '+parseFloat(c.PrecioUnitario).toFixed(2)+'</td>' +
+                '<td style="font-family:var(--serif);color:var(--rose-deep)">Bs '+parseFloat(c.Total).toFixed(2)+'</td>' +
+                '<td>'+(c.NumeroFactura || '—')+'</td>' +
+                '<td>'+badgeEstado(c.EstadoFactura)+'</td>' +
+                '</tr>';
+        }).join('');
+    } catch(e) {
+        tb.innerHTML = '<tr><td colspan="8"><div class="empty">Error al cargar compras</div></td></tr>';
+        console.error(e);
+    }
+}
+
+function limpiarFiltrosCompras() {
+    document.getElementById('compras-desde').value = '';
+    document.getElementById('compras-hasta').value = '';
+    cargarCompras();
+}
+
+// ── MIS FACTURAS ──────────────────────────────────────
+async function cargarFacturas() {
+    var desde = document.getElementById('filtro-factura-desde').value || null;
+    var hasta = document.getElementById('filtro-factura-hasta').value || null;
+    var url   = '/api/cliente/facturas';
+    var params = [];
+    if (desde) params.push('fechaDesde='+desde);
+    if (hasta) params.push('fechaHasta='+hasta);
+    if (params.length) url += '?' + params.join('&');
+    var div = document.getElementById('tabla-facturas-listado');
+    div.innerHTML = '<div class="loading">Cargando...</div>';
+    try {
+        var data = await api(url);
+        if (!data || !data.length) {
+            div.innerHTML = '<div class="empty">No tienes facturas en el período seleccionado</div>';
+            return;
+        }
+        div.innerHTML = '<table class="tabla"><thead><tr>' +
+            '<th>N° Factura</th><th>Fecha</th><th>Total</th><th>Estado</th><th>Acciones</th>' +
+            '</tr></thead><tbody>' +
+            data.map(function(f){
+                return '<tr>' +
+                    '<td><strong>'+f.NumeroFactura+'</strong></td>' +
+                    '<td>'+fFecha(f.Fecha)+'</td>' +
+                    '<td style="font-family:var(--serif);color:var(--rose-deep);font-weight:400">Bs '+parseFloat(f.Total).toFixed(2)+'</td>' +
+                    '<td>'+badgeEstado(f.Estado)+'</td>' +
+                    '<td><button class="btn-sm outline" onclick="verDetalleFactura('+f.FacturaID+')">Ver detalle</button></td>' +
+                    '</tr>';
+            }).join('') +
+            '</tbody></table>';
+    } catch(e) {
+        div.innerHTML = '<div class="empty">Error al cargar facturas</div>';
+        console.error(e);
+    }
+}
+
+function limpiarFiltrosFacturas() {
+    document.getElementById('filtro-factura-desde').value = '';
+    document.getElementById('filtro-factura-hasta').value = '';
+    cargarFacturas();
+}
+
+async function verDetalleFactura(facturaID) {
+    document.getElementById('factura-placeholder').style.display = 'none';
+    document.getElementById('factura-detalle').style.display     = 'block';
+    var contenido = document.getElementById('factura-preview-contenido');
+    contenido.innerHTML = '<div class="loading">Cargando detalle...</div>';
+    try {
+        var detalle = await api('/api/cliente/facturas/'+facturaID+'/detalle');
+        var cab   = detalle.cabecera  || {};
+        var srvs  = detalle.servicios || [];
+        var prods = detalle.productos || [];
+
+        var totalItems=srvs.concat(prods).reduce(function(s,i){return s+parseFloat(i.Subtotal);},0);
+        var descPct=parseFloat(cab.DescuentoPct)||0,descMonto=parseFloat(cab.DescuentoMonto)||0;
+        var subtotal=descMonto>0 ? totalItems+descMonto : totalItems;
+        var total     = parseFloat(cab.Total || (subtotal - descMonto));
+
+        // Empleados que atendieron (sin duplicados)
+        var empVisto = {}, empList = [];
+        srvs.forEach(function(s){
+            if (s.NombreEmpleado) {
+                var k = s.NombreEmpleado + ' ' + (s.ApellidoEmpleado||'');
+                if (!empVisto[k]) { empVisto[k]=true; empList.push(k); }
+            }
+        });
+
+        var itemsHTML = srvs.map(function(i){
+            return '<tr>' +
+                '<td style="padding:0.6rem 0.3rem">'+i.Item+'<br><span style="font-size:0.65rem;color:var(--mink)">Servicio</span></td>' +
+                '<td style="text-align:center;padding:0.6rem 0.3rem">'+i.Cantidad+'</td>' +
+                '<td style="text-align:right;padding:0.6rem 0.3rem">Bs '+parseFloat(i.PrecioUnitario).toFixed(2)+'</td>' +
+                '<td style="text-align:right;padding:0.6rem 0.3rem;font-family:var(--serif)">Bs '+parseFloat(i.Subtotal).toFixed(2)+'</td>' +
+                '</tr>';
+        }).join('');
+
+        itemsHTML += prods.map(function(i){
+            return '<tr>' +
+                '<td style="padding:0.6rem 0.3rem">'+i.Item+'<br><span style="font-size:0.65rem;color:var(--mink)">Producto</span></td>' +
+                '<td style="text-align:center;padding:0.6rem 0.3rem">'+i.Cantidad+'</td>' +
+                '<td style="text-align:right;padding:0.6rem 0.3rem">Bs '+parseFloat(i.PrecioUnitario).toFixed(2)+'</td>' +
+                '<td style="text-align:right;padding:0.6rem 0.3rem;font-family:var(--serif)">Bs '+parseFloat(i.Subtotal).toFixed(2)+'</td>' +
+                '</tr>';
+        }).join('');
+
+        contenido.innerHTML =
+            // Cabecera factura
+            '<div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--mink);margin-bottom:1.25rem">' +
+            '<span><strong style="color:var(--espresso)">'+(cab.NumeroFactura||'—')+'</strong></span>' +
+            '<span>'+fFecha(cab.Fecha)+'</span></div>' +
+
+            // Info cliente + atendió
+            '<div style="background:var(--cream);border-radius:4px;padding:1rem;margin-bottom:1.5rem;font-size:0.8rem">' +
+            '<strong>Cliente:</strong> '+(cab.NombreCliente||'')+' '+(cab.ApellidoCliente||'')+'<br>' +
+            (empList.length ? '<strong>Atendió:</strong> '+empList.join(', ')+'<br>' : '') +
+            (cab.MetodoPago ? '<strong>Método de pago:</strong> '+cab.MetodoPago : '') +
+            '</div>' +
+
+            // Tabla ítems
+            '<table style="width:100%;border-collapse:collapse;font-size:0.78rem">' +
+            '<thead><tr style="border-bottom:1px solid var(--sand)">' +
+            '<th style="text-align:left;padding:0.5rem 0.3rem;color:var(--mink);font-size:0.65rem">Ítem</th>' +
+            '<th style="text-align:center;padding:0.5rem 0.3rem;color:var(--mink);font-size:0.65rem">Cant.</th>' +
+            '<th style="text-align:right;padding:0.5rem 0.3rem;color:var(--mink);font-size:0.65rem">Precio</th>' +
+            '<th style="text-align:right;padding:0.5rem 0.3rem;color:var(--mink);font-size:0.65rem">Total</th>' +
+            '</tr></thead><tbody>'+itemsHTML+'</tbody></table>' +
+
+            // Totales
+            '<div style="margin-top:1.25rem;padding-top:1rem;border-top:2px solid var(--sand)">' +
+            '<div style="display:flex;justify-content:space-between;font-size:0.8rem;color:var(--mink);margin-bottom:0.4rem">' +
+            '<span>Subtotal</span><span>Bs '+subtotal.toFixed(2)+'</span></div>' +
+            (descMonto > 0 ?
+                '<div style="display:flex;justify-content:space-between;font-size:0.8rem;color:var(--success);margin-bottom:0.4rem">' +
+                '<span>Descuento</span><span>− Bs '+descMonto.toFixed(2)+'</span></div>' : '') +
+            '<div style="display:flex;justify-content:space-between;font-size:1.1rem;font-weight:500;padding-top:0.75rem;border-top:1px solid var(--espresso)">' +
+            '<span>TOTAL</span>' +
+            '<span style="font-family:var(--serif);color:var(--rose-deep)">Bs '+total.toFixed(2)+'</span></div></div>' +
+
+            // Estado
+            '<div style="margin-top:1.5rem;text-align:right">' +
+            badgeEstado(cab.Estado) + '</div>';
+
+    } catch(e) {
+        contenido.innerHTML = '<div class="empty">No se pudo cargar el detalle de la factura</div>';
+        console.error(e);
+    }
+}
+
+// ── MIS PAGOS ─────────────────────────────────────────
+async function cargarPagos() {
+    var desde = document.getElementById('pagos-desde').value || null;
+    var hasta = document.getElementById('pagos-hasta').value || null;
+    var url   = '/api/cliente/pagos';
+    var params = [];
+    if (desde) params.push('fechaDesde='+desde);
+    if (hasta) params.push('fechaHasta='+hasta);
+    if (params.length) url += '?' + params.join('&');
+    var tb = document.getElementById('tabla-pagos');
+    tb.innerHTML = '<tr><td colspan="5"><div class="loading">Cargando...</div></td></tr>';
+    try {
+        var data = await api(url);
+        if (!data || !data.length) {
+            tb.innerHTML = '<tr><td colspan="5"><div class="empty">Sin pagos en el período seleccionado</div></td></tr>';
+            return;
+        }
+        // Calcular totales para footer
+        var totalMonto = data.reduce(function(s,p){ return s + parseFloat(p.Monto||0); }, 0);
+        tb.innerHTML = data.map(function(p){
+            return '<tr>' +
+                '<td>'+fFecha(p.Fecha)+'</td>' +
+                '<td style="font-weight:400">'+(p.NumeroFactura || '—')+'</td>' +
+                '<td>' +
+                  '<span style="display:inline-flex;align-items:center;gap:0.4rem;font-size:0.75rem">' +
+                  metodoPagoIcon(p.MetodoPago) + p.MetodoPago +
+                  '</span>' +
+                '</td>' +
+                '<td class="pago-row-total">Bs '+parseFloat(p.Monto).toFixed(2)+'</td>' +
+                '<td>'+badgeEstado(p.EstadoFactura)+'</td>' +
+                '</tr>';
+        }).join('') +
+        '<tr style="border-top:2px solid var(--sand);background:var(--cream)">' +
+        '<td colspan="3" style="font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--mink);font-weight:400">Total del período</td>' +
+        '<td style="font-family:var(--serif);font-size:1.1rem;color:var(--espresso);font-weight:500">Bs '+totalMonto.toFixed(2)+'</td>' +
+        '<td></td></tr>';
+    } catch(e) {
+        tb.innerHTML = '<tr><td colspan="5"><div class="empty">Error al cargar pagos</div></td></tr>';
+        console.error(e);
+    }
+}
+
+function limpiarFiltrosPagos() {
+    document.getElementById('pagos-desde').value = '';
+    document.getElementById('pagos-hasta').value = '';
+    cargarPagos();
+}
+
+function metodoPagoIcon(metodo) {
+    var m = (metodo || '').toLowerCase();
+    if (m.indexOf('tarjeta') >= 0 || m.indexOf('card') >= 0)
+        return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>';
+    if (m.indexOf('transfer') >= 0 || m.indexOf('qr') >= 0)
+        return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="21 15 21 21 15 21"/><path d="M21 21L9 9"/><polyline points="3 9 3 3 9 3"/></svg>';
+    return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>';
+}
+
+// ── CATÁLOGO ──────────────────────────────────────────
+async function cargarCatalogo() {
+    try {
+        var data = await api('/api/cliente/catalogo');
+        var cats = {};
+        data.forEach(function(s){ cats[s.CategoriaID] = s.Categoria; });
+        var f2 = '<button class="btn-sm solid" onclick="filtCat(null,this)" style="margin:2px">Todos</button>';
+        Object.keys(cats).forEach(function(id){
+            f2 += '<button class="btn-sm outline" onclick="filtCat('+id+',this)" style="margin:2px">'+cats[id]+'</button>';
+        });
+        document.getElementById('filtros-cat2').innerHTML = f2;
+        window._catData = data;
+        renderCat(data);
+    } catch(e) { document.getElementById('catalogo-srv').innerHTML='<div class="empty">Error</div>'; }
+}
+
+function filtCat(id, btn) {
+    document.querySelectorAll('#filtros-cat2 .btn-sm').forEach(function(b){ b.className='btn-sm outline'; });
+    btn.className = 'btn-sm solid';
+    renderCat(id ? window._catData.filter(function(s){ return s.CategoriaID==id; }) : window._catData);
+}
+
+function renderCat(data) {
+    var grupos = {};
+    data.forEach(function(s){
+        var k = s.Categoria + ' · ' + s.Subcategoria;
+        if (!grupos[k]) grupos[k] = [];
+        grupos[k].push(s);
+    });
+    document.getElementById('catalogo-srv').innerHTML = Object.keys(grupos).map(function(k){
+        return '<div style="margin-bottom:1.5rem">' +
+            '<div style="font-size:0.65rem;font-weight:400;letter-spacing:0.14em;text-transform:uppercase;color:var(--mink);margin-bottom:0.75rem">'+k+'</div>' +
+            grupos[k].map(function(s){
+                return '<div style="display:flex;align-items:center;gap:1rem;padding:0.75rem 0;border-bottom:1px solid var(--sand)">' +
+                    '<div style="flex:1"><div style="font-size:0.85rem;font-weight:400;color:var(--espresso)">'+s.Nombre+'</div>' +
+                    '<div style="font-size:0.7rem;color:var(--mink)">'+s.DuracionMin+' min · '+(s.Descripcion||'')+'</div></div>' +
+                    '<div style="font-family:var(--serif);font-size:1rem;color:var(--rose-deep);white-space:nowrap">Bs '+s.Precio+'</div>' +
+                    '<button class="btn-sm outline" onclick="nav(\'reservar\',null)">Reservar</button></div>';
+            }).join('') + '</div>';
+    }).join('') || '<div class="empty">Sin servicios</div>';
+}
+
+// ── PROMOCIONES ───────────────────────────────────────
+async function cargarPromociones() {
+    var div = document.getElementById('lista-promos');
+    div.innerHTML = '<div class="loading" style="grid-column:1/-1">Cargando...</div>';
+    try {
+        var data = await api('/api/cliente/promociones');
+        if (!data || !data.length) {
+            div.innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="empty-icon">✦</div>Sin promociones activas</div>';
+            return;
+        }
+        var unicas = dedupPromos(data);
+        div.innerHTML = unicas.map(function(p){
+            return '<div class="promo-card">' +
+                '<div class="promo-banner">' +
+                '<div class="promo-pct">'+p.Descuento+'%</div>' +
+                '<div class="promo-off">de descuento</div></div>' +
+                '<div class="promo-body">' +
+                  (p.TipoPromocion === 'cumpleaños' ?
+    '<div style="font-size:0.72rem;color:var(--rose-deep);margin-bottom:0.3rem">🎂 ¡Feliz cumpleaños!</div>' : '') +
+'<div class="promo-name">'+p.Nombre+'</div>' +
+'<div class="promo-desc">'+(p.Descripcion||'')+'</div>' +
+((p.NombresServicios && p.NombresServicios.length) ?
+    '<div style="margin-top:0.5rem;padding-top:0.5rem;border-top:1px solid var(--sand)">'+
+    '<div style="font-size:0.62rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--mink);margin-bottom:0.3rem">Servicios incluidos</div>'+
+    p.NombresServicios.map(function(s){ return '<span style="display:inline-block;font-size:0.68rem;background:var(--blush);color:var(--rose-dark);border-radius:2px;padding:0.15rem 0.5rem;margin:0.15rem">'+s+'</span>'; }).join('')+
+    '</div>' : '') +
+  '<div class="promo-fechas" style="margin-top:0.5rem">'+fFecha(p.FechaInicio)+' – '+fFecha(p.FechaFin)+'</div>' +
+                '</div></div>';
+        }).join('');
+    } catch(e) {
+        div.innerHTML = '<div class="empty" style="grid-column:1/-1">Error al cargar promociones</div>';
+        console.error(e);
+    }
+}
+
+// ── NOTIFICACIONES ────────────────────────────────────
+async function cargarNotificaciones() {
+    try {
+        var data  = await api('/api/cliente/notificaciones');
+        var div   = document.getElementById('lista-notifs');
+        if (!data || !data.length) { div.innerHTML='<div class="empty">Sin notificaciones</div>'; return; }
+        var noLeidas = data.filter(function(n){ return !n.Leido; }).length;
+        var badge    = document.getElementById('badge-notif');
+        if (noLeidas > 0) { badge.textContent = noLeidas; badge.style.display = 'inline-block'; }
+        else badge.style.display = 'none';
+        div.innerHTML = data.map(function(n){
+            return '<div class="notif-item '+(n.Leido?'leida':'')+'" onclick="marcarLeida('+n.NotificacionID+',this)">' +
+                '<div class="notif-dot '+(n.Leido?'leida':'')+'"></div>' +
+                '<div style="flex:1">' +
+                '<div style="font-size:0.82rem;font-weight:400;color:var(--espresso)">'+n.TipoNotificacion+'</div>' +
+                '<div style="font-size:0.75rem;font-weight:300;color:var(--mink);line-height:1.5">'+n.Mensaje+'</div>' +
+                '<div style="font-size:0.65rem;color:var(--sand);margin-top:0.2rem">'+fFecha(n.Fecha)+' · '+fHora(n.Fecha)+'</div>' +
+                '</div></div>';
+        }).join('');
+    } catch(e) { document.getElementById('lista-notifs').innerHTML='<div class="empty">Error</div>'; }
+}
+
+async function marcarLeida(id, el) {
+    if (el.classList.contains('leida')) return;
+    try {
+        await api('/api/cliente/notificaciones/'+id+'/leer', {method:'PUT'});
+        el.classList.add('leida');
+        el.querySelector('.notif-dot').classList.add('leida');
+    } catch(e) { console.error(e); }
+}
+
+// Cargar inicio al arrancar
+cargarInicio();
+</script>
+</body>
+</html>

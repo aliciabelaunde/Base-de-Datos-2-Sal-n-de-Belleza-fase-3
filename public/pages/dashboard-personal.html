@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COCO · Mi Jornada</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --blush:      #f2e0dc;
+  --rose:       #d4968a;
+  --rose-deep:  #b87060;
+  --rose-dark:  #8a4a3a;
+  --cream:      #faf6f3;
+  --sand:       #e8ddd6;
+  --mink:       #8a7168;
+  --espresso:   #3d2b25;
+  --white:      #ffffff;
+  --success:    #7aab6e;
+  --warning:    #d4a050;
+  --error:      #c0614f;
+  --serif:      'Cormorant Garamond', serif;
+  --sans:       'Jost', sans-serif;
+  --sidebar-w:  260px;
+  --topbar-h:   64px;
+  --ease:       cubic-bezier(0.4, 0, 0.2, 1);
+}
+body { font-family: var(--sans); background: var(--cream); color: var(--espresso); min-height: 100vh; display: flex; }
+.sidebar { width: var(--sidebar-w); min-height: 100vh; background: var(--espresso); display: flex; flex-direction: column; position: fixed; left: 0; top: 0; bottom: 0; z-index: 100; overflow-y: auto; }
+.sidebar-brand { padding: 1.5rem 1.5rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.sidebar-salon { font-size: 0.6rem; font-weight: 300; color: var(--mink); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 0.5rem; }
+.sidebar-nombre { font-family: var(--serif); font-size: 1.4rem; font-weight: 300; color: var(--white); letter-spacing: 0.04em; line-height: 1.2; margin-bottom: 0.2rem; }
+.sidebar-rol { font-size: 0.68rem; font-weight: 300; color: var(--rose); letter-spacing: 0.1em; }
+.sidebar-deco { display: flex; align-items: center; gap: 6px; margin-top: 0.5rem; }
+.sidebar-deco-line { flex: 1; height: 0.5px; background: var(--rose); opacity: 0.3; }
+.sidebar-deco-diamond { width: 4px; height: 4px; background: var(--rose); transform: rotate(45deg); opacity: 0.5; }
+.sidebar-nav { flex: 1; padding: 1.25rem 0; }
+.nav-group-label { font-size: 0.6rem; font-weight: 400; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(255,255,255,0.25); padding: 1rem 1.5rem 0.4rem; }
+.nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.65rem 1.5rem; cursor: pointer; transition: all 0.2s var(--ease); border-left: 2px solid transparent; }
+.nav-item:hover { background: rgba(255,255,255,0.04); }
+.nav-item.active { background: rgba(212,150,138,0.12); border-left-color: var(--rose); }
+.nav-item svg { width: 16px; height: 16px; stroke: rgba(255,255,255,0.4); fill: none; stroke-width: 1.5; flex-shrink: 0; transition: stroke 0.2s; }
+.nav-item:hover svg, .nav-item.active svg { stroke: var(--rose); }
+.nav-item span { font-size: 0.78rem; font-weight: 300; color: rgba(255,255,255,0.5); transition: color 0.2s; flex: 1; }
+.nav-item:hover span, .nav-item.active span { color: var(--white); }
+.nav-badge { font-size: 0.6rem; font-weight: 500; padding: 0.15rem 0.45rem; border-radius: 10px; min-width: 18px; text-align: center; }
+.nav-badge.red { background: var(--error); color: white; }
+.sidebar-footer { padding: 1.25rem 1.5rem; border-top: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 0.75rem; }
+.avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--rose-deep); display: flex; align-items: center; justify-content: center; font-family: var(--serif); font-size: 0.9rem; color: white; flex-shrink: 0; }
+.avatar-info { flex: 1; min-width: 0; }
+.avatar-name { font-size: 0.78rem; font-weight: 400; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.avatar-role { font-size: 0.62rem; font-weight: 300; color: var(--mink); }
+.btn-logout { background: none; border: none; cursor: pointer; padding: 0.3rem; }
+.btn-logout svg { width: 15px; height: 15px; stroke: rgba(255,255,255,0.3); fill: none; stroke-width: 1.5; transition: stroke 0.2s; }
+.btn-logout:hover svg { stroke: var(--rose); }
+.main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+.topbar { height: var(--topbar-h); background: var(--white); border-bottom: 1px solid var(--sand); display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; position: sticky; top: 0; z-index: 50; }
+.topbar-left { display: flex; flex-direction: column; }
+.topbar-title { font-family: var(--serif); font-size: 1.4rem; font-weight: 300; color: var(--espresso); line-height: 1; }
+.topbar-fecha { font-size: 0.68rem; font-weight: 300; color: var(--mink); letter-spacing: 0.06em; margin-top: 0.15rem; }
+.topbar-actions { display: flex; align-items: center; gap: 0.75rem; }
+.status-pill { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.9rem; border: 1px solid rgba(122,171,110,0.3); border-radius: 20px; background: rgba(122,171,110,0.08); font-size: 0.68rem; color: var(--success); }
+.pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--success); animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(1.2)} }
+.topbar-btn { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 2px; font-family: var(--sans); font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; transition: all 0.2s; border: 1px solid var(--sand); background: none; color: var(--mink); }
+.topbar-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.5; }
+.topbar-btn:hover { border-color: var(--rose); color: var(--rose-deep); }
+.content { flex: 1; padding: 2rem; }
+.section { display: none; animation: fadeUp 0.35s var(--ease); }
+.section.active { display: block; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+.section-header { margin-bottom: 1.5rem; }
+.section-header h2 { font-family: var(--serif); font-size: 1.8rem; font-weight: 300; color: var(--espresso); margin-bottom: 0.2rem; }
+.section-header p { font-size: 0.78rem; font-weight: 300; color: var(--mink); }
+.stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1.25rem; margin-bottom: 1.75rem; }
+.stat-card { background: var(--white); border: 1px solid var(--sand); border-radius: 4px; overflow: hidden; }
+.stat-bar { height: 3px; }
+.stat-bar.rose  { background: var(--rose-deep); }
+.stat-bar.blush { background: var(--rose); }
+.stat-bar.sand  { background: var(--warning); }
+.stat-bar.green { background: var(--success); }
+.stat-body { padding: 1.25rem; }
+.stat-label { font-size: 0.65rem; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mink); margin-bottom: 0.5rem; }
+.stat-value { font-family: var(--serif); font-size: 2rem; font-weight: 300; color: var(--espresso); line-height: 1; margin-bottom: 0.3rem; }
+.stat-sub { font-size: 0.7rem; font-weight: 300; color: var(--mink); }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.5rem; }
+.grid-agenda { display: grid; grid-template-columns: 1fr 320px; gap: 1.5rem; margin-bottom: 1.5rem; }
+.card { background: var(--white); border: 1px solid var(--sand); border-radius: 4px; padding: 1.5rem; margin-bottom: 1.25rem; }
+.card:last-child { margin-bottom: 0; }
+.card-title { font-family: var(--serif); font-size: 1.1rem; font-weight: 400; color: var(--espresso); margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--sand); display: flex; align-items: center; justify-content: space-between; }
+.badge { font-size: 0.62rem; font-weight: 400; letter-spacing: 0.08em; padding: 0.2rem 0.6rem; border-radius: 20px; white-space: nowrap; }
+.badge-green { background:#f0f7ee; color:#4a7a40; }
+.badge-amber { background:#fdf5e8; color:#8a6020; }
+.badge-rose  { background:var(--blush); color:var(--rose-dark); }
+.badge-gray  { background:#f0efed; color:var(--mink); }
+.badge-error { background:#fdf0ee; color:var(--error); }
+.tabla { width: 100%; border-collapse: collapse; }
+.tabla th { font-size: 0.62rem; font-weight: 400; letter-spacing: 0.12em; text-transform: uppercase; color: var(--mink); text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--sand); }
+.tabla td { font-size: 0.78rem; font-weight: 300; color: var(--espresso); padding: 0.65rem 0.75rem; border-bottom: 1px solid var(--sand); vertical-align: middle; }
+.tabla tr:last-child td { border-bottom: none; }
+.tabla tr:hover td { background: var(--cream); }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+.form-field { margin-bottom: 0; }
+.form-field.full { grid-column: 1/-1; }
+.form-field label { display: block; font-size: 0.65rem; font-weight: 400; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mink); margin-bottom: 0.5rem; }
+.form-field input, .form-field textarea, .form-field select { width: 100%; padding: 0.75rem 0; background: none; border: none; border-bottom: 1px solid var(--sand); font-family: var(--sans); font-size: 0.88rem; font-weight: 300; color: var(--espresso); outline: none; transition: border-color 0.2s; resize: none; }
+.form-field input:focus, .form-field textarea:focus { border-bottom-color: var(--rose-deep); }
+.form-field input:disabled { opacity: 0.4; cursor: not-allowed; }
+.form-actions { display: flex; gap: 1rem; margin-top: 1.5rem; }
+.btn-primary { padding: 0.75rem 2rem; background: var(--espresso); color: white; border: none; font-family: var(--sans); font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; cursor: pointer; border-radius: 2px; transition: background 0.2s; }
+.btn-primary:hover { background: var(--rose-deep); }
+.btn-secondary { padding: 0.75rem 2rem; background: none; color: var(--mink); border: 1px solid var(--sand); font-family: var(--sans); font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; cursor: pointer; border-radius: 2px; transition: all 0.2s; }
+.btn-secondary:hover { border-color: var(--rose); color: var(--rose-deep); }
+.btn-sm { padding: 0.3rem 0.7rem; font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; border-radius: 2px; cursor: pointer; font-family: var(--sans); transition: all 0.2s; white-space: nowrap; }
+.btn-sm.outline { background: none; border: 1px solid var(--sand); color: var(--mink); }
+.btn-sm.outline:hover { border-color: var(--rose); color: var(--rose-deep); }
+.btn-sm.solid { background: var(--espresso); border: none; color: white; }
+.btn-sm.solid:hover { background: var(--rose-deep); }
+.btn-sm.danger { background: none; border: 1px solid rgba(192,97,79,0.3); color: var(--error); }
+.btn-sm.danger:hover { background: var(--error); color: white; border-color: var(--error); }
+/* TIMELINE */
+.timeline { position: relative; padding-left: 1.5rem; }
+.timeline::before { content:''; position:absolute; left:0; top:0; bottom:0; width:1px; background:var(--sand); }
+.tl-item { position: relative; margin-bottom: 1rem; }
+.tl-dot { position: absolute; left: -1.85rem; top: 1rem; width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--white); }
+.tl-dot.confirmada { background: var(--success); }
+.tl-dot.pendiente  { background: var(--warning); }
+.tl-dot.completada { background: var(--mink); }
+.tl-dot.cancelada  { background: var(--error); }
+.tl-dot.en-curso   { background: var(--rose-deep); }
+.tl-card { border: 1px solid var(--sand); border-radius: 4px; padding: 1rem; background: var(--white); cursor: pointer; position: relative; overflow: hidden; transition: border-color 0.2s; }
+.tl-card::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; }
+.tl-card.confirmada::before { background: var(--success); }
+.tl-card.pendiente::before  { background: var(--warning); }
+.tl-card.completada::before { background: var(--mink); }
+.tl-card.cancelada::before  { background: var(--error); }
+.tl-card.en-curso::before   { background: var(--rose-deep); }
+.tl-card:hover { border-color: var(--rose); }
+.tl-hora { font-size: 0.68rem; color: var(--mink); margin-bottom: 0.3rem; }
+.tl-cliente { font-family: var(--serif); font-size: 1rem; font-weight: 400; color: var(--espresso); margin-bottom: 0.2rem; }
+.tl-servicio { font-size: 0.75rem; color: var(--mink); margin-bottom: 0.5rem; }
+.tl-footer { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap; }
+.tl-precio { font-family: var(--serif); font-size: 0.95rem; color: var(--rose-deep); }
+.btn-confirmar { font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--success); background: rgba(122,171,110,0.1); border: 1px solid rgba(122,171,110,0.3); padding: 0.2rem 0.6rem; border-radius: 2px; cursor: pointer; transition: all 0.2s; }
+.btn-confirmar:hover { background: var(--success); color: white; }
+/* ALERTA */
+.alerta { border-radius: 4px; padding: 1rem; margin-bottom: 0.75rem; }
+.alerta.amber { background: #fdf5e8; border: 1px solid rgba(212,160,80,0.3); border-left: 3px solid var(--warning); }
+.alerta-titulo { font-size: 0.72rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--espresso); margin-bottom: 0.3rem; }
+.alerta-texto { font-size: 0.75rem; font-weight: 300; color: var(--mink); line-height: 1.6; }
+/* PROGRESS */
+.progress-bar { height: 6px; background: var(--sand); border-radius: 3px; overflow: hidden; margin-top: 0.4rem; }
+.progress-fill { height: 100%; background: var(--rose-deep); border-radius: 3px; }
+/* GRILLA SEMANAL */
+.semana-grid { display: grid; grid-template-columns: 60px repeat(7,1fr); border: 1px solid var(--sand); border-radius: 4px; overflow: hidden; overflow-x: auto; }
+.sem-header-empty { background: var(--cream); border-bottom: 1px solid var(--sand); }
+.sem-header-dia { padding: 0.75rem 0.5rem; text-align: center; border-bottom: 1px solid var(--sand); border-left: 1px solid var(--sand); background: var(--white); }
+.sem-header-dia.hoy { background: var(--blush); }
+.sem-dia-nombre { font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mink); }
+.sem-dia-num { font-family: var(--serif); font-size: 1.3rem; font-weight: 300; color: var(--espresso); }
+.sem-header-dia.hoy .sem-dia-num { color: var(--rose-deep); }
+.sem-hora-cell { padding: 0.5rem; font-size: 0.62rem; color: var(--mink); border-bottom: 1px solid var(--sand); background: var(--cream); text-align: right; }
+.sem-cita-cell { border-left: 1px solid var(--sand); border-bottom: 1px solid var(--sand); padding: 0.25rem; min-height: 52px; background: var(--white); }
+.sem-cita-cell.hoy { background: rgba(242,224,220,0.15); }
+.sem-evento { border-radius: 2px; padding: 0.2rem 0.4rem; font-size: 0.6rem; margin-bottom: 2px; cursor: pointer; }
+.sem-evento.confirmada { background: var(--blush); color: var(--rose-dark); }
+.sem-evento.pendiente  { background: #fdf5e8; color: #8a6020; }
+.sem-evento.completada { background: #f0efed; color: var(--mink); }
+/* CLIENTES */
+.cliente-item { display: flex; align-items: center; gap: 1rem; padding: 0.875rem 0; border-bottom: 1px solid var(--sand); cursor: pointer; transition: all 0.15s; }
+.cliente-item:last-child { border-bottom: none; }
+.cliente-item:hover { background: var(--cream); margin: 0 -1.5rem; padding-left: 1.5rem; padding-right: 1.5rem; }
+.cliente-avatar { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--serif); font-size: 1rem; color: white; flex-shrink: 0; }
+/* PERFIL */
+.perfil-header { background: var(--white); border: 1px solid var(--sand); border-radius: 4px; padding: 2rem; display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1.5rem; }
+.perfil-avatar-lg { width: 72px; height: 72px; border-radius: 50%; background: var(--blush); border: 2px solid var(--rose); display: flex; align-items: center; justify-content: center; font-family: var(--serif); font-size: 1.8rem; font-weight: 300; color: var(--rose-deep); flex-shrink: 0; }
+.chip { display: inline-flex; align-items: center; padding: 0.25rem 0.75rem; border: 1px solid var(--rose); border-radius: 20px; font-size: 0.68rem; color: var(--rose-dark); background: var(--blush); margin: 0.2rem; }
+/* HERO */
+.hero-sueldo { background: var(--espresso); border-radius: 4px; padding: 2rem; display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; position: relative; overflow: hidden; }
+.hero-sueldo::before { content:''; position:absolute; right:-60px; top:-60px; width:220px; height:220px; border-radius:50%; border:1px solid rgba(212,150,138,0.2); }
+.hero-sueldo::after  { content:''; position:absolute; right:-30px; top:-30px; width:140px; height:140px; border-radius:50%; border:1px solid rgba(212,150,138,0.12); }
+.hero-left .hero-label { font-size:0.65rem; letter-spacing:0.16em; text-transform:uppercase; color:rgba(255,255,255,0.4); margin-bottom:0.4rem; }
+.hero-left .hero-monto { font-family:var(--serif); font-size:3rem; font-weight:300; color:var(--white); line-height:1; margin-bottom:0.3rem; }
+.hero-left .hero-periodo { font-size:0.72rem; color:rgba(255,255,255,0.4); }
+.hero-right { text-align:right; position:relative; z-index:1; }
+.hero-right .hero-label { font-size:0.65rem; letter-spacing:0.16em; text-transform:uppercase; color:rgba(255,255,255,0.4); margin-bottom:0.4rem; }
+.hero-right .hero-pct { font-family:var(--serif); font-size:2.4rem; font-weight:300; color:var(--rose); line-height:1; margin-bottom:0.2rem; }
+.hero-right .hero-comision { font-size:0.78rem; color:rgba(255,255,255,0.6); }
+/* BARRAS */
+.barras-semana { display: flex; align-items: flex-end; gap: 0.75rem; height: 120px; margin-bottom: 1rem; }
+.barra-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.4rem; height: 100%; justify-content: flex-end; }
+.barra { width: 100%; border-radius: 2px 2px 0 0; min-height: 4px; }
+.barra.activa { background: var(--rose-deep); }
+.barra.normal { background: var(--blush); }
+.barra-label { font-size: 0.62rem; color: var(--mink); }
+.barra-valor { font-size: 0.65rem; color: var(--espresso); }
+/* NOTIF */
+.notif-item { display: flex; gap: 1rem; padding: 1rem 1.25rem; border-bottom: 1px solid var(--sand); background: var(--white); cursor: pointer; transition: background 0.15s; }
+.notif-item:last-child { border-bottom: none; }
+.notif-item.leida { opacity: 0.5; }
+.notif-item:hover { background: var(--cream); }
+.notif-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+.notif-dot.rose { background: var(--rose-deep); }
+.notif-dot.gray { background: var(--mink); }
+.monto-green { color: var(--success); font-weight: 400; }
+.empty { text-align: center; padding: 2.5rem; color: var(--mink); font-size: 0.82rem; }
+.loading { text-align: center; padding: 2rem; color: var(--mink); font-size: 0.78rem; }
+/* FICHA */
+.ficha-alerta-medica { background: var(--blush); border: 1px solid rgba(184,112,96,0.3); border-left: 3px solid var(--rose-deep); border-radius: 4px; padding: 1rem; margin-bottom: 1rem; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="sidebar-salon">COCO · Salón de Belleza</div>
+    <div class="sidebar-nombre" id="sb-nombre">—</div>
+    <div class="sidebar-rol">Personal técnico</div>
+    <div class="sidebar-deco"><div class="sidebar-deco-line"></div><div class="sidebar-deco-diamond"></div><div class="sidebar-deco-line"></div></div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-group-label">Mi jornada</div>
+    <div class="nav-item active" onclick="nav('agenda',this)">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span>Agenda del día</span>
+    </div>
+    <div class="nav-item" onclick="nav('horario',this)">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span>Mi horario</span>
+    </div>
+    <div class="nav-group-label">Clientes</div>
+    <div class="nav-item" onclick="nav('clientes',this)">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      <span>Mis clientes</span>
+    </div>
+    <div class="nav-item" onclick="nav('ficha',null)">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <span>Ficha de cliente</span>
+    </div>
+    <div class="nav-group-label">Ingresos</div>
+    <div class="nav-item" onclick="nav('sueldo',this)">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+      <span>Sueldo y comisiones</span>
+    </div>
+    <div class="nav-item" onclick="nav('ventas',this)">
+      <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
+      <span>Mis ventas</span>
+    </div>
+    <div class="nav-group-label">Personal</div>
+    <div class="nav-item" onclick="nav('perfil',this)">
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Mi perfil</span>
+    </div>
+    <div class="nav-item" onclick="nav('notificaciones',this)">
+      <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+      <span>Notificaciones</span>
+      <span class="nav-badge red" id="badge-notif" style="display:none">0</span>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="avatar" id="sb-avatar">?</div>
+    <div class="avatar-info">
+      <div class="avatar-name" id="sb-avatar-nombre">—</div>
+      <div class="avatar-role">Personal técnico</div>
+    </div>
+    <button class="btn-logout" onclick="cerrarSesion()">
+      <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    </button>
+  </div>
+</aside>
+
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-title" id="topbar-title">Agenda del día</div>
+      <div class="topbar-fecha" id="topbar-fecha"></div>
+    </div>
+    <div class="topbar-actions">
+      <div class="status-pill"><span class="pulse"></span>En servicio</div>
+      <button class="topbar-btn" onclick="nav('horario',null)">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Mi horario
+      </button>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- ══ AGENDA DEL DÍA ══ -->
+    <div class="section active" id="sec-agenda">
+      <div class="section-header">
+        <h2>Agenda del <em style="font-style:italic;color:var(--rose-deep)">día</em></h2>
+        <p>Tu jornada completa de hoy</p>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-bar rose"></div><div class="stat-body"><div class="stat-label">Citas hoy</div><div class="stat-value" id="stat-citas-hoy">—</div><div class="stat-sub" id="stat-citas-sub">Cargando...</div></div></div>
+        <div class="stat-card"><div class="stat-bar blush"></div><div class="stat-body"><div class="stat-label">Completadas</div><div class="stat-value" id="stat-completadas">—</div><div class="stat-sub">Hoy</div></div></div>
+        <div class="stat-card"><div class="stat-bar sand"></div><div class="stat-body"><div class="stat-label">Ingresos hoy</div><div class="stat-value" id="stat-ingresos" style="font-size:1.3rem">—</div><div class="stat-sub" id="stat-comision">Comisión: —</div></div></div>
+        <div class="stat-card"><div class="stat-bar green"></div><div class="stat-body"><div class="stat-label">Semana actual</div><div class="stat-value" id="stat-semana-citas">—</div><div class="stat-sub" id="stat-semana-comision">Comisión: —</div></div></div>
+      </div>
+
+      <!-- Timeline + Panel derecho -->
+      <div class="grid-agenda">
+        <div class="card">
+          <div class="card-title">Timeline del día</div>
+          <div class="timeline" id="timeline-citas"><div class="loading">Cargando...</div></div>
+        </div>
+        <div>
+          <div class="card">
+            <div class="card-title">Notas del turno</div>
+            <div id="notas-turno"><div class="loading">Cargando...</div></div>
+          </div>
+          <div class="card">
+            <div class="card-title">Resumen semanal</div>
+            <div style="display:flex;gap:1.5rem">
+              <div><div class="stat-label">Citas</div><div style="font-family:var(--serif);font-size:1.6rem;font-weight:300;color:var(--espresso)" id="sem-citas">—</div></div>
+              <div><div class="stat-label">Comisiones</div><div style="font-family:var(--serif);font-size:1.6rem;font-weight:300;color:var(--rose-deep)" id="sem-comision">—</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grilla semanal -->
+      <div class="card">
+        <div class="card-title">Grilla semanal</div>
+        <div id="grilla-semanal"><div class="loading">Cargando...</div></div>
+      </div>
+    </div>
+
+    <!-- ══ MI HORARIO ══ -->
+    <div class="section" id="sec-horario">
+      <div class="section-header"><h2>Mi <em style="font-style:italic;color:var(--rose-deep)">horario</em></h2><p>Planificación semanal y excepciones</p></div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Horarios fijos</div>
+          <table class="tabla">
+            <thead><tr><th>Día</th><th>Entrada</th><th>Salida</th><th>Estado</th></tr></thead>
+            <tbody id="tabla-horarios"><tr><td colspan="4" class="loading">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-title">Excepciones <button class="btn-sm solid" onclick="document.getElementById('form-excepcion').style.display='block'">+ Solicitar</button></div>
+          <div id="form-excepcion" style="display:none;margin-bottom:1rem;padding:1rem;background:var(--cream);border-radius:4px">
+            <div class="form-grid">
+              <div class="form-field"><label>Fecha *</label><input type="date" id="exc-fecha"></div>
+              <div class="form-field"><label>Tipo *</label>
+                <select id="exc-tipo">
+                  <option value="0">No disponible (día libre)</option>
+                  <option value="1">Turno extra</option>
+                </select>
+              </div>
+              <div class="form-field full"><label>Motivo</label><input type="text" id="exc-motivo" placeholder="Motivo de la solicitud..."></div>
+            </div>
+            <div style="display:flex;gap:0.5rem;margin-top:0.75rem">
+              <button class="btn-sm solid" onclick="solicitarExcepcion()">Enviar</button>
+              <button class="btn-sm outline" onclick="document.getElementById('form-excepcion').style.display='none'">Cancelar</button>
+            </div>
+          </div>
+          <table class="tabla">
+            <thead><tr><th>Fecha</th><th>Motivo</th><th>Estado</th></tr></thead>
+            <tbody id="tabla-excepciones"><tr><td colspan="3" class="loading">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ MIS CLIENTES ══ -->
+    <div class="section" id="sec-clientes">
+      <div class="section-header"><h2>Mis <em style="font-style:italic;color:var(--rose-deep)">clientes</em></h2><p>Clientas que has atendido</p></div>
+      <div class="grid-2" style="align-items:start">
+        <div class="card">
+          <div class="card-title">Listado de clientas</div>
+          <div id="lista-clientes"><div class="loading">Cargando...</div></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:1.25rem">
+          <div class="card">
+            <div class="card-title">Distribución por servicio</div>
+            <div id="distribucion-servicios"><div class="loading">Cargando...</div></div>
+          </div>
+          <div class="card">
+            <div class="card-title">Retención</div>
+            <div style="font-family:var(--serif);font-size:3rem;font-weight:300;color:var(--rose-deep);line-height:1;margin-bottom:0.5rem" id="stat-retencion">—</div>
+            <div style="font-size:0.72rem;color:var(--mink);margin-bottom:1rem">Clientas que regresan contigo</div>
+            <div style="display:flex;gap:1.5rem">
+              <div><div class="stat-label">Total</div><div style="font-family:var(--serif);font-size:1.4rem;color:var(--espresso)" id="stat-total-cli">—</div></div>
+              <div><div class="stat-label">Recurrentes</div><div style="font-family:var(--serif);font-size:1.4rem;color:var(--espresso)" id="stat-nuevos-cli">—</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ FICHA DE CLIENTE ══ -->
+    <div class="section" id="sec-ficha">
+      <div class="section-header"><h2>Ficha de <em style="font-style:italic;color:var(--rose-deep)">clienta</em></h2><p>Información técnica para el servicio</p></div>
+      <div id="ficha-sin-seleccion" style="text-align:center;padding:3rem;color:var(--mink);font-size:0.82rem">
+        Selecciona una clienta desde <a href="#" onclick="nav('clientes',null)" style="color:var(--rose-deep)">Mis clientes</a> para ver su ficha.
+      </div>
+      <div id="ficha-contenido" style="display:none">
+        <input type="hidden" id="ficha-cliente-id">
+        <input type="hidden" id="ficha-cita-id">
+        <div class="grid-2" style="align-items:start">
+          <div style="display:flex;flex-direction:column;gap:1.25rem">
+            <div class="card">
+              <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem">
+                <div class="cliente-avatar" style="background:var(--rose-deep);width:52px;height:52px;font-size:1.2rem" id="ficha-avatar">?</div>
+                <div>
+                  <div style="font-family:var(--serif);font-size:1.3rem;font-weight:300;color:var(--espresso)" id="ficha-nombre">—</div>
+                  <div style="font-size:0.72rem;color:var(--mink)" id="ficha-contacto">—</div>
+                </div>
+              </div>
+              <div class="ficha-alerta-medica" id="ficha-alerta" style="display:none">
+                <div style="font-size:0.68rem;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--rose-dark);margin-bottom:0.5rem">⚠ Alertas de seguridad</div>
+                <div style="font-size:0.75rem;font-weight:300;color:var(--espresso);line-height:1.7">
+                  <strong>Alergias:</strong> <span id="ficha-alergias">—</span><br>
+                  <strong>Contraindicaciones:</strong> <span id="ficha-contraindicaciones">—</span>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">Agregar nota de servicio</div>
+              <textarea id="ficha-notas-texto" style="width:100%;border:none;border-bottom:1px solid var(--sand);font-family:var(--sans);font-size:0.82rem;color:var(--espresso);outline:none;resize:none;padding:0.5rem 0;background:none" rows="4" placeholder="Ej: Apliqué tono 8.1, dejé actuar 35 min..."></textarea>
+              <div style="margin-top:1rem"><button class="btn-primary" style="font-size:0.65rem" onclick="guardarNotasTecnicas()">Guardar nota</button></div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:1.25rem">
+            <div class="card">
+              <div class="card-title">Historial de citas</div>
+              <table class="tabla">
+                <thead><tr><th>Fecha</th><th>Servicio</th></tr></thead>
+                <tbody id="ficha-historial"><tr><td colspan="2" class="loading">Cargando...</td></tr></tbody>
+              </table>
+            </div>
+            <div class="card" id="ficha-cita-actual" style="display:none;background:rgba(242,224,220,0.2);border-color:var(--rose)">
+              <div class="card-title">Cita actual</div>
+              <table style="width:100%;border-collapse:collapse">
+                <tr><td style="font-size:0.72rem;color:var(--mink);padding:0.4rem 0;border-bottom:1px solid var(--sand)">Servicio</td><td style="font-size:0.82rem;padding:0.4rem 0;border-bottom:1px solid var(--sand)" id="ficha-cita-servicio">—</td></tr>
+                <tr><td style="font-size:0.72rem;color:var(--mink);padding:0.4rem 0;border-bottom:1px solid var(--sand)">Hora</td><td style="font-size:0.82rem;padding:0.4rem 0;border-bottom:1px solid var(--sand)" id="ficha-cita-hora">—</td></tr>
+                <tr><td style="font-size:0.72rem;color:var(--mink);padding:0.4rem 0;border-bottom:1px solid var(--sand)">Duración</td><td style="font-size:0.82rem;padding:0.4rem 0;border-bottom:1px solid var(--sand)" id="ficha-cita-duracion">—</td></tr>
+                <tr><td style="font-size:0.72rem;color:var(--mink);padding:0.4rem 0">Precio</td><td style="font-family:var(--serif);font-size:1.1rem;color:var(--rose-deep);padding:0.4rem 0" id="ficha-cita-precio">—</td></tr>
+              </table>
+              <div style="margin-top:1.25rem">
+                <button class="btn-primary" style="width:100%;font-size:0.65rem" onclick="completarCita()">Marcar completada</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SUELDO Y COMISIONES ══ -->
+    <div class="section" id="sec-sueldo">
+      <div class="section-header"><h2>Sueldo y <em style="font-style:italic;color:var(--rose-deep)">comisiones</em></h2><p>Tu resumen financiero del mes</p></div>
+      <div class="hero-sueldo">
+        <div class="hero-left">
+          <div class="hero-label">Sueldo base mensual</div>
+          <div class="hero-monto" id="hero-sueldo">—</div>
+          <div class="hero-periodo" id="hero-periodo">—</div>
+        </div>
+        <div class="hero-right">
+          <div class="hero-label">Comisión vigente</div>
+          <div class="hero-pct" id="hero-pct">—</div>
+          <div class="hero-comision" id="hero-comision">—</div>
+        </div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-bar rose"></div><div class="stat-body"><div class="stat-label">Total estimado</div><div class="stat-value" id="stat-total-est" style="font-size:1.3rem">—</div><div class="stat-sub">Base + comisiones</div></div></div>
+        <div class="stat-card"><div class="stat-bar blush"></div><div class="stat-body"><div class="stat-label">Ventas generadas</div><div class="stat-value" id="stat-ventas-mes" style="font-size:1.3rem">—</div><div class="stat-sub">Este mes</div></div></div>
+        <div class="stat-card"><div class="stat-bar sand"></div><div class="stat-body"><div class="stat-label">% Comisión</div><div class="stat-value" id="stat-pct-com">—</div><div class="stat-sub">Vigente</div></div></div>
+        <div class="stat-card"><div class="stat-bar green"></div><div class="stat-body"><div class="stat-label">Citas del mes</div><div class="stat-value" id="stat-citas-mes">—</div><div class="stat-sub">Completadas</div></div></div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Comisiones por semana</div>
+          <div class="barras-semana" id="barras-semana"><div class="loading">Cargando...</div></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Histórico mensual</div>
+          <table class="tabla">
+            <thead><tr><th>Período</th><th>Ventas</th><th style="color:var(--success)">Comisión</th><th>Base</th><th>Total</th></tr></thead>
+            <tbody id="tabla-historico"><tr><td colspan="5" class="loading">Cargando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ MIS VENTAS ══ -->
+    <div class="section" id="sec-ventas">
+      <div class="section-header"><h2>Mis <em style="font-style:italic;color:var(--rose-deep)">ventas</em></h2><p>Detalle de servicios y comisiones</p></div>
+      <div class="card">
+        <table class="tabla">
+          <thead><tr><th>Fecha</th><th>Cliente</th><th>Servicio</th><th>Tipo</th><th>Monto</th><th style="color:var(--success)">Comisión</th></tr></thead>
+          <tbody id="tabla-ventas"><tr><td colspan="6" class="loading">Cargando...</td></tr></tbody>
+        </table>
+        <div style="display:flex;justify-content:flex-end;gap:2rem;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--sand)">
+          <div style="text-align:right"><div class="stat-label">Total ventas</div><div style="font-family:var(--serif);font-size:1.4rem;color:var(--espresso)" id="total-ventas">Bs 0</div></div>
+          <div style="text-align:right"><div class="stat-label">Total comisiones</div><div style="font-family:var(--serif);font-size:1.4rem;color:var(--success)" id="total-comision">Bs 0</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ MI PERFIL ══ -->
+    <div class="section" id="sec-perfil">
+      <div class="section-header"><h2>Mi <em style="font-style:italic;color:var(--rose-deep)">perfil</em></h2><p>Datos personales y contractuales</p></div>
+      <div class="perfil-header">
+        <div class="perfil-avatar-lg" id="perfil-avatar">?</div>
+        <div>
+          <div style="font-family:var(--serif);font-size:1.6rem;font-weight:300;color:var(--espresso)" id="perfil-nombre-display">—</div>
+          <div style="font-size:0.78rem;color:var(--mink);margin-top:0.2rem" id="perfil-email-display">—</div>
+          <div style="font-size:0.65rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--rose-dark);background:var(--blush);padding:0.2rem 0.75rem;border-radius:20px;display:inline-block;margin-top:0.5rem" id="perfil-desde">—</div>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:1.25rem">
+        <div class="card-title">Información personal</div>
+        <div class="form-grid">
+          <div class="form-field"><label>Nombre</label><input type="text" id="p-nombre"></div>
+          <div class="form-field"><label>Apellido</label><input type="text" id="p-apellido"></div>
+          <div class="form-field"><label>Teléfono</label><input type="tel" id="p-telefono"></div>
+          <div class="form-field"><label>Email</label><input type="email" id="p-email"></div>
+          <div class="form-field"><label>Rol</label><input type="text" id="p-rol" disabled></div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-primary" onclick="guardarPerfil()">Guardar cambios</button>
+          <button class="btn-secondary" onclick="cargarPerfil()">Cancelar</button>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Sueldo base</div>
+          <div style="font-family:var(--serif);font-size:1.8rem;font-weight:300;color:var(--espresso);line-height:1;margin-bottom:0.3rem" id="info-sueldo">—</div>
+          <div style="font-size:0.68rem;color:var(--mink)" id="info-sueldo-desde">—</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Comisión</div>
+          <div style="font-family:var(--serif);font-size:1.8rem;font-weight:300;color:var(--rose-deep);line-height:1;margin-bottom:0.3rem" id="info-comision">—</div>
+          <div style="font-size:0.68rem;color:var(--mink)" id="info-com-desde">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ NOTIFICACIONES ══ -->
+    <div class="section" id="sec-notificaciones">
+      <div class="section-header"><h2>Notificaciones</h2><p>Alertas relevantes para tu jornada</p></div>
+      <div style="border:1px solid var(--sand);border-radius:4px;overflow:hidden;background:var(--white)" id="lista-notificaciones">
+        <div class="loading">Cargando...</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+var token  = localStorage.getItem('token');
+var nombre = localStorage.getItem('nombre') || 'Empleada';
+if (!token) window.location.href = '/coco-auth.html';
+
+document.getElementById('sb-nombre').textContent        = nombre;
+document.getElementById('sb-avatar').textContent        = nombre.charAt(0).toUpperCase();
+document.getElementById('sb-avatar-nombre').textContent = nombre;
+
+var hoy   = new Date();
+var DIAS  = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+var MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+var DIAS_CORTO = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+
+document.getElementById('topbar-fecha').textContent = DIAS[hoy.getDay()] + ', ' + hoy.getDate() + ' de ' + MESES[hoy.getMonth()] + ' de ' + hoy.getFullYear();
+
+async function api(url, opts) {
+    opts = opts || {};
+    var cfg = Object.assign({}, opts, {
+        headers: Object.assign({ 'Content-Type':'application/json', 'Authorization':'Bearer '+token }, opts.headers||{})
+    });
+    var res = await fetch(url, cfg);
+    if (!res.ok) { var e = await res.json().catch(function(){ return {error:'Error'}; }); throw new Error(e.error||'Error '+res.status); }
+    return res.json();
+}
+
+function fFecha(f) {
+    if (!f) return '—';
+    // Si es solo fecha (YYYY-MM-DD) extraer directamente sin conversión
+    var s = typeof f === 'string' ? f : '';
+    if (s.length >= 10) {
+        var partes = s.substring(0, 10).split('-');
+        if (partes.length === 3) {
+            return parseInt(partes[2]) + '/' + parseInt(partes[1]) + '/' + partes[0];
+        }
+    }
+    var d = new Date(f);
+    return d.getDate() + '/' + (d.getMonth()+1) + '/' + d.getFullYear();
+}
+
+function fHora(f)  { var d=new Date(f); return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0'); }
+
+var SECCIONES = {
+    agenda:'Agenda del día', horario:'Mi horario', clientes:'Mis clientes',
+    ficha:'Ficha de cliente', sueldo:'Sueldo y comisiones', ventas:'Mis ventas',
+    perfil:'Mi perfil', notificaciones:'Notificaciones'
+};
+
+function nav(id, el) {
+    document.querySelectorAll('.section').forEach(function(s){ s.classList.remove('active'); });
+    document.querySelectorAll('.nav-item').forEach(function(n){ n.classList.remove('active'); });
+    document.getElementById('sec-'+id).classList.add('active');
+    document.getElementById('topbar-title').textContent = SECCIONES[id]||id;
+    if (el) el.classList.add('active');
+    else document.querySelectorAll('.nav-item').forEach(function(n){
+        var oc=n.getAttribute('onclick');
+        if(oc&&oc.indexOf("'"+id+"'")!==-1) n.classList.add('active');
+    });
+    var fns = {
+        agenda:cargarAgenda, horario:cargarHorario, clientes:cargarClientes,
+        sueldo:cargarSueldo, ventas:cargarVentas, perfil:cargarPerfil,
+        notificaciones:cargarNotificaciones
+    };
+    if (fns[id]) fns[id]();
+}
+
+function cerrarSesion() {
+    ['token','nombre','rol','personaID'].forEach(function(k){ localStorage.removeItem(k); });
+    window.location.href = '/coco-auth.html';
+}
+
+// ══ AGENDA ═══════════════════════════════════════════
+async function cargarAgenda() {
+    try {
+        var data = await api('/api/personal/agenda');
+        var est  = data.estadisticas || {};
+
+        document.getElementById('stat-citas-hoy').textContent   = est.TotalCitas || 0;
+        document.getElementById('stat-citas-sub').textContent   = (est.Confirmadas||0)+' conf · '+(est.Pendientes||0)+' pend';
+        document.getElementById('stat-completadas').textContent = est.Completadas || 0;
+        document.getElementById('stat-ingresos').textContent    = 'Bs '+(parseFloat(est.IngresosDia)||0).toFixed(2);
+        document.getElementById('stat-comision').textContent = 'Comisión: Bs '+(parseFloat(est.ComisionDia)||0).toFixed(2);
+
+        var sem = data.semana || {};
+        document.getElementById('stat-semana-citas').textContent    = sem.CitasSemana || 0;
+        document.getElementById('stat-semana-comision').textContent = 'Bs '+(parseFloat(sem.ComisionesSemana)||0).toFixed(2);
+        document.getElementById('sem-citas').textContent            = sem.CitasSemana || 0;
+        document.getElementById('sem-comision').textContent         = 'Bs '+(parseFloat(sem.ComisionesSemana)||0).toFixed(2);
+
+        // Timeline del día
+        var timeline = data.timeline || [];
+        var divTL = document.getElementById('timeline-citas');
+        if (!timeline.length) {
+            divTL.innerHTML = '<div class="empty">No hay citas para hoy</div>';
+        } else {
+            divTL.innerHTML = timeline.map(function(c){
+                var estado = (c.Estado||'').toLowerCase().replace(' ','\ ');
+                var alerta = c.Alergias ? '<span class="badge badge-error" style="margin-left:4px">⚠ Alergia</span>' : '';
+                return '<div class="tl-item">' +
+                    '<div class="tl-dot '+estado+'"></div>' +
+                    '<div class="tl-card '+estado+'" onclick="cargarFichaCliente('+c.ClienteID+')">' +
+                    '<div class="tl-hora">'+fHora(c.FechaInicioServicio)+' – '+fHora(c.FechaFinServicio)+alerta+'</div>' +
+                    '<div class="tl-cliente">'+c.NombreCliente+' '+c.ApellidoCliente+'</div>' +
+                    '<div class="tl-servicio">'+c.Servicio+'</div>' +
+                    '<div class="tl-footer">' +
+                    '<span class="tl-precio">Bs '+c.Precio+'</span>' +
+                    '<span class="badge badge-'+(estado==='confirmada'?'green':estado==='completada'?'gray':estado==='cancelada'?'error':'amber')+'">'+c.Estado+'</span>' +
+                    (c.EstadoID===8?'<button class="btn-confirmar" onclick="event.stopPropagation()">Confirmar</button>':'') +
+                    '</div></div></div>';
+            }).join('');
+        }
+
+        // Notas del turno
+        var notas = timeline.filter(function(c){ return c.Alergias||c.Contraindicaciones; });
+        var divN  = document.getElementById('notas-turno');
+        if (!notas.length) {
+            divN.innerHTML = '<div style="font-size:0.75rem;color:var(--mink)">Sin alertas médicas para hoy</div>';
+        } else {
+            divN.innerHTML = notas.map(function(c){
+                return '<div class="alerta amber">' +
+                    '<div class="alerta-titulo">⚠ '+c.NombreCliente+' '+c.ApellidoCliente+'</div>' +
+                    '<div class="alerta-texto">'+(c.Alergias||'')+(c.Contraindicaciones?' · '+c.Contraindicaciones:'')+'</div></div>';
+            }).join('');
+        }
+
+        // Grilla semanal
+        var semGrid = data.semanaGrid || [];
+        var ahora   = new Date();
+        var diaJS   = ahora.getDay() === 0 ? 7 : ahora.getDay();
+        var inicioSem = new Date(ahora);
+        inicioSem.setDate(ahora.getDate() - diaJS + 1);
+        inicioSem.setHours(0,0,0,0);
+
+        var fechasSem = [];
+        for (var i = 0; i < 7; i++) {
+            var fd = new Date(inicioSem);
+            fd.setDate(inicioSem.getDate() + i);
+            fechasSem.push(fd);
+        }
+
+        var horas = ['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00'];
+        var ghtml = '<div class="semana-grid">';
+
+        // Header vacío + días
+        ghtml += '<div class="sem-header-empty"></div>';
+        fechasSem.forEach(function(fd, idx) {
+            var esHoy = fd.toDateString() === ahora.toDateString();
+            ghtml += '<div class="sem-header-dia'+(esHoy?' hoy':'')+'">' +
+                '<div class="sem-dia-nombre">'+DIAS_CORTO[idx]+'</div>' +
+                '<div class="sem-dia-num">'+fd.getDate()+'</div></div>';
+        });
+
+        // Filas por hora
+        horas.forEach(function(hora) {
+            var horaNum = parseInt(hora.split(':')[0]);
+            ghtml += '<div class="sem-hora-cell">'+hora+'</div>';
+            fechasSem.forEach(function(fd) {
+                var esHoy = fd.toDateString() === ahora.toDateString();
+                var citasCelda = semGrid.filter(function(c) {
+                    var dc = new Date(c.FechaInicioServicio);
+                    return dc.toDateString() === fd.toDateString() && dc.getHours() === horaNum;
+                });
+                ghtml += '<div class="sem-cita-cell'+(esHoy?' hoy':'')+'">';
+                citasCelda.forEach(function(c) {
+                    var cls = (c.EstadoID===9||c.EstadoID===10?'confirmada':c.EstadoID===11?'completada':c.EstadoID===12||c.EstadoID===13?'cancelada':'pendiente');
+                    ghtml += '<div class="sem-evento '+cls+'" onclick="cargarFichaCliente('+c.ClienteID+')" title="'+c.NombreCliente+' · '+c.Servicio+'">' +
+                        fHora(c.FechaInicioServicio)+' · '+c.NombreCliente+'</div>';
+                });
+                ghtml += '</div>';
+            });
+        });
+
+        ghtml += '</div>';
+        document.getElementById('grilla-semanal').innerHTML = ghtml;
+
+    } catch(e) { console.error('Error agenda:', e); }
+}
+
+// ══ HORARIO ═══════════════════════════════════════════
+function formatHora(val) {
+    if (!val) return '—';
+    // Si es un objeto Date o string con fecha completa
+    var d = new Date(val);
+    if (!isNaN(d.getTime())) {
+        return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
+    }
+    // Si ya viene como 'HH:MM' o 'HH:MM:SS'
+    return val.toString().substring(0,5);
+}
+
+async function cargarHorario() {
+    try {
+        var data = await api('/api/personal/horario');
+        var dias = ['','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+        var h    = data.horarios || [];
+
+        document.getElementById('tabla-horarios').innerHTML = h.map(function(x){
+            return '<tr>' +
+                '<td>'+(dias[x.DiaSemana]||x.DiaSemana)+'</td>' +
+                '<td>'+formatHora(x.HoraEntrada)+'</td>' +
+                '<td>'+formatHora(x.HoraSalida)+'</td>' +
+                '<td><span class="badge '+(x.Activo?'badge-green':'badge-gray')+'">'+(x.Activo?'Activo':'Inactivo')+'</span></td>' +
+                '</tr>';
+        }).join('') || '<tr><td colspan="4" class="empty">Sin horario</td></tr>';
+
+        var exc = data.excepciones || [];
+        document.getElementById('tabla-excepciones').innerHTML = exc.map(function(e){
+            var badgeExc = e.Estado==='Aprobada' ? 'badge-green' : e.Estado==='Rechazada' ? 'badge-error' : 'badge-amber';
+            return '<tr>' +
+                '<td>'+fFecha(e.Fecha)+'</td>' +
+                '<td>'+(e.Motivo||'—')+'</td>' +
+                '<td><span class="badge '+badgeExc+'">'+(e.Estado||'Pendiente')+'</span></td>' +
+                '</tr>';
+        }).join('') || '<tr><td colspan="3" class="empty">Sin excepciones</td></tr>';
+
+    } catch(e) { console.error('Error horario:', e); }
+}
+
+async function solicitarExcepcion() {
+    var fecha      = document.getElementById('exc-fecha').value;
+    var disponible = document.getElementById('exc-tipo').value === '1';
+    var motivo     = document.getElementById('exc-motivo').value;
+    if (!fecha) { alert('Selecciona una fecha.'); return; }
+    try {
+        await api('/api/personal/horario/excepcion', { method:'POST', body:JSON.stringify({ fecha:fecha, disponible:disponible, motivo:motivo }) });
+        alert('Solicitud enviada correctamente.');
+        document.getElementById('form-excepcion').style.display = 'none';
+        cargarHorario();
+    } catch(e) { alert('Error: '+e.message); }
+}
+
+// ══ CLIENTES ══════════════════════════════════════════
+async function cargarClientes() {
+    try {
+        var data     = await api('/api/personal/clientes');
+        var clientes = data.clientes || [];
+        var colores  = ['#b87060','#8a6090','#6090a0','#a06060','#608060'];
+        var div      = document.getElementById('lista-clientes');
+
+        div.innerHTML = clientes.map(function(c){
+            var ini   = (c.Nombre||'').charAt(0)+(c.Apellido||'').charAt(0);
+            var color = colores[c.ClienteID % colores.length];
+            return '<div class="cliente-item" onclick="cargarFichaCliente('+c.ClienteID+')">' +
+                '<div class="cliente-avatar" style="background:'+color+'">'+ini.toUpperCase()+'</div>' +
+                '<div style="flex:1"><div style="font-size:0.85rem;font-weight:400;color:var(--espresso)">'+c.Nombre+' '+c.Apellido+'</div>' +
+                '<div style="font-size:0.68rem;color:var(--mink)">'+(c.TotalVisitas||0)+' visitas · '+(c.UltimaVisita?fFecha(c.UltimaVisita):'—')+'</div>' +
+                '<div style="margin-top:0.3rem">'+(c.Alergias?'<span class="badge badge-error">⚠ Alergia</span>':'')+'</div></div></div>';
+        }).join('') || '<div class="empty">Sin clientes atendidos</div>';
+
+        var dist = data.distribucion || [];
+        document.getElementById('distribucion-servicios').innerHTML = dist.map(function(d){
+            return '<div style="margin-bottom:0.75rem">' +
+                '<div style="display:flex;justify-content:space-between;font-size:0.72rem;color:var(--mink);margin-bottom:0.3rem"><span>'+d.Subcategoria+'</span><span>'+d.Porcentaje+'%</span></div>' +
+                '<div class="progress-bar"><div class="progress-fill" style="width:'+d.Porcentaje+'%"></div></div></div>';
+        }).join('') || '<div class="empty">Sin datos</div>';
+
+        var ret = data.retencion || {};
+        document.getElementById('stat-retencion').textContent  = (ret.PorcentajeRetencion||0)+'%';
+        document.getElementById('stat-total-cli').textContent  = ret.TotalClientes       || 0;
+        document.getElementById('stat-nuevos-cli').textContent = ret.ClientesRecurrentes || 0;
+    } catch(e) { console.error('Error clientes:', e); }
+}
+
+// ══ FICHA ══════════════════════════════════════════════
+async function cargarFichaCliente(clienteID) {
+    nav('ficha', null);
+    document.getElementById('ficha-sin-seleccion').style.display = 'none';
+    document.getElementById('ficha-contenido').style.display     = 'block';
+    try {
+        var data    = await api('/api/personal/clientes/'+clienteID+'/ficha');
+        var cliente = data.cliente || {};
+        var ini     = (cliente.Nombre||'').charAt(0)+(cliente.Apellido||'').charAt(0);
+
+        document.getElementById('ficha-avatar').textContent    = ini.toUpperCase();
+        document.getElementById('ficha-nombre').textContent    = (cliente.Nombre||'')+' '+(cliente.Apellido||'');
+        document.getElementById('ficha-contacto').textContent  = (cliente.Telefono||'')+' · '+(cliente.TotalVisitas||0)+' visitas';
+        document.getElementById('ficha-cliente-id').value      = clienteID;
+        document.getElementById('ficha-notas-texto').value     = cliente.NotasTecnicas || '';
+
+        var divA = document.getElementById('ficha-alerta');
+        if (cliente.Alergias || cliente.Contraindicaciones) {
+            divA.style.display = 'block';
+            document.getElementById('ficha-alergias').textContent           = cliente.Alergias           || '—';
+            document.getElementById('ficha-contraindicaciones').textContent = cliente.Contraindicaciones || '—';
+        } else { divA.style.display = 'none'; }
+
+        var hist = data.historial || [];
+        document.getElementById('ficha-historial').innerHTML = hist.map(function(h){
+            return '<tr><td>'+fFecha(h.FechaInicioServicio)+'</td><td>'+h.Servicio+'</td></tr>';
+        }).join('') || '<tr><td colspan="2" class="empty">Sin historial</td></tr>';
+
+        var cita    = data.citaActual;
+        var divCita = document.getElementById('ficha-cita-actual');
+        if (cita) {
+            divCita.style.display = 'block';
+            document.getElementById('ficha-cita-servicio').textContent = cita.Servicio;
+            document.getElementById('ficha-cita-hora').textContent     = fHora(cita.FechaInicioServicio)+' – '+fHora(cita.FechaFinServicio);
+            document.getElementById('ficha-cita-duracion').textContent = cita.DuracionMin+' min';
+            document.getElementById('ficha-cita-precio').textContent   = 'Bs '+cita.Precio;
+            document.getElementById('ficha-cita-id').value             = cita.CitaID;
+        } else { divCita.style.display = 'none'; }
+    } catch(e) { console.error('Error ficha:', e); }
+}
+
+async function guardarNotasTecnicas() {
+    var clienteID = document.getElementById('ficha-cliente-id').value;
+    var notas     = document.getElementById('ficha-notas-texto').value;
+    if (!notas) { alert('Escribe una nota.'); return; }
+    try {
+        await api('/api/personal/clientes/'+clienteID+'/notas', { method:'PUT', body:JSON.stringify({ notasTecnicas:notas }) });
+        alert('Nota guardada correctamente.');
+    } catch(e) { alert('Error: '+e.message); }
+}
+
+async function completarCita() {
+    var citaID = document.getElementById('ficha-cita-id').value;
+    if (!citaID) return;
+    if (!confirm('¿Marcar esta cita como completada?')) return;
+    try {
+        await api('/api/personal/citas/'+citaID+'/completar', { method:'PUT' });
+        alert('Cita completada.');
+        nav('agenda', null);
+    } catch(e) { alert('Error: '+e.message); }
+}
+
+// ══ SUELDO ════════════════════════════════════════════
+async function cargarSueldo() {
+    try {
+        var data   = await api('/api/personal/sueldo');
+        var sueldo = data.sueldo || {};
+        var mes    = data.mes    || {};
+
+        document.getElementById('hero-sueldo').textContent   = 'Bs '+(parseFloat(sueldo.SueldoBase)||0).toLocaleString();
+        document.getElementById('hero-periodo').textContent  = 'Vigente desde '+(sueldo.SueldoDesde?fFecha(sueldo.SueldoDesde):'—');
+        document.getElementById('hero-pct').textContent      = (sueldo.PorcentajeComision||0)+'%';
+        document.getElementById('hero-comision').textContent = 'Bs '+(parseFloat(mes.ComisionMes)||0).toFixed(2)+' acumulados';
+
+        var totalEst = (parseFloat(sueldo.SueldoBase)||0)+(parseFloat(mes.ComisionMes)||0);
+        document.getElementById('stat-total-est').textContent  = 'Bs '+totalEst.toFixed(2);
+        document.getElementById('stat-ventas-mes').textContent = 'Bs '+(parseFloat(mes.VentasMes)||0).toFixed(2);
+        document.getElementById('stat-pct-com').textContent    = (sueldo.PorcentajeComision||0)+'%';
+        document.getElementById('stat-citas-mes').textContent  = mes.CitasMes || 0;
+
+        var semanas = data.semanas || [];
+        var maxSem  = Math.max.apply(null, semanas.map(function(s){ return parseFloat(s.ComisionSemana)||0; }).concat([1]));
+        document.getElementById('barras-semana').innerHTML = [1,2,3,4].map(function(i){
+            var sem = semanas.find(function(s){ return s.Semana===i; });
+            var val = sem ? parseFloat(sem.ComisionSemana)||0 : 0;
+            var pct = Math.round(val*100/maxSem);
+            var act = i === Math.ceil(new Date().getDate()/7);
+            return '<div class="barra-wrap">' +
+                '<div class="barra-valor">'+(val>0?'Bs '+val.toFixed(0):'—')+'</div>' +
+                '<div class="barra '+(act?'activa':'normal')+'" style="height:'+Math.max(pct,4)+'%"></div>' +
+                '<div class="barra-label">Sem '+i+'</div></div>';
+        }).join('');
+
+        var hist   = data.historico || [];
+        var MESES2 = ['','Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+        document.getElementById('tabla-historico').innerHTML = hist.map(function(h){
+            return '<tr><td>'+MESES2[h.Mes]+' '+h.Anio+'</td>' +
+                '<td>Bs '+(parseFloat(h.Ventas)||0).toFixed(2)+'</td>' +
+                '<td class="monto-green">Bs '+(parseFloat(h.Comision)||0).toFixed(2)+'</td>' +
+                '<td>Bs '+(parseFloat(h.SueldoBase)||0).toFixed(2)+'</td>' +
+                '<td style="font-weight:500">Bs '+((parseFloat(h.SueldoBase)||0)+(parseFloat(h.Comision)||0)).toFixed(2)+'</td></tr>';
+        }).join('') || '<tr><td colspan="5" class="empty">Sin historial</td></tr>';
+    } catch(e) { console.error('Error sueldo:', e); }
+}
+
+// ══ VENTAS ════════════════════════════════════════════
+async function cargarVentas() {
+    try {
+        var data  = await api('/api/personal/ventas');
+        var tbody = document.getElementById('tabla-ventas');
+        if (!data||!data.length) { tbody.innerHTML='<tr><td colspan="6" class="empty">Sin ventas</td></tr>'; return; }
+        var tv=0, tc=0;
+        tbody.innerHTML = data.map(function(v){
+            tv += parseFloat(v.Precio)||0;
+            tc += parseFloat(v.Comision)||0;
+            return '<tr><td>'+fFecha(v.Fecha)+'</td>' +
+                '<td>'+(v.NombreCliente||'')+' '+(v.ApellidoCliente||'')+'</td>' +
+                '<td>'+v.Servicio+'</td>' +
+                '<td><span class="badge badge-rose">Servicio</span></td>' +
+                '<td>Bs '+(parseFloat(v.Precio)||0).toFixed(2)+'</td>' +
+                '<td class="monto-green">Bs '+(parseFloat(v.Comision)||0).toFixed(2)+'</td></tr>';
+        }).join('');
+        document.getElementById('total-ventas').textContent   = 'Bs '+tv.toFixed(2);
+        document.getElementById('total-comision').textContent = 'Bs '+tc.toFixed(2);
+    } catch(e) { console.error('Error ventas:', e); }
+}
+
+// ══ PERFIL ════════════════════════════════════════════
+async function cargarPerfil() {
+    try {
+        var data   = await api('/api/personal/perfil');
+        var perfil = data.perfil || {};
+        var ini    = (perfil.Nombre||'').charAt(0)+(perfil.Apellido||'').charAt(0);
+
+        document.getElementById('perfil-avatar').textContent         = ini.toUpperCase();
+        document.getElementById('perfil-nombre-display').textContent = (perfil.Nombre||'')+' '+(perfil.Apellido||'');
+        document.getElementById('perfil-email-display').textContent  = perfil.Email||'';
+        document.getElementById('perfil-desde').textContent          = 'Empleada desde '+(perfil.FechaContratacion?fFecha(perfil.FechaContratacion):'—');
+        document.getElementById('p-nombre').value   = perfil.Nombre    || '';
+        document.getElementById('p-apellido').value = perfil.Apellido  || '';
+        document.getElementById('p-telefono').value = perfil.Telefono  || '';
+        document.getElementById('p-email').value    = perfil.Email     || '';
+        document.getElementById('p-rol').value      = perfil.NombreRol || '';
+        document.getElementById('info-sueldo').textContent      = 'Bs '+(parseFloat(perfil.SueldoBase)||0).toFixed(2)+' / mes';
+        document.getElementById('info-sueldo-desde').textContent = 'Desde '+(perfil.SueldoDesde?fFecha(perfil.SueldoDesde):'—');
+        document.getElementById('info-comision').textContent    = (perfil.PorcentajeComision||0)+'%';
+        document.getElementById('info-com-desde').textContent   = 'Desde '+(perfil.ComisionDesde?fFecha(perfil.ComisionDesde):'—');
+    } catch(e) { console.error('Error perfil:', e); }
+}
+
+async function guardarPerfil() {
+    try {
+        await api('/api/personal/perfil', { method:'PUT', body:JSON.stringify({
+            nombre:   document.getElementById('p-nombre').value,
+            apellido: document.getElementById('p-apellido').value,
+            telefono: document.getElementById('p-telefono').value,
+            email:    document.getElementById('p-email').value
+        })});
+        alert('Perfil actualizado.');
+        cargarPerfil();
+    } catch(e) { alert('Error: '+e.message); }
+}
+
+// ══ NOTIFICACIONES ════════════════════════════════════
+async function cargarNotificaciones() {
+    try {
+        var data = await api('/api/personal/notificaciones');
+        var div  = document.getElementById('lista-notificaciones');
+        if (!data||!data.length) { div.innerHTML='<div class="empty">Sin notificaciones</div>'; return; }
+        var noLeidas = data.filter(function(n){ return !n.Leido; }).length;
+        var badge    = document.getElementById('badge-notif');
+        if (noLeidas>0) { badge.textContent=noLeidas; badge.style.display='inline-block'; }
+        else badge.style.display='none';
+        div.innerHTML = data.map(function(n){
+            return '<div class="notif-item '+(n.Leido?'leida':'')+'" onclick="marcarLeida('+n.NotificacionID+',this)">' +
+                '<div class="notif-dot '+(n.Leido?'gray':'rose')+'"></div>' +
+                '<div style="flex:1"><div style="font-size:0.82rem;font-weight:400;color:var(--espresso)">'+n.TipoNotificacion+'</div>' +
+                '<div style="font-size:0.75rem;color:var(--mink);line-height:1.5">'+n.Mensaje+'</div>' +
+                '<div style="font-size:0.65rem;color:var(--sand);margin-top:0.2rem">'+fFecha(n.Fecha)+' · '+fHora(n.Fecha)+'</div></div></div>';
+        }).join('');
+    } catch(e) { console.error('Error notificaciones:', e); }
+}
+
+async function marcarLeida(id, el) {
+    if (el.classList.contains('leida')) return;
+    try {
+        await api('/api/personal/notificaciones/'+id+'/leer', { method:'PUT' });
+        el.classList.add('leida');
+        el.querySelector('.notif-dot').className = 'notif-dot gray';
+    } catch(e) { console.error(e); }
+}
+
+// Cargar al iniciar
+cargarAgenda();
+</script>
+</body>
+</html>

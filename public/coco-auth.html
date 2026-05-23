@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COCO · Salón de Belleza</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blush:     #f2e0dc;
+    --rose:      #d4968a;
+    --rose-deep: #b87060;
+    --cream:     #faf6f3;
+    --sand:      #e8ddd6;
+    --mink:      #8a7168;
+    --espresso:  #3d2b25;
+    --white:     #ffffff;
+    --error:     #c0614f;
+    --serif:     'Cormorant Garamond', serif;
+    --sans:      'Jost', sans-serif;
+    --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  body {
+    min-height: 100vh;
+    background: var(--cream);
+    font-family: var(--sans);
+    display: flex;
+    align-items: stretch;
+    overflow-x: hidden;
+  }
+
+  /* ── PANEL IZQUIERDO (decorativo) ── */
+  .panel-art {
+    flex: 0 0 45%;
+    background: var(--blush);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  /* Líneas decorativas SVG de fondo */
+  .panel-art svg.bg-lines {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.35;
+  }
+
+  /* Círculos decorativos */
+  .deco-circle {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid var(--rose);
+  }
+  .deco-circle.c1 { width: 380px; height: 380px; top: -100px; right: -120px; border-color: var(--rose); opacity: 0.4; }
+  .deco-circle.c2 { width: 220px; height: 220px; bottom: 60px; left: -70px; opacity: 0.3; }
+  .deco-circle.c3 { width: 120px; height: 120px; bottom: 180px; right: 40px; opacity: 0.2; }
+  .deco-circle.c4 { width: 60px; height: 60px; top: 200px; left: 60px; opacity: 0.25; }
+
+  /* Pétalo decorativo */
+  .petal {
+    position: absolute;
+    width: 8px;
+    height: 14px;
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    background: var(--rose);
+    opacity: 0.25;
+  }
+  .petal:nth-child(1)  { top: 28%; left: 20%; transform: rotate(-30deg); }
+  .petal:nth-child(2)  { top: 35%; left: 26%; transform: rotate(15deg); }
+  .petal:nth-child(3)  { top: 30%; left: 32%; transform: rotate(60deg); }
+  .petal:nth-child(4)  { top: 42%; left: 23%; transform: rotate(-60deg); }
+  .petal:nth-child(5)  { top: 38%; left: 16%; transform: rotate(5deg); }
+
+  .petal.g2:nth-child(1) { top: 65%; left: 58%; transform: rotate(-20deg); }
+  .petal.g2:nth-child(2) { top: 72%; left: 63%; transform: rotate(35deg); }
+  .petal.g2:nth-child(3) { top: 68%; left: 70%; transform: rotate(-55deg); }
+  .petal.g2:nth-child(4) { top: 78%; left: 62%; transform: rotate(10deg); }
+  .petal.g2:nth-child(5) { top: 75%; left: 55%; transform: rotate(-80deg); }
+
+  /* Contenido central del panel */
+  .panel-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 2rem;
+  }
+
+  .logo-mark {
+    width: 72px;
+    height: 72px;
+    border: 1.5px solid var(--rose-deep);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    position: relative;
+  }
+  .logo-mark::before {
+    content: '';
+    position: absolute;
+    inset: 5px;
+    border-radius: 50%;
+    border: 0.5px solid var(--rose);
+  }
+  .logo-mark span {
+    font-family: var(--serif);
+    font-size: 1.9rem;
+    font-weight: 300;
+    color: var(--rose-deep);
+    letter-spacing: 0.05em;
+    line-height: 1;
+  }
+
+  .panel-headline {
+    font-family: var(--serif);
+    font-size: 2.6rem;
+    font-weight: 300;
+    color: var(--espresso);
+    line-height: 1.2;
+    margin-bottom: 0.75rem;
+    letter-spacing: 0.02em;
+  }
+  .panel-headline em {
+    font-style: italic;
+    color: var(--rose-deep);
+  }
+
+  .panel-sub {
+    font-size: 0.75rem;
+    font-weight: 300;
+    color: var(--mink);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  /* Línea decorativa horizontal */
+  .divider-line {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 1.5rem auto;
+    width: 160px;
+  }
+  .divider-line::before,
+  .divider-line::after {
+    content: '';
+    flex: 1;
+    height: 0.5px;
+    background: var(--rose);
+    opacity: 0.6;
+  }
+  .divider-line .diamond {
+    width: 5px;
+    height: 5px;
+    background: var(--rose);
+    transform: rotate(45deg);
+    opacity: 0.7;
+  }
+
+  /* ── PANEL DERECHO (formulario) ── */
+  .panel-form {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 4rem;
+    background: var(--white);
+    position: relative;
+  }
+
+  /* Línea sutil a la izquierda del panel */
+  .panel-form::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 10%;
+    height: 80%;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, var(--sand) 30%, var(--sand) 70%, transparent);
+  }
+
+  .form-container {
+    width: 100%;
+    max-width: 380px;
+  }
+
+  /* ── TABS (Login / Crear cuenta) ── */
+  .tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 2.5rem;
+    border-bottom: 1px solid var(--sand);
+  }
+
+  .tab-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 0.6rem 1rem 0.9rem;
+    font-family: var(--sans);
+    font-size: 0.75rem;
+    font-weight: 400;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--mink);
+    cursor: pointer;
+    transition: all 0.3s var(--ease-soft);
+    margin-bottom: -1px;
+  }
+  .tab-btn.active {
+    color: var(--rose-deep);
+    border-bottom-color: var(--rose-deep);
+  }
+  .tab-btn:hover:not(.active) {
+    color: var(--espresso);
+  }
+
+  /* ── FORMULARIOS ── */
+  .form-panel { display: none; animation: fadeIn 0.4s var(--ease-soft); }
+  .form-panel.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .form-title {
+    font-family: var(--serif);
+    font-size: 2rem;
+    font-weight: 300;
+    color: var(--espresso);
+    margin-bottom: 0.4rem;
+    letter-spacing: 0.01em;
+  }
+  .form-subtitle {
+    font-size: 0.78rem;
+    font-weight: 300;
+    color: var(--mink);
+    margin-bottom: 2rem;
+    letter-spacing: 0.04em;
+  }
+
+  /* Grupos de campo */
+  .field-group {
+    margin-bottom: 1.25rem;
+    position: relative;
+  }
+
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  label {
+    display: block;
+    font-size: 0.68rem;
+    font-weight: 400;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--mink);
+    margin-bottom: 0.5rem;
+    transition: color 0.2s;
+  }
+
+  input {
+    width: 100%;
+    padding: 0.75rem 0;
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--sand);
+    font-family: var(--sans);
+    font-size: 0.9rem;
+    font-weight: 300;
+    color: var(--espresso);
+    outline: none;
+    transition: border-color 0.3s var(--ease-soft);
+    border-radius: 0;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  input::placeholder { color: var(--sand); font-size: 0.85rem; }
+  input:focus { border-bottom-color: var(--rose-deep); }
+  input:focus + label,
+  .field-group:focus-within > label { color: var(--rose-deep); }
+
+  /* Línea animada bajo el input */
+  .field-line {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: var(--rose-deep);
+    transition: width 0.35s var(--ease-soft);
+  }
+  .field-group:focus-within .field-line { width: 100%; }
+
+  /* Mensaje de error */
+  .field-error {
+    font-size: 0.68rem;
+    color: var(--error);
+    margin-top: 0.35rem;
+    display: none;
+    letter-spacing: 0.04em;
+  }
+  .field-group.has-error input { border-bottom-color: var(--error); }
+  .field-group.has-error .field-line { background: var(--error); width: 100%; }
+  .field-group.has-error .field-error { display: block; }
+
+  /* Fuerza de contraseña */
+  .pw-strength {
+    display: flex;
+    gap: 4px;
+    margin-top: 0.5rem;
+  }
+  .pw-bar {
+    flex: 1;
+    height: 2px;
+    background: var(--sand);
+    border-radius: 2px;
+    transition: background 0.3s;
+  }
+  .pw-bar.active-weak   { background: #c0614f; }
+  .pw-bar.active-medium { background: #d49050; }
+  .pw-bar.active-strong { background: #7aab6e; }
+
+  /* Checkbox de términos */
+  .check-group {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 1.75rem;
+  }
+  .check-group input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    min-width: 16px;
+    min-height: 16px;
+    border: 1px solid var(--sand);
+    border-radius: 3px;
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    position: relative;
+    margin-top: 1px;
+    padding: 0;
+    transition: all 0.2s;
+  }
+  .check-group input[type="checkbox"]:checked {
+    background: var(--rose-deep);
+    border-color: var(--rose-deep);
+  }
+  .check-group input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 2px;
+    width: 5px;
+    height: 8px;
+    border: 1.5px solid white;
+    border-top: none;
+    border-left: none;
+    transform: rotate(45deg);
+  }
+  .check-group label {
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 0.75rem;
+    color: var(--mink);
+    cursor: pointer;
+    line-height: 1.6;
+    margin: 0;
+  }
+  .check-group label a {
+    color: var(--rose-deep);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s;
+  }
+  .check-group label a:hover { border-bottom-color: var(--rose-deep); }
+
+  /* Botón principal */
+  .btn-primary {
+    width: 100%;
+    padding: 1rem;
+    background: var(--espresso);
+    color: var(--white);
+    border: none;
+    font-family: var(--sans);
+    font-size: 0.72rem;
+    font-weight: 400;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.3s var(--ease-soft);
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 1.25rem;
+  }
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--rose-deep);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s var(--ease-soft);
+  }
+  .btn-primary:hover::before { transform: scaleX(1); }
+  .btn-primary span { position: relative; z-index: 1; }
+  .btn-primary:active { transform: scale(0.99); }
+
+  /* Enlace olvidé contraseña */
+  .link-forgot {
+    display: block;
+    text-align: center;
+    font-size: 0.72rem;
+    font-weight: 300;
+    color: var(--mink);
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    transition: color 0.2s;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+  }
+  .link-forgot:hover { color: var(--rose-deep); }
+
+  /* Mensaje de alerta global */
+  .alert-msg {
+    padding: 0.75rem 1rem;
+    border-radius: 2px;
+    font-size: 0.78rem;
+    font-weight: 300;
+    letter-spacing: 0.03em;
+    margin-bottom: 1.25rem;
+    display: none;
+  }
+  .alert-msg.error   { background: #fdf0ee; color: var(--error); border-left: 2px solid var(--error); display: block; }
+  .alert-msg.success { background: #f0f7ee; color: #4a7a40; border-left: 2px solid #7aab6e; display: block; }
+
+  /* Separador "o" */
+  .separator {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 1.5rem 0;
+    color: var(--sand);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+  }
+  .separator::before,
+  .separator::after {
+    content: '';
+    flex: 1;
+    height: 0.5px;
+    background: var(--sand);
+  }
+
+  /* Modal de éxito */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(61, 43, 37, 0.45);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    animation: fadeIn 0.3s;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: var(--white);
+    padding: 3rem 2.5rem;
+    text-align: center;
+    max-width: 340px;
+    width: 90%;
+    border-radius: 2px;
+    position: relative;
+  }
+  .modal-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 1.5px solid var(--rose-deep);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.25rem;
+  }
+  .modal-icon svg { width: 22px; height: 22px; stroke: var(--rose-deep); fill: none; stroke-width: 1.5; }
+  .modal-title {
+    font-family: var(--serif);
+    font-size: 1.6rem;
+    font-weight: 300;
+    color: var(--espresso);
+    margin-bottom: 0.5rem;
+  }
+  .modal-sub {
+    font-size: 0.8rem;
+    color: var(--mink);
+    font-weight: 300;
+    line-height: 1.7;
+    margin-bottom: 1.75rem;
+  }
+  .btn-modal {
+    display: inline-block;
+    padding: 0.75rem 2rem;
+    background: var(--espresso);
+    color: var(--white);
+    font-family: var(--sans);
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: background 0.2s;
+  }
+  .btn-modal:hover { background: var(--rose-deep); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    body { flex-direction: column; }
+    .panel-art {
+      flex: 0 0 auto;
+      min-height: 200px;
+      padding: 2rem;
+    }
+    .panel-headline { font-size: 1.8rem; }
+    .panel-form { padding: 2.5rem 1.75rem; }
+    .field-row { grid-template-columns: 1fr; gap: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- PANEL IZQUIERDO -->
+<div class="panel-art">
+  <svg class="bg-lines" viewBox="0 0 500 800" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+    <circle cx="400" cy="100" r="260" fill="none" stroke="#d4968a" stroke-width="0.5"/>
+    <circle cx="400" cy="100" r="200" fill="none" stroke="#d4968a" stroke-width="0.3"/>
+    <circle cx="100" cy="700" r="200" fill="none" stroke="#d4968a" stroke-width="0.5"/>
+    <circle cx="100" cy="700" r="140" fill="none" stroke="#d4968a" stroke-width="0.3"/>
+    <line x1="0" y1="400" x2="500" y2="400" stroke="#d4968a" stroke-width="0.3"/>
+    <line x1="250" y1="0" x2="250" y2="800" stroke="#d4968a" stroke-width="0.3"/>
+    <circle cx="250" cy="400" r="80" fill="none" stroke="#d4968a" stroke-width="0.5"/>
+    <circle cx="250" cy="400" r="40" fill="none" stroke="#d4968a" stroke-width="0.3"/>
+  </svg>
+
+  <div class="deco-circle c1"></div>
+  <div class="deco-circle c2"></div>
+  <div class="deco-circle c3"></div>
+  <div class="deco-circle c4"></div>
+
+  <!-- Pétalos grupo 1 -->
+  <div class="petal"></div>
+  <div class="petal"></div>
+  <div class="petal"></div>
+  <div class="petal"></div>
+  <div class="petal"></div>
+
+  <!-- Pétalos grupo 2 -->
+  <div class="petal g2"></div>
+  <div class="petal g2"></div>
+  <div class="petal g2"></div>
+  <div class="petal g2"></div>
+  <div class="petal g2"></div>
+
+  <div class="panel-content">
+    <div class="logo-mark"><span>C</span></div>
+
+    <p class="panel-sub">Salón de Belleza</p>
+
+    <div class="divider-line"><div class="diamond"></div></div>
+
+    <h1 class="panel-headline">
+      Donde cada <em>detalle</em><br>te hace brillar
+    </h1>
+
+    <div class="divider-line"><div class="diamond"></div></div>
+
+    <p class="panel-sub" style="font-size:0.65rem; opacity:0.7;">Santa Cruz · Bolivia</p>
+  </div>
+</div>
+
+<!-- PANEL DERECHO -->
+<div class="panel-form">
+  <div class="form-container">
+
+    <!-- TABS -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('login')">Iniciar Sesión</button>
+      <button class="tab-btn" onclick="switchTab('register')">Crear Cuenta</button>
+    </div>
+
+    <!-- ══ FORMULARIO LOGIN ══ -->
+    <div class="form-panel active" id="panel-login">
+      <h2 class="form-title">Bienvenida</h2>
+      <p class="form-subtitle">Ingresa tus datos para continuar</p>
+
+      <div id="alert-login" class="alert-msg"></div>
+
+      <div class="field-group">
+        <label>Correo electrónico</label>
+        <input type="email" id="login-email" placeholder="tucorreo@email.com" autocomplete="email">
+        <div class="field-line"></div>
+        <span class="field-error" id="err-login-email">Ingresa un correo válido</span>
+      </div>
+
+      <div class="field-group">
+        <label>Contraseña</label>
+        <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
+        <div class="field-line"></div>
+        <span class="field-error" id="err-login-pw">La contraseña es requerida</span>
+      </div>
+
+      <div style="margin-bottom:1.75rem"></div>
+
+      <button class="btn-primary" onclick="handleLogin()"><span>Ingresar</span></button>
+
+      <a class="link-forgot" onclick="forgotPassword()">¿Olvidaste tu contraseña?</a>
+    </div>
+
+    <!-- ══ FORMULARIO REGISTRO ══ -->
+    <div class="form-panel" id="panel-register">
+      <h2 class="form-title">Nueva cuenta</h2>
+      <p class="form-subtitle">Únete a la familia COCO</p>
+
+      <div id="alert-register" class="alert-msg"></div>
+
+      <div class="field-row">
+        <div class="field-group">
+          <label>Nombre</label>
+          <input type="text" id="reg-nombre" placeholder="Sofía" autocomplete="given-name">
+          <div class="field-line"></div>
+          <span class="field-error" id="err-nombre">Campo requerido</span>
+        </div>
+        <div class="field-group">
+          <label>Apellido</label>
+          <input type="text" id="reg-apellido" placeholder="Medina" autocomplete="family-name">
+          <div class="field-line"></div>
+          <span class="field-error" id="err-apellido">Campo requerido</span>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label>Teléfono</label>
+        <input type="tel" id="reg-telefono" placeholder="+591 7X XXX XXX" autocomplete="tel">
+        <div class="field-line"></div>
+        <span class="field-error" id="err-telefono">Ingresa un número válido</span>
+      </div>
+
+      <div class="field-group">
+        <label>Correo electrónico</label>
+        <input type="email" id="reg-email" placeholder="tucorreo@email.com" autocomplete="email">
+        <div class="field-line"></div>
+        <span class="field-error" id="err-email">Ingresa un correo válido</span>
+      </div>
+
+      <div class="field-group">
+        <label>Contraseña</label>
+        <input type="password" id="reg-password" placeholder="Mínimo 8 caracteres"
+               autocomplete="new-password" oninput="checkStrength(this.value)">
+        <div class="field-line"></div>
+        <div class="pw-strength">
+          <div class="pw-bar" id="bar1"></div>
+          <div class="pw-bar" id="bar2"></div>
+          <div class="pw-bar" id="bar3"></div>
+          <div class="pw-bar" id="bar4"></div>
+        </div>
+        <span class="field-error" id="err-pw">Mínimo 8 caracteres</span>
+      </div>
+
+      <div class="field-group">
+        <label>Confirmar contraseña</label>
+        <input type="password" id="reg-confirm" placeholder="Repite tu contraseña" autocomplete="new-password">
+        <div class="field-line"></div>
+        <span class="field-error" id="err-confirm">Las contraseñas no coinciden</span>
+      </div>
+
+      <div class="check-group" style="margin-top:0.5rem">
+        <input type="checkbox" id="terms">
+        <label for="terms">
+          Acepto los <a href="#">Términos y Condiciones</a> y la
+          <a href="#">Política de Privacidad</a> de COCO
+        </label>
+      </div>
+
+      <button class="btn-primary" onclick="handleRegister()"><span>Crear mi cuenta</span></button>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL ÉXITO -->
+<div class="modal-overlay" id="modal-success">
+  <div class="modal-box">
+    <div class="modal-icon">
+      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <h3 class="modal-title">¡Cuenta creada!</h3>
+    <p class="modal-sub" id="modal-text">
+      Bienvenida a COCO. Ya puedes iniciar sesión y agendar tu próxima visita.
+    </p>
+    <button class="btn-modal" onclick="closeModal()">Iniciar sesión</button>
+  </div>
+</div>
+
+<script>
+  /* ── Navegación de tabs ── */
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach((b, i) => {
+      b.classList.toggle('active', (tab === 'login' && i === 0) || (tab === 'register' && i === 1));
+    });
+    document.getElementById('panel-login').classList.toggle('active', tab === 'login');
+    document.getElementById('panel-register').classList.toggle('active', tab === 'register');
+    clearErrors();
+  }
+
+  /* ── Limpieza de errores ── */
+  function clearErrors() {
+    document.querySelectorAll('.field-group').forEach(g => g.classList.remove('has-error'));
+    document.querySelectorAll('.alert-msg').forEach(a => {
+      a.className = 'alert-msg';
+      a.textContent = '';
+    });
+  }
+
+  function showError(fieldId, errId) {
+    document.getElementById(fieldId).closest('.field-group').classList.add('has-error');
+    if (errId) document.getElementById(errId).style.display = 'block';
+  }
+
+  /* ── Validaciones ── */
+  function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+  function isValidPhone(p) { return /^[\+]?[\d\s\-]{7,15}$/.test(p.trim()); }
+
+  /* ── Fuerza de contraseña ── */
+  function checkStrength(pw) {
+    const bars = [document.getElementById('bar1'), document.getElementById('bar2'),
+                  document.getElementById('bar3'), document.getElementById('bar4')];
+    bars.forEach(b => { b.className = 'pw-bar'; });
+    if (!pw) return;
+    let score = 0;
+    if (pw.length >= 8)                          score++;
+    if (/[A-Z]/.test(pw) && /[a-z]/.test(pw))   score++;
+    if (/[0-9]/.test(pw))                         score++;
+    if (/[^A-Za-z0-9]/.test(pw))                 score++;
+    const cls = score <= 1 ? 'active-weak' : score <= 2 ? 'active-medium' : 'active-strong';
+    for (let i = 0; i < score; i++) bars[i].classList.add(cls);
+  }
+
+  /* ── Login ── */
+  async function handleLogin() {
+  clearErrors();
+  const email = document.getElementById('login-email').value.trim();
+  const pw    = document.getElementById('login-password').value;
+  let ok = true;
+
+  if (!isValidEmail(email)) { showError('login-email', 'err-login-email'); ok = false; }
+  if (!pw) { showError('login-password', 'err-login-pw'); ok = false; }
+  if (!ok) return;
+
+  const alertEl = document.getElementById('alert-login');
+  alertEl.textContent = 'Verificando credenciales…';
+  alertEl.style.display = 'block';
+  alertEl.style.background = '#faf6f3';
+  alertEl.style.color = 'var(--mink)';
+  alertEl.style.borderLeft = '2px solid var(--sand)';
+
+  try {
+    const res  = await fetch('/api/auth/login', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ email, password: pw })
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      alertEl.textContent = data.error;
+      alertEl.className   = 'alert-msg error';
+    } else if (data.multiroles) {
+      // Guardar token y datos base
+      localStorage.setItem('token',     data.token);
+      localStorage.setItem('nombre',    data.nombre);
+      localStorage.setItem('personaID', data.personaID);
+      // Mostrar selector de dashboard
+      mostrarSelectorRol(data.rutasPosibles, data.nombre);
+    } else {
+      localStorage.setItem('token',     data.token);
+      localStorage.setItem('nombre',    data.nombre);
+      localStorage.setItem('rol',       data.rol);
+      localStorage.setItem('personaID', data.personaID);
+      window.location.href = data.ruta;
+    }
+  } catch(e) {
+    alertEl.textContent = 'Error de conexión. Intenta de nuevo.';
+    alertEl.className   = 'alert-msg error';
+  }
+}
+
+function mostrarSelectorRol(rutas, nombre) {
+    document.getElementById('panel-login').style.display = 'none';
+    document.querySelector('.tabs').style.display = 'none';
+
+    var iconos = {
+        'Atención y soporte': '🗓',
+        'Personal técnico':   '✂️',
+        'Administrador':      '⚙️',
+        'Dueño/a':            '👑',
+        'Cliente':            '💆'
+    };
+
+    var html = '<div style="text-align:center;margin-bottom:2rem">' +
+        '<div style="font-family:var(--serif);font-size:2rem;font-weight:300;color:var(--espresso);margin-bottom:0.4rem">Hola, ' + nombre + '</div>' +
+        '<div style="font-size:0.78rem;color:var(--mink)">¿Con qué rol deseas ingresar hoy?</div></div>';
+
+    html += rutas.map(function(r) {
+        return '<button onclick="seleccionarRol(\'' + r.rol + '\',\'' + r.ruta + '\')" style="' +
+            'width:100%;padding:1.25rem;background:var(--white);border:1px solid var(--sand);' +
+            'border-radius:4px;margin-bottom:0.75rem;cursor:pointer;display:flex;align-items:center;' +
+            'gap:1rem;font-family:var(--sans);transition:all 0.2s;text-align:left"' +
+            ' onmouseover="this.style.borderColor=\'var(--rose-deep)\';this.style.background=\'var(--blush)\'"' +
+            ' onmouseout="this.style.borderColor=\'var(--sand)\';this.style.background=\'var(--white)\'">' +
+            '<span style="font-size:1.5rem">' + (iconos[r.rol]||'👤') + '</span>' +
+            '<div><div style="font-size:0.88rem;font-weight:400;color:var(--espresso)">' + r.rol + '</div>' +
+            '<div style="font-size:0.68rem;color:var(--mink);margin-top:0.15rem">Ir a mi portal</div></div>' +
+            '</button>';
+    }).join('');
+
+    var extra = document.createElement('div');
+    extra.id = 'selector-rol';
+    extra.innerHTML = html;
+    document.querySelector('.form-container').appendChild(extra);
+}
+
+async function seleccionarRol(rol, ruta) {
+    // Recuperar credenciales temporales para generar token con rol correcto
+    var email = document.getElementById('login-email').value.trim();
+    var pw    = document.getElementById('login-password').value;
+    try {
+        var res  = await fetch('/api/auth/elegir-rol', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ email: email, password: pw, rolElegido: rol })
+        });
+        var data = await res.json();
+        if (!res.ok) { alert('Error al seleccionar rol: ' + data.error); return; }
+        localStorage.setItem('token',     data.token);
+        localStorage.setItem('nombre',    data.nombre);
+        localStorage.setItem('rol',       data.rol);
+        localStorage.setItem('personaID', data.personaID);
+        window.location.href = ruta;
+    } catch(e) {
+        alert('Error de conexión al seleccionar rol.');
+    }
+}
+
+  /* ── Registro ── */
+  async function handleRegister() {
+  clearErrors();
+  const nombre   = document.getElementById('reg-nombre').value.trim();
+  const apellido = document.getElementById('reg-apellido').value.trim();
+  const tel      = document.getElementById('reg-telefono').value.trim();
+  const email    = document.getElementById('reg-email').value.trim();
+  const pw       = document.getElementById('reg-password').value;
+  const conf     = document.getElementById('reg-confirm').value;
+  const terms    = document.getElementById('terms').checked;
+  let ok = true;
+
+  if (!nombre)             { showError('reg-nombre',    'err-nombre');    ok = false; }
+  if (!apellido)           { showError('reg-apellido',  'err-apellido');  ok = false; }
+  if (!isValidPhone(tel))  { showError('reg-telefono',  'err-telefono');  ok = false; }
+  if (!isValidEmail(email)){ showError('reg-email',     'err-email');     ok = false; }
+  if (pw.length < 8)       { showError('reg-password',  'err-pw');        ok = false; }
+  if (pw !== conf)         { showError('reg-confirm',   'err-confirm');   ok = false; }
+
+  if (!terms) {
+    const alertEl = document.getElementById('alert-register');
+    alertEl.textContent = 'Debes aceptar los Términos y Condiciones para continuar.';
+    alertEl.className   = 'alert-msg error';
+    ok = false;
+  }
+  if (!ok) return;
+
+  try {
+    const res  = await fetch('/api/auth/register', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ nombre, apellido, telefono: tel, email, password: pw })
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      const alertEl = document.getElementById('alert-register');
+      alertEl.textContent = data.error;
+      alertEl.className   = 'alert-msg error';
+    } else {
+      document.getElementById('modal-text').innerHTML =
+        `Bienvenida, <strong>${nombre}</strong>. Ya puedes iniciar sesión y agendar tu próxima visita en COCO.`;
+      document.getElementById('modal-success').classList.add('open');
+    }
+  } catch(e) {
+    const alertEl = document.getElementById('alert-register');
+    alertEl.textContent = 'Error de conexión. Intenta de nuevo.';
+    alertEl.className   = 'alert-msg error';
+  }
+}
+
+  /* ── Modal ── */
+  function closeModal() {
+    document.getElementById('modal-success').classList.remove('open');
+    switchTab('login');
+  }
+  document.getElementById('modal-success').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  /* ── Olvidé contraseña ── */
+  function forgotPassword() {
+    const email = document.getElementById('login-email').value.trim();
+    const alert = document.getElementById('alert-login');
+    if (!isValidEmail(email)) {
+      alert.textContent = 'Ingresa tu correo electrónico primero para recuperar tu contraseña.';
+      alert.className = 'alert-msg error';
+      document.getElementById('login-email').focus();
+      return;
+    }
+    alert.textContent = `Se enviarán instrucciones a ${email} si está registrado.`;
+    alert.className = 'alert-msg success';
+  }
+</script>
+</body>
+</html>

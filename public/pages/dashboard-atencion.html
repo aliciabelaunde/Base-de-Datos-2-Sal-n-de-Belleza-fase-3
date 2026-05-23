@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COCO · Portal Recepción</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --blush:#f2e0dc; --rose:#d4968a; --rose-deep:#b87060; --rose-dark:#8a4a3a;
+  --cream:#faf6f3; --sand:#e8ddd6; --mink:#8a7168; --espresso:#3d2b25;
+  --white:#ffffff; --success:#7aab6e; --warning:#d4a050; --error:#c0614f;
+  --serif:'Cormorant Garamond',serif; --sans:'Jost',sans-serif;
+  --sidebar-w:260px; --topbar-h:64px; --ease:cubic-bezier(0.4,0,0.2,1);
+}
+body { font-family:var(--sans); background:var(--cream); color:var(--espresso); min-height:100vh; display:flex; }
+.sidebar { width:var(--sidebar-w); min-height:100vh; background:var(--espresso); display:flex; flex-direction:column; position:fixed; left:0; top:0; bottom:0; z-index:100; overflow-y:auto; }
+.sidebar-brand { padding:1.5rem 1.5rem 1rem; border-bottom:1px solid rgba(255,255,255,0.08); }
+.sidebar-salon { font-size:0.6rem; font-weight:300; color:var(--mink); letter-spacing:0.2em; text-transform:uppercase; margin-bottom:0.4rem; }
+.sidebar-portal { font-family:var(--serif); font-size:1.5rem; font-weight:300; color:var(--white); letter-spacing:0.04em; margin-bottom:0.2rem; }
+.sidebar-turno { font-size:0.68rem; font-weight:300; color:var(--rose); letter-spacing:0.1em; }
+.sidebar-deco { display:flex; align-items:center; gap:6px; margin-top:0.5rem; }
+.sidebar-deco-line { flex:1; height:0.5px; background:var(--rose); opacity:0.3; }
+.sidebar-deco-diamond { width:4px; height:4px; background:var(--rose); transform:rotate(45deg); opacity:0.5; }
+.sidebar-nav { flex:1; padding:1.25rem 0; }
+.nav-group-label { font-size:0.6rem; font-weight:400; letter-spacing:0.2em; text-transform:uppercase; color:rgba(255,255,255,0.25); padding:1rem 1.5rem 0.4rem; }
+.nav-item { display:flex; align-items:center; gap:0.75rem; padding:0.65rem 1.5rem; cursor:pointer; transition:all 0.2s var(--ease); border-left:2px solid transparent; }
+.nav-item:hover { background:rgba(255,255,255,0.04); }
+.nav-item.active { background:rgba(212,150,138,0.12); border-left-color:var(--rose); }
+.nav-item svg { width:16px; height:16px; stroke:rgba(255,255,255,0.4); fill:none; stroke-width:1.5; flex-shrink:0; transition:stroke 0.2s; }
+.nav-item:hover svg, .nav-item.active svg { stroke:var(--rose); }
+.nav-item span { font-size:0.78rem; font-weight:300; color:rgba(255,255,255,0.5); transition:color 0.2s; flex:1; }
+.nav-item:hover span, .nav-item.active span { color:var(--white); }
+.nav-badge { font-size:0.6rem; font-weight:500; padding:0.15rem 0.45rem; border-radius:10px; min-width:18px; text-align:center; }
+.nav-badge.red { background:var(--error); color:white; }
+.sidebar-footer { padding:1.25rem 1.5rem; border-top:1px solid rgba(255,255,255,0.08); display:flex; align-items:center; gap:0.75rem; }
+.avatar { width:36px; height:36px; border-radius:50%; background:var(--rose-deep); display:flex; align-items:center; justify-content:center; font-family:var(--serif); font-size:0.9rem; color:white; flex-shrink:0; }
+.avatar-info { flex:1; min-width:0; }
+.avatar-name { font-size:0.78rem; font-weight:400; color:var(--white); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.avatar-role { font-size:0.62rem; font-weight:300; color:var(--mink); }
+.btn-logout { background:none; border:none; cursor:pointer; padding:0.3rem; }
+.btn-logout svg { width:15px; height:15px; stroke:rgba(255,255,255,0.3); fill:none; stroke-width:1.5; transition:stroke 0.2s; }
+.btn-logout:hover svg { stroke:var(--rose); }
+.main { margin-left:var(--sidebar-w); flex:1; display:flex; flex-direction:column; min-height:100vh; }
+.topbar { height:var(--topbar-h); background:var(--white); border-bottom:1px solid var(--sand); display:flex; align-items:center; justify-content:space-between; padding:0 2rem; position:sticky; top:0; z-index:50; gap:1rem; }
+.topbar-title { font-family:var(--serif); font-size:1.4rem; font-weight:300; color:var(--espresso); white-space:nowrap; }
+.search-bar { flex:1; max-width:320px; position:relative; }
+.search-bar input { width:100%; padding:0.5rem 0.75rem 0.5rem 2rem; border:1px solid var(--sand); border-radius:2px; font-family:var(--sans); font-size:0.78rem; color:var(--espresso); outline:none; background:var(--cream); transition:border-color 0.2s; }
+.search-bar input:focus { border-color:var(--rose); background:var(--white); }
+.search-bar svg { position:absolute; left:0.5rem; top:50%; transform:translateY(-50%); width:14px; height:14px; stroke:var(--mink); fill:none; stroke-width:1.5; }
+.topbar-actions { display:flex; align-items:center; gap:0.75rem; }
+.topbar-btn { display:flex; align-items:center; gap:0.5rem; padding:0.5rem 1rem; border-radius:2px; font-family:var(--sans); font-size:0.7rem; letter-spacing:0.12em; text-transform:uppercase; cursor:pointer; transition:all 0.2s; border:1px solid var(--sand); background:none; color:var(--mink); }
+.topbar-btn svg { width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:1.5; }
+.topbar-btn:hover { border-color:var(--rose); color:var(--rose-deep); }
+.topbar-btn.primary { background:var(--espresso); border-color:var(--espresso); color:white; }
+.topbar-btn.primary:hover { background:var(--rose-deep); border-color:var(--rose-deep); }
+.content { flex:1; padding:2rem; }
+.section { display:none; animation:fadeUp 0.35s var(--ease); }
+.section.active { display:block; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+.section-header { margin-bottom:1.5rem; }
+.section-header h2 { font-family:var(--serif); font-size:1.8rem; font-weight:300; color:var(--espresso); margin-bottom:0.2rem; }
+.section-header p { font-size:0.78rem; font-weight:300; color:var(--mink); }
+.stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1.25rem; margin-bottom:1.75rem; }
+.stat-card { background:var(--white); border:1px solid var(--sand); border-radius:4px; overflow:hidden; }
+.stat-bar { height:3px; }
+.stat-bar.rose { background:var(--rose-deep); } .stat-bar.blush { background:var(--rose); }
+.stat-bar.sand { background:var(--warning); }  .stat-bar.green { background:var(--success); }
+.stat-body { padding:1.25rem; }
+.stat-label { font-size:0.65rem; font-weight:400; letter-spacing:0.14em; text-transform:uppercase; color:var(--mink); margin-bottom:0.5rem; }
+.stat-value { font-family:var(--serif); font-size:2rem; font-weight:300; color:var(--espresso); line-height:1; margin-bottom:0.3rem; }
+.stat-sub { font-size:0.7rem; font-weight:300; color:var(--mink); }
+.grid-panel { display:grid; grid-template-columns:1fr 300px; gap:1.5rem; margin-bottom:1.5rem; }
+.card { background:var(--white); border:1px solid var(--sand); border-radius:4px; padding:1.5rem; margin-bottom:1.25rem; }
+.card:last-child { margin-bottom:0; }
+.card-title { font-family:var(--serif); font-size:1.1rem; font-weight:400; color:var(--espresso); margin-bottom:1rem; padding-bottom:0.75rem; border-bottom:1px solid var(--sand); display:flex; align-items:center; justify-content:space-between; }
+.badge { font-size:0.62rem; font-weight:400; letter-spacing:0.08em; padding:0.2rem 0.6rem; border-radius:20px; white-space:nowrap; }
+.badge-green { background:#f0f7ee; color:#4a7a40; } .badge-amber { background:#fdf5e8; color:#8a6020; }
+.badge-rose  { background:var(--blush); color:var(--rose-dark); } .badge-gray { background:#f0efed; color:var(--mink); }
+.badge-error { background:#fdf0ee; color:var(--error); }
+.tabla { width:100%; border-collapse:collapse; }
+.tabla th { font-size:0.62rem; font-weight:400; letter-spacing:0.12em; text-transform:uppercase; color:var(--mink); text-align:left; padding:0.5rem 0.75rem; border-bottom:1px solid var(--sand); }
+.tabla td { font-size:0.78rem; font-weight:300; color:var(--espresso); padding:0.65rem 0.75rem; border-bottom:1px solid var(--sand); vertical-align:middle; }
+.tabla tr:last-child td { border-bottom:none; }
+.tabla tr:hover td { background:var(--cream); }
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; }
+.form-field { margin-bottom:0; }
+.form-field.full { grid-column:1/-1; }
+.form-field label { display:block; font-size:0.65rem; font-weight:400; letter-spacing:0.14em; text-transform:uppercase; color:var(--mink); margin-bottom:0.5rem; }
+.form-field input, .form-field textarea, .form-field select { width:100%; padding:0.75rem 0; background:none; border:none; border-bottom:1px solid var(--sand); font-family:var(--sans); font-size:0.88rem; font-weight:300; color:var(--espresso); outline:none; transition:border-color 0.2s; resize:none; }
+.form-field input:focus, .form-field textarea:focus, .form-field select:focus { border-bottom-color:var(--rose-deep); }
+.form-actions { display:flex; gap:1rem; margin-top:1.5rem; }
+.btn-primary { padding:0.75rem 2rem; background:var(--espresso); color:white; border:none; font-family:var(--sans); font-size:0.7rem; letter-spacing:0.18em; text-transform:uppercase; cursor:pointer; border-radius:2px; transition:background 0.2s; }
+.btn-primary:hover { background:var(--rose-deep); }
+.btn-secondary { padding:0.75rem 2rem; background:none; color:var(--mink); border:1px solid var(--sand); font-family:var(--sans); font-size:0.7rem; letter-spacing:0.18em; text-transform:uppercase; cursor:pointer; border-radius:2px; transition:all 0.2s; }
+.btn-secondary:hover { border-color:var(--rose); color:var(--rose-deep); }
+.btn-sm { padding:0.3rem 0.7rem; font-size:0.62rem; letter-spacing:0.08em; text-transform:uppercase; border-radius:2px; cursor:pointer; font-family:var(--sans); transition:all 0.2s; white-space:nowrap; }
+.btn-sm.outline { background:none; border:1px solid var(--sand); color:var(--mink); }
+.btn-sm.outline:hover { border-color:var(--rose); color:var(--rose-deep); }
+.btn-sm.solid { background:var(--espresso); border:none; color:white; }
+.btn-sm.solid:hover { background:var(--rose-deep); }
+.btn-sm.success { background:none; border:1px solid rgba(122,171,110,0.4); color:var(--success); }
+.btn-sm.success:hover { background:var(--success); color:white; }
+.btn-sm.danger { background:none; border:1px solid rgba(192,97,79,0.3); color:var(--error); }
+.btn-sm.danger:hover { background:var(--error); color:white; border-color:var(--error); }
+.cobro-layout { display:grid; grid-template-columns:1fr 320px; gap:0; border:1px solid var(--sand); border-radius:4px; overflow:hidden; }
+.cobro-izq { padding:1.75rem; background:var(--white); }
+.cobro-der { padding:1.75rem; background:var(--espresso); position:relative; overflow:hidden; }
+.cobro-der::before { content:''; position:absolute; right:-60px; top:-60px; width:200px; height:200px; border-radius:50%; border:1px solid rgba(212,150,138,0.15); }
+.metodo-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:0.5rem; margin-bottom:1rem; }
+.metodo-btn { padding:0.65rem; text-align:center; border:1px solid rgba(255,255,255,0.15); border-radius:2px; cursor:pointer; font-family:var(--sans); font-size:0.68rem; color:rgba(255,255,255,0.5); transition:all 0.2s; background:none; }
+.metodo-btn:hover { border-color:rgba(212,150,138,0.5); color:var(--rose); }
+.metodo-btn.active { border-color:var(--rose-deep); background:rgba(184,112,96,0.15); color:var(--white); }
+.btn-cobrar { width:100%; padding:0.9rem; background:var(--success); color:white; border:none; font-family:var(--sans); font-size:0.72rem; letter-spacing:0.16em; text-transform:uppercase; cursor:pointer; border-radius:2px; margin-top:1rem; transition:background 0.2s; position:relative; z-index:1; }
+.btn-cobrar:hover { background:#5a8a50; }
+.item-venta { display:flex; align-items:center; gap:0.75rem; padding:0.65rem 0; border-bottom:1px solid var(--sand); }
+.item-venta:last-child { border-bottom:none; }
+.item-qty { width:40px; text-align:center; border:1px solid var(--sand); border-radius:2px; padding:0.2rem; font-size:0.78rem; font-family:var(--sans); outline:none; }
+.item-del { width:20px; height:20px; border-radius:50%; border:1px solid var(--sand); background:none; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s; color:var(--mink); font-size:0.8rem; }
+.item-del:hover { background:var(--error); border-color:var(--error); color:white; }
+.cliente-card { border:1px solid var(--sand); border-radius:4px; padding:1rem; background:var(--white); cursor:pointer; transition:all 0.2s; margin-bottom:0.75rem; display:flex; align-items:center; gap:0.75rem; }
+.cliente-card:hover { border-color:var(--rose); background:var(--blush); }
+.cli-avatar { width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:var(--serif); font-size:1rem; color:white; flex-shrink:0; }
+.factura-layout { display:grid; grid-template-columns:1fr 360px; gap:1.25rem; }
+.factura-preview { background:var(--white); border:1px solid var(--sand); border-radius:4px; padding:2rem; }
+.estilista-card { background:var(--white); border:1px solid var(--sand); border-radius:4px; padding:1rem; margin-bottom:0.75rem; }
+.est-avatar { width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:var(--serif); font-size:0.9rem; color:white; flex-shrink:0; }
+.pulse-dot { width:7px; height:7px; border-radius:50%; animation:pulse 2s infinite; }
+.pulse-dot.libre { background:var(--success); } .pulse-dot.ocupada { background:var(--warning); }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(1.2)} }
+.progress-bar { height:4px; background:var(--sand); border-radius:2px; overflow:hidden; margin-top:0.5rem; }
+.progress-fill { height:100%; background:var(--rose-deep); border-radius:2px; }
+.notif-item { display:flex; gap:1rem; padding:1rem 1.25rem; border-bottom:1px solid var(--sand); background:var(--white); cursor:pointer; transition:background 0.15s; }
+.notif-item:last-child { border-bottom:none; }
+.notif-item.leida { opacity:0.5; }
+.notif-item:hover { background:var(--cream); }
+.notif-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; margin-top:5px; }
+.notif-dot.rose { background:var(--rose-deep); } .notif-dot.gray { background:var(--mink); }
+.modal-overlay { position:fixed; inset:0; background:rgba(61,43,37,0.45); display:none; align-items:center; justify-content:center; z-index:200; }
+.modal-overlay.open { display:flex; }
+.modal-box { background:var(--white); border-radius:4px; padding:2rem; width:100%; max-width:520px; max-height:90vh; overflow-y:auto; }
+.modal-title { font-family:var(--serif); font-size:1.4rem; font-weight:300; color:var(--espresso); margin-bottom:1.5rem; }
+.modal-actions { display:flex; gap:1rem; margin-top:1.5rem; }
+.empty { text-align:center; padding:2.5rem; color:var(--mink); font-size:0.82rem; }
+.loading { text-align:center; padding:2rem; color:var(--mink); font-size:0.78rem; }
+.filtros { display:flex; align-items:center; gap:0.75rem; margin-bottom:1.25rem; flex-wrap:wrap; }
+.filter-select { padding:0.4rem 0.75rem; border:1px solid var(--sand); border-radius:2px; font-family:var(--sans); font-size:0.72rem; color:var(--espresso); background:var(--white); outline:none; }
+.perfil-header { background:var(--white); border:1px solid var(--sand); border-radius:4px; padding:2rem; display:flex; align-items:center; gap:1.5rem; margin-bottom:1.5rem; }
+.perfil-avatar-lg { width:72px; height:72px; border-radius:50%; background:var(--blush); border:2px solid var(--rose); display:flex; align-items:center; justify-content:center; font-family:var(--serif); font-size:1.8rem; font-weight:300; color:var(--rose-deep); flex-shrink:0; }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="sidebar-salon">COCO · Salón de Belleza</div>
+    <div class="sidebar-portal">Portal Recepción</div>
+    <div class="sidebar-turno" id="sb-turno">—</div>
+    <div class="sidebar-deco"><div class="sidebar-deco-line"></div><div class="sidebar-deco-diamond"></div><div class="sidebar-deco-line"></div></div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-group-label">Operaciones</div>
+    <div class="nav-item active" onclick="nav('panel',this)">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      <span>Panel general</span>
+    </div>
+    <div class="nav-item" onclick="nav('citas',this)">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span>Gestión de citas</span>
+      <span class="nav-badge red" id="badge-citas" style="display:none">0</span>
+    </div>
+    <div class="nav-item" onclick="nav('cobro',this)">
+      <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+      <span>Cobro y ventas</span>
+    </div>
+    <div class="nav-item" onclick="nav('facturas',this)">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <span>Facturas</span>
+    </div>
+    <div class="nav-item" onclick="nav('excepciones',this)">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span>Excepciones</span>
+      <span class="nav-badge red" id="badge-excepciones" style="display:none">0</span>
+    </div>
+    <div class="nav-item" onclick="nav('solicitudes',this)">
+      <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      <span>Solicitudes especiales</span>
+      <span class="nav-badge red" id="badge-solicitudes" style="display:none">0</span>
+    </div>
+    <div class="nav-group-label">Clientes</div>
+    <div class="nav-item" onclick="nav('clientes',this)">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      <span>Clientes</span>
+    </div>
+    <div class="nav-item" onclick="nav('nuevo-cliente',this)">
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
+      <span>Nuevo cliente</span>
+    </div>
+    <div class="nav-group-label">Personal</div>
+    <div class="nav-item" onclick="nav('perfil',this)">
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Mi perfil</span>
+    </div>
+    <div class="nav-group-label">Sistema</div>
+    <div class="nav-item" onclick="nav('notificaciones',this)">
+      <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+      <span>Notificaciones</span>
+      <span class="nav-badge red" id="badge-notif" style="display:none">0</span>
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="avatar" id="sb-avatar">?</div>
+    <div class="avatar-info">
+      <div class="avatar-name" id="sb-nombre">—</div>
+      <div class="avatar-role">Recepcionista</div>
+    </div>
+    <button class="btn-logout" onclick="cerrarSesion()">
+      <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    </button>
+  </div>
+</aside>
+
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-title" id="topbar-title">Panel general</div>
+    <div class="search-bar">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="search-input" placeholder="Buscar cliente..." oninput="buscarClienteTopbar(this.value)">
+    </div>
+    <div class="topbar-actions">
+      <button class="topbar-btn" onclick="nav('perfil',null)">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Mi perfil
+      </button>
+      <button class="topbar-btn" onclick="nav('nuevo-cliente',null)">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
+        + Cliente
+      </button>
+      <button class="topbar-btn primary" onclick="abrirNuevaCita()">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        + Nueva cita
+      </button>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- PANEL -->
+    <div class="section active" id="sec-panel">
+      <div class="section-header"><h2>Panel <em style="font-style:italic;color:var(--rose-deep)">general</em></h2><p>Resumen de la jornada de hoy</p></div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-bar rose"></div><div class="stat-body"><div class="stat-label">Citas hoy</div><div class="stat-value" id="stat-total-citas">—</div><div class="stat-sub" id="stat-citas-sub">Cargando...</div></div></div>
+        <div class="stat-card"><div class="stat-bar blush"></div><div class="stat-body"><div class="stat-label">Próxima cita</div><div class="stat-value" id="stat-proxima" style="font-size:1.1rem">—</div><div class="stat-sub" id="stat-proxima-sub">—</div></div></div>
+        <div class="stat-card"><div class="stat-bar sand"></div><div class="stat-body"><div class="stat-label">Ventas hoy</div><div class="stat-value" id="stat-ventas" style="font-size:1.3rem">—</div><div class="stat-sub" id="stat-ventas-sub">—</div></div></div>
+        <div class="stat-card"><div class="stat-bar green"></div><div class="stat-body"><div class="stat-label">Clientes</div><div class="stat-value" id="stat-clientes">—</div><div class="stat-sub" id="stat-clientes-sub">—</div></div></div>
+      </div>
+      <div class="grid-panel">
+        <div class="card"><div class="card-title">Citas del día</div><div id="tabla-citas-panel"><div class="loading">Cargando...</div></div></div>
+        <div><div class="card"><div class="card-title">Disponibilidad</div><div id="disponibilidad-empleados"><div class="loading">Cargando...</div></div></div></div>
+      </div>
+    </div>
+
+    <!-- CITAS -->
+    <div class="section" id="sec-citas">
+      <div class="section-header"><h2>Gestión de <em style="font-style:italic;color:var(--rose-deep)">citas</em></h2><p>Agenda y acciones</p></div>
+      <div class="filtros">
+        <select class="filter-select" id="filtro-empleado" onchange="cargarCitas()"><option value="">Todo el personal</option></select>
+        <select class="filter-select" id="filtro-estado" onchange="cargarCitas()">
+          <option value="">Todos los estados</option>
+          <option value="8">Programada</option><option value="9">Confirmada</option>
+          <option value="10">En curso</option><option value="11">Completada</option>
+        </select>
+        <input type="date" class="filter-select" id="filtro-fecha" onchange="cargarCitas()" style="cursor:pointer">
+        <button class="topbar-btn primary" style="margin-left:auto" onclick="abrirNuevaCita()">+ Nueva cita</button>
+      </div>
+      <div class="card"><div id="tabla-citas-gestion"><div class="loading">Cargando...</div></div></div>
+    </div>
+
+    <!-- COBRO -->
+    <div class="section" id="sec-cobro">
+      <div class="section-header"><h2>Cobro y <em style="font-style:italic;color:var(--rose-deep)">ventas</em></h2><p>Registra la venta y genera la factura</p></div>
+      <div class="cobro-layout">
+        <div class="cobro-izq">
+          <div style="font-size:0.65rem;font-weight:400;letter-spacing:0.14em;text-transform:uppercase;color:var(--mink);margin-bottom:0.75rem">Datos de la venta</div>
+          <div class="form-grid" style="margin-bottom:1.25rem">
+            <div class="form-field full"><label>Cliente *</label><select id="cobro-cliente"><option value="">Seleccionar cliente...</option></select></div>
+          </div>
+          <div style="font-size:0.65rem;font-weight:400;letter-spacing:0.14em;text-transform:uppercase;color:var(--mink);margin-bottom:0.75rem">Ítems</div>
+          <div id="items-venta"></div>
+          <div style="display:flex;gap:0.75rem;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--sand)">
+            <select id="sel-item" style="flex:1;padding:0.5rem;border:1px solid var(--sand);border-radius:2px;font-family:var(--sans);font-size:0.78rem;color:var(--espresso);background:var(--white);outline:none"><option value="">Seleccionar servicio o producto...</option></select>
+            <button class="btn-sm solid" onclick="agregarItem()">+ Agregar</button>
+          </div>
+          <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--sand)">
+            <div style="font-size:0.65rem;font-weight:400;letter-spacing:0.14em;text-transform:uppercase;color:var(--mink);margin-bottom:0.5rem">Promoción</div>
+            <select id="sel-promo" style="width:100%;padding:0.5rem;border:1px solid var(--sand);border-radius:2px;font-family:var(--sans);font-size:0.78rem;color:var(--espresso);background:var(--white);outline:none" onchange="actualizarResumen()">
+              <option value="0" data-servicios="" data-nombre="" data-promoid="">Sin promoción</option>
+            </select>
+          </div>
+        </div>
+        <div class="cobro-der">
+          <div style="position:relative;z-index:1">
+            <div style="font-size:0.65rem;letter-spacing:0.16em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:0.75rem">Resumen</div>
+            <div id="resumen-items" style="margin-bottom:1rem"></div>
+            <div style="padding-top:0.75rem;border-top:1px solid rgba(255,255,255,0.1)">
+              <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:rgba(255,255,255,0.5);margin-bottom:0.4rem"><span>Subtotal</span><span id="cobro-subtotal">Bs 0</span></div>
+              <div id="cobro-descuento-row" style="display:none;justify-content:space-between;font-size:0.75rem;color:var(--rose);margin-bottom:0.4rem"><span id="cobro-desc-label">Descuento</span><span id="cobro-desc-valor"></span></div>
+            </div>
+            <div style="font-size:0.65rem;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-top:1rem;margin-bottom:0.3rem">Total a cobrar</div>
+            <div style="font-family:var(--serif);font-size:2.4rem;font-weight:300;color:var(--white);line-height:1;margin-bottom:1.25rem" id="cobro-total">Bs 0</div>
+            <div style="font-size:0.65rem;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:0.5rem">Método de pago *</div>
+            <div class="metodo-grid" id="metodos-pago"></div>
+            <div style="margin-bottom:1rem">
+              <div style="font-size:0.65rem;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:0.4rem">Referencia</div>
+              <input type="text" id="cobro-referencia" placeholder="N° transacción (opcional)" style="width:100%;background:rgba(255,255,255,0.06);border:none;border-bottom:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.8);font-family:var(--sans);font-size:0.8rem;padding:0.4rem 0;outline:none">
+            </div>
+            <button class="btn-cobrar" onclick="registrarVenta()">Registrar venta y cobrar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FACTURAS -->
+    <div class="section" id="sec-facturas">
+      <div class="section-header"><h2>Facturas</h2><p>Gestión de documentos de venta</p></div>
+      <div class="filtros">
+        <input type="date" class="filter-select" id="filtro-factura-desde" onchange="cargarFacturas()" style="cursor:pointer">
+        <input type="date" class="filter-select" id="filtro-factura-hasta" onchange="cargarFacturas()" style="cursor:pointer">
+        <button class="btn-sm outline" onclick="limpiarFiltrosFactura()">Limpiar</button>
+      </div>
+      <div class="factura-layout">
+        <div class="card">
+          <div class="card-title">Listado de facturas</div>
+          <div id="tabla-facturas"><div class="loading">Cargando...</div></div>
+        </div>
+        <div>
+          <div class="factura-preview" id="factura-detalle" style="display:none">
+            <div style="text-align:center;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--sand)">
+              <div style="font-family:var(--serif);font-size:1.6rem;font-weight:300;color:var(--espresso)">COCO</div>
+              <div style="font-size:0.68rem;color:var(--mink)">Salón de Belleza · Santa Cruz, Bolivia</div>
+            </div>
+            <div id="factura-preview-contenido"></div>
+            <div style="display:flex;gap:0.5rem;margin-top:1.25rem">
+              <button class="btn-sm success" style="flex:1" id="btn-pagar-factura" onclick="pagarFactura()">Marcar pagada</button>
+              <button class="btn-sm danger" id="btn-anular-factura" onclick="anularFactura()">Anular</button>
+            </div>
+          </div>
+          <div class="factura-preview" id="factura-placeholder"><div class="empty">Haz clic en "Ver" para previsualizar</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXCEPCIONES -->
+    <div class="section" id="sec-excepciones">
+      <div class="section-header"><h2>Excepciones <em style="font-style:italic;color:var(--rose-deep)">de horario</em></h2><p>Solicitudes pendientes del personal técnico</p></div>
+      <div class="card"><div id="tabla-excepciones-rec"><div class="loading">Cargando...</div></div></div>
+    </div>
+
+    <!-- SOLICITUDES ESPECIALES -->
+<div class="section" id="sec-solicitudes">
+  <div class="section-header"><h2>Solicitudes <em style="font-style:italic;color:var(--rose-deep)">especiales</em></h2><p>Peticiones de clientas que requieren atención personalizada</p></div>
+  <div class="filtros">
+    <select class="filter-select" id="filtro-sol-estado" onchange="cargarSolicitudes()">
+      <option value="">Todas</option>
+      <option value="Pendiente">Pendientes</option>
+      <option value="Aprobada">Aprobadas</option>
+      <option value="Rechazada">Rechazadas</option>
+    </select>
+    <button class="btn-sm outline" onclick="document.getElementById('filtro-sol-estado').value='';cargarSolicitudes()">Limpiar</button>
+  </div>
+  <div class="card">
+    <div id="tabla-solicitudes"><div class="loading">Cargando...</div></div>
+  </div>
+</div>
+
+    <!-- CLIENTES -->
+    <div class="section" id="sec-clientes">
+      <div class="section-header"><h2>Clientes</h2><p>Directorio y fichas</p></div>
+      <div style="display:flex;gap:0.75rem;margin-bottom:1.25rem">
+        <input type="text" id="busqueda-clientes" placeholder="Buscar por nombre, teléfono o email..." style="flex:1;padding:0.5rem 0.75rem;border:1px solid var(--sand);border-radius:2px;font-family:var(--sans);font-size:0.78rem;outline:none" oninput="buscarClienteEnLista(this.value)">
+        <button class="topbar-btn primary" onclick="nav('nuevo-cliente',null)">+ Nuevo cliente</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 360px;gap:1.25rem">
+        <div id="lista-clientes"><div class="loading">Cargando...</div></div>
+        <div class="card" id="detalle-cliente" style="display:none"><div id="detalle-cliente-contenido"></div></div>
+        <div class="card" id="detalle-cliente-placeholder"><div class="empty">Selecciona un cliente para ver su ficha</div></div>
+      </div>
+    </div>
+
+    <!-- NUEVO CLIENTE -->
+    <div class="section" id="sec-nuevo-cliente">
+      <div class="section-header"><h2>Nuevo <em style="font-style:italic;color:var(--rose-deep)">cliente</em></h2></div>
+      <div class="card" style="max-width:700px">
+        <div class="form-grid">
+          <div class="form-field"><label>Nombre *</label><input type="text" id="nc-nombre"></div>
+          <div class="form-field"><label>Apellido *</label><input type="text" id="nc-apellido"></div>
+          <div class="form-field"><label>Teléfono *</label><input type="tel" id="nc-telefono" placeholder="+591 7X XXX XXX"></div>
+          <div class="form-field"><label>Email *</label><input type="email" id="nc-email"></div>
+          <div class="form-field full"><label>Alergias</label><textarea id="nc-alergias" rows="2"></textarea></div>
+          <div class="form-field full"><label>Contraindicaciones</label><textarea id="nc-contraindicaciones" rows="2"></textarea></div>
+          <div class="form-field full"><label>Notas técnicas</label><textarea id="nc-notas" rows="2"></textarea></div>
+        </div>
+        <div style="background:var(--cream);border-radius:4px;padding:0.75rem;margin-top:1rem;font-size:0.72rem;color:var(--mink)">
+          🔑 Contraseña temporal: <strong>primeros 4 dígitos del teléfono + Coco!</strong>
+        </div>
+        <div class="form-actions">
+          <button class="btn-primary" onclick="registrarCliente()">Registrar cliente</button>
+          <button class="btn-secondary" onclick="nav('clientes',null)">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PERFIL -->
+    <div class="section" id="sec-perfil">
+      <div class="section-header"><h2>Mi <em style="font-style:italic;color:var(--rose-deep)">perfil</em></h2></div>
+      <div class="perfil-header">
+        <div class="perfil-avatar-lg" id="perfil-avatar">?</div>
+        <div>
+          <div style="font-family:var(--serif);font-size:1.6rem;font-weight:300" id="perfil-nombre-display">—</div>
+          <div style="font-size:0.78rem;color:var(--mink);margin-top:0.2rem" id="perfil-email-display">—</div>
+          <span class="badge badge-rose" style="margin-top:0.5rem;display:inline-block">Atención y soporte</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Datos personales</div>
+        <div class="form-grid">
+          <div class="form-field"><label>Nombre *</label><input type="text" id="p-nombre"></div>
+          <div class="form-field"><label>Apellido *</label><input type="text" id="p-apellido"></div>
+          <div class="form-field"><label>Teléfono *</label><input type="tel" id="p-telefono"></div>
+          <div class="form-field"><label>Email *</label><input type="email" id="p-email"></div>
+          <div class="form-field"><label>Fecha de nacimiento</label><input type="date" id="p-nacimiento"></div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-primary" onclick="guardarPerfil()">Guardar cambios</button>
+          <button class="btn-secondary" onclick="cargarPerfil()">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTIFICACIONES -->
+    <div class="section" id="sec-notificaciones">
+      <div class="section-header"><h2>Notificaciones</h2></div>
+      <div style="border:1px solid var(--sand);border-radius:4px;overflow:hidden;background:var(--white)" id="lista-notificaciones"><div class="loading">Cargando...</div></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal nueva cita -->
+<div class="modal-overlay" id="modal-nueva-cita">
+  <div class="modal-box" style="max-width:640px">
+    <div class="modal-title">Nueva cita</div>
+    <div class="form-grid" style="margin-bottom:1.25rem">
+      <div class="form-field full"><label>Cliente *</label><select id="mc-cliente"><option value="">Seleccionar cliente...</option></select></div>
+      <div class="form-field"><label>Fecha *</label><input type="date" id="mc-fecha-dia" onchange="actualizarDuracionCita()"></div>
+      <div class="form-field"><label>Hora de inicio *</label><input type="time" id="mc-hora" value="09:00" onchange="actualizarDuracionCita()"></div>
+      <div class="form-field"><label>Estado inicial</label>
+        <select id="mc-estado"><option value="8">Programada</option><option value="9">Confirmada</option></select>
+      </div>
+      <div class="form-field"><label>Duración estimada</label><input type="text" id="mc-duracion-total" disabled style="opacity:0.6"></div>
+    </div>
+    <div style="font-size:0.65rem;font-weight:400;letter-spacing:0.14em;text-transform:uppercase;color:var(--mink);margin-bottom:0.75rem">Servicios</div>
+    <div id="mc-servicios-lista"></div>
+    <div style="display:flex;gap:0.75rem;margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid var(--sand)">
+      <select id="mc-srv-sel" style="flex:1;padding:0.5rem;border:1px solid var(--sand);border-radius:2px;font-family:var(--sans);font-size:0.78rem;color:var(--espresso);background:var(--white);outline:none"><option value="">Agregar servicio...</option></select>
+      <button class="btn-sm solid" onclick="agregarServicioCita()">+ Agregar</button>
+    </div>
+    <div class="form-field full" style="margin-top:1rem"><label>Notas</label><input type="text" id="mc-notas" placeholder="Indicaciones especiales..."></div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="crearCita()">Guardar cita</button>
+      <button class="btn-secondary" onclick="cerrarModal('modal-nueva-cita')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal editar cita -->
+<div class="modal-overlay" id="modal-editar-cita">
+  <div class="modal-box">
+    <div class="modal-title">Editar cita</div>
+    <input type="hidden" id="edit-cita-id">
+    <div class="form-grid">
+      <div class="form-field"><label>Estado</label>
+        <select id="edit-estado">
+          <option value="">Sin cambio</option>
+          <option value="8">Programada</option><option value="9">Confirmada</option>
+          <option value="10">En curso</option><option value="11">Completada</option><option value="12">Cancelada</option>
+        </select>
+      </div>
+      <div class="form-field"><label>Nueva fecha y hora</label><input type="datetime-local" id="edit-fecha"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="editarCita()">Guardar</button>
+      <button class="btn-secondary" onclick="cerrarModal('modal-editar-cita')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var token  = localStorage.getItem('token');
+var nombre = localStorage.getItem('nombre') || 'Recepcionista';
+if (!token) window.location.href = '/coco-auth.html';
+document.getElementById('sb-nombre').textContent = nombre;
+document.getElementById('sb-avatar').textContent = nombre.charAt(0).toUpperCase();
+
+var hoy = new Date();
+var DIAS  = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+var MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+document.getElementById('sb-turno').textContent = DIAS[hoy.getDay()] + ' · ' + hoy.getDate() + ' ' + MESES[hoy.getMonth()];
+document.getElementById('filtro-fecha').value = hoy.toISOString().split('T')[0];
+
+var metodoSeleccionado=0, itemsVenta=[], facturaSeleccionada=null, _catalogoData=[];
+var COLORES=['#b87060','#8a6090','#6090a0','#a06060','#608060'];
+
+async function api(url,opts){
+    opts=opts||{};
+    var cfg=Object.assign({},opts,{headers:Object.assign({'Content-Type':'application/json','Authorization':'Bearer '+token},opts.headers||{})});
+    var res=await fetch(url,cfg);
+    if(!res.ok){var e=await res.json().catch(function(){return{error:'Error'};});throw new Error(e.error||'Error '+res.status);}
+    return res.json();
+}
+
+function fFecha(f) {
+    if (!f) return '—';
+    var s = typeof f === 'string' ? f : '';
+    if (s.length >= 10) {
+        var partes = s.substring(0, 10).split('-');
+        if (partes.length === 3) {
+            return parseInt(partes[2]) + '/' + parseInt(partes[1]) + '/' + partes[0];
+        }
+    }
+    var d = new Date(f);
+    return d.getDate() + '/' + (d.getMonth()+1) + '/' + d.getFullYear();
+}
+
+function fHora(f){
+    if(!f) return '—';
+    var s = typeof f === 'string' ? f : f.toISOString();
+    var t = s.indexOf('T') >= 0 ? s.split('T')[1] : s;
+    return t.substring(0,5);
+}
+
+function fISODate(f) {
+    if (!f) return '';
+    var s = typeof f === 'string' ? f : '';
+    return s.substring(0, 10);
+}
+
+var SECCIONES={panel:'Panel general',citas:'Gestión de citas',cobro:'Cobro y ventas',facturas:'Facturas',excepciones:'Excepciones de horario',solicitudes:'Solicitudes especiales',clientes:'Clientes','nuevo-cliente':'Nuevo cliente',perfil:'Mi perfil',notificaciones:'Notificaciones'};
+
+function nav(id,el){
+    document.querySelectorAll('.section').forEach(function(s){s.classList.remove('active');});
+    document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
+    document.getElementById('sec-'+id).classList.add('active');
+    document.getElementById('topbar-title').textContent=SECCIONES[id]||id;
+    if(el)el.classList.add('active');
+    else document.querySelectorAll('.nav-item').forEach(function(n){var oc=n.getAttribute('onclick');if(oc&&oc.indexOf("'"+id+"'")!==-1)n.classList.add('active');});
+    var fns={panel:cargarPanel,citas:cargarCitas,cobro:cargarCobro,facturas:cargarFacturas,excepciones:cargarExcepciones,solicitudes:cargarSolicitudes,clientes:cargarClientes,perfil:cargarPerfil,notificaciones:cargarNotificaciones};
+    if(fns[id])fns[id]();
+}
+function cerrarSesion(){['token','nombre','rol','personaID'].forEach(function(k){localStorage.removeItem(k);});window.location.href='/coco-auth.html';}
+function abrirModal(id){document.getElementById(id).classList.add('open');}
+function cerrarModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-overlay').forEach(function(m){m.addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});});
+
+function estadoBadge(est){
+    var m={'Confirmada':'badge-green','Completada':'badge-gray','Cancelada':'badge-error','Programada':'badge-amber','En curso':'badge-rose','No asistió':'badge-error'};
+    return '<span class="badge '+(m[est]||'badge-gray')+'">'+est+'</span>';
+}
+
+// ══ PANEL ═══════════════
+async function cargarPanel(){
+    try{
+        var data=await api('/api/atencion/panel');
+        var est=data.estadisticas||{},prox=data.proximaCita,ven=data.ventas||{},cli=data.clientes||{};
+        document.getElementById('stat-total-citas').textContent=est.TotalCitas||0;
+        document.getElementById('stat-citas-sub').textContent=(est.Confirmadas||0)+' conf · '+(est.Programadas||0)+' prog';
+        if(prox){document.getElementById('stat-proxima').textContent=fHora(prox.FechaInicio);document.getElementById('stat-proxima-sub').textContent=prox.NombreCliente+' · '+prox.Servicio;}
+        else{document.getElementById('stat-proxima').textContent='—';document.getElementById('stat-proxima-sub').textContent='Sin citas próximas';}
+        document.getElementById('stat-ventas').textContent='Bs '+(parseFloat(ven.TotalMonto)||0).toFixed(2);
+        document.getElementById('stat-ventas-sub').textContent=(ven.TotalVentas||0)+' transacciones';
+        document.getElementById('stat-clientes').textContent=cli.TotalClientes||0;
+        document.getElementById('stat-clientes-sub').textContent='+'+(cli.NuevosEstaSemana||0)+' esta semana';
+        var citas = data.citasHoy || [];
+var bc = citas.filter(function(c){ return c.EstadoID === 8; }).length;
+if(bc>0){document.getElementById('badge-citas').textContent=bc;document.getElementById('badge-citas').style.display='inline-block';}
+else document.getElementById('badge-citas').style.display='none';
+
+// Agrupar por CitaID
+var grupos = {};
+citas.forEach(function(c){
+    if(!grupos[c.CitaID]) grupos[c.CitaID] = { cita:c, servicios:[] };
+    grupos[c.CitaID].servicios.push(c);
+});
+
+var panelDiv = document.getElementById('tabla-citas-panel');
+var lista = Object.values(grupos).sort(function(a, b){
+    return new Date(a.cita.FechaInicio) - new Date(b.cita.FechaInicio);
+});
+if(!lista.length){ panelDiv.innerHTML='<div class="empty">No hay citas para hoy</div>'; }
+else {
+    panelDiv.innerHTML = lista.map(function(g){
+        var c = g.cita;
+        var estadoCls = c.EstadoID===9?'badge-green':c.EstadoID===10?'badge-rose':c.EstadoID===11?'badge-gray':'badge-amber';
+        var hora = fHora(c.FechaInicio);
+        var srvChips = g.servicios.map(function(s){
+        var horaS = fHora(s.FechaInicioServicio || s.FechaInicio);
+        var horaF = fHora(s.FechaFinServicio    || s.FechaInicio);
+        var paralelo = s.EsParalelo ?
+            '<span style="font-size:0.6rem;background:var(--blush);color:var(--rose-deep);border-radius:2px;padding:0.1rem 0.35rem;margin-left:0.25rem">simultáneo</span>' : '';
+        return '<div style="display:flex;align-items:center;gap:0.4rem;margin:0.2rem 0;font-size:0.72rem">'+
+            '<span style="color:var(--mink);min-width:90px;font-size:0.65rem">'+horaS+' – '+horaF+'</span>'+
+            '<span style="font-weight:400">'+s.Servicio+'</span>'+
+            '<span style="color:var(--mink)">· '+s.NombreEmpleado+' '+s.ApellidoEmpleado+'</span>'+
+            paralelo+
+            '</div>';
+    }).join('');
+        var acciones = '<div style="display:flex;gap:4px;flex-wrap:wrap">'+
+            (c.EstadoID===8?'<button class="btn-sm success" onclick="confirmarCita('+c.CitaID+')">Confirmar</button>':'')+
+            '<button class="btn-sm outline" onclick="abrirEditarCita('+c.CitaID+')">Editar</button>'+
+            (c.EstadoID!==11&&c.EstadoID!==12&&c.EstadoID!==13?'<button class="btn-sm danger" onclick="cancelarCita('+c.CitaID+')">Cancelar</button>':'')+
+            '</div>';
+        return '<div style="display:flex;align-items:flex-start;gap:1rem;padding:0.875rem 0;border-bottom:1px solid var(--sand)">'+
+            '<div style="min-width:48px;text-align:center">'+
+            '<div style="font-family:var(--serif);font-size:1.4rem;font-weight:300;color:var(--espresso);line-height:1">'+hora+'</div>'+
+            '</div>'+
+            '<div style="flex:1;min-width:0">'+
+            '<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.3rem">'+
+            '<span style="font-size:0.85rem;font-weight:400;color:var(--espresso)">'+c.NombreCliente+' '+c.ApellidoCliente+'</span>'+
+            '<span class="badge '+estadoCls+'">'+c.Estado+'</span>'+
+            '</div>'+
+            '<div style="flex-wrap:wrap;display:flex">'+srvChips+'</div>'+
+            '</div>'+
+            '<div style="flex-shrink:0">'+acciones+'</div>'+
+            '</div>';
+    }).join('');
+}
+        var emp=data.disponibilidad||[];
+        document.getElementById('disponibilidad-empleados').innerHTML=emp.map(function(e,i){
+            var libre=e.EstadoActual==='Libre',ini=(e.Nombre||'').charAt(0)+(e.Apellido||'').charAt(0);
+            return'<div class="estilista-card"><div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem">'+
+                '<div class="est-avatar" style="background:'+COLORES[i%COLORES.length]+'">'+ini.toUpperCase()+'</div>'+
+                '<div style="flex:1"><div style="font-size:0.85rem;font-weight:400">'+e.Nombre+' '+e.Apellido+'</div>'+
+                '<div style="font-size:0.68rem;color:var(--mink)">'+e.NombreRol+'</div></div>'+
+                '<div style="display:flex;align-items:center;gap:5px;font-size:0.65rem;color:'+(libre?'var(--success)':'var(--warning)')+'">'+
+                '<span class="pulse-dot '+(libre?'libre':'ocupada')+'"></span>'+(libre?'Libre':'Ocupada')+'</div></div>'+
+                '<div style="font-size:0.68rem;color:var(--mink)">'+(e.CitasHoy||0)+' citas hoy</div>'+
+                '<div class="progress-bar"><div class="progress-fill" style="width:'+Math.min((e.CitasHoy||0)*20,100)+'%"></div></div></div>';
+        }).join('')||'<div class="empty">Sin personal técnico</div>';
+    }catch(e){console.error(e);}
+}
+
+// ══ CITAS ═══════════════
+async function cargarCitas(){
+    var fecha=document.getElementById('filtro-fecha').value;
+    var empID=document.getElementById('filtro-empleado').value;
+    var estID=document.getElementById('filtro-estado').value;
+    try{
+        var url='/api/atencion/citas?fecha='+fecha;
+        if(empID)url+='&empleadoID='+empID;
+        if(estID)url+='&estadoID='+estID;
+        var data=await api(url);
+
+        // Agrupar por CitaID
+        var grupos={};
+        (data||[]).forEach(function(c){
+            if(!grupos[c.CitaID]) grupos[c.CitaID]={cita:c,servicios:[]};
+            grupos[c.CitaID].servicios.push(c);
+        });
+
+        var lista=Object.values(grupos).sort(function(a,b){
+            return new Date(a.cita.FechaInicio)-new Date(b.cita.FechaInicio);
+        });
+
+        var div=document.getElementById('tabla-citas-gestion');
+        if(!lista.length){div.innerHTML='<div class="empty">No hay citas</div>';return;}
+
+        div.innerHTML='<table class="tabla"><thead><tr>'+
+            '<th>Hora</th><th>Cliente</th><th>Servicios</th><th>Total</th><th>Estado</th><th>Acciones</th>'+
+            '</tr></thead><tbody>'+
+            lista.map(function(g){
+                var c=g.cita;
+                var estadoCls=c.EstadoID===9?'badge-green':c.EstadoID===10?'badge-rose':c.EstadoID===11?'badge-gray':'badge-amber';
+                var total=g.servicios.reduce(function(s,x){return s+parseFloat(x.Precio||0);},0);
+
+                var srvRows=g.servicios.map(function(s){
+                    var horaS=fHora(s.FechaInicioServicio||s.FechaInicio);
+                    var horaF=fHora(s.FechaFinServicio||s.FechaInicio);
+                    var paralelo=s.EsParalelo?
+                        '<span style="font-size:0.6rem;background:var(--blush);color:var(--rose-deep);border-radius:2px;padding:0.1rem 0.35rem;margin-left:0.25rem">simultáneo</span>':'';
+                    return '<div style="display:flex;align-items:center;gap:0.4rem;margin:0.2rem 0;font-size:0.72rem">'+
+                        '<span style="color:var(--mink);min-width:90px;font-size:0.65rem">'+horaS+' – '+horaF+'</span>'+
+                        '<span style="font-weight:400">'+s.Servicio+'</span>'+
+                        '<span style="color:var(--mink)">· '+s.NombreEmpleado+' '+s.ApellidoEmpleado+'</span>'+
+                        paralelo+'</div>';
+                }).join('');
+
+                var acciones='<div style="display:flex;gap:4px;flex-wrap:wrap">'+
+                    (c.EstadoID===8?'<button class="btn-sm success" onclick="confirmarCita('+c.CitaID+')">Confirmar</button>':'')+
+                    (c.EstadoID===9||c.EstadoID===10?'<button class="btn-sm solid" onclick="completarCita('+c.CitaID+')">Completar</button>':'')+
+                    '<button class="btn-sm outline" onclick="abrirEditarCita('+c.CitaID+')">Editar</button>'+
+                    (c.EstadoID!==11?'<button class="btn-sm danger" onclick="cancelarCita('+c.CitaID+')">Cancelar</button>':'')+
+                    '</div>';
+
+                return '<tr>'+
+                    '<td style="font-family:var(--serif);font-size:1.1rem;font-weight:300;white-space:nowrap">'+fHora(c.FechaInicio)+'</td>'+
+                    '<td>'+(c.Alergias?'<span class="badge badge-error" style="margin-right:4px">⚠</span>':'')+
+                    '<span style="font-weight:400">'+c.NombreCliente+' '+c.ApellidoCliente+'</span></td>'+
+                    '<td>'+srvRows+'</td>'+
+                    '<td style="font-family:var(--serif);color:var(--rose-deep);white-space:nowrap">Bs '+total.toFixed(2)+'</td>'+
+                    '<td><span class="badge '+estadoCls+'">'+c.Estado+'</span></td>'+
+                    '<td>'+acciones+'</td>'+
+                    '</tr>';
+            }).join('')+'</tbody></table>';
+    }catch(e){console.error(e);}
+}
+
+async function confirmarCita(id){try{await api('/api/atencion/citas/'+id+'/confirmar',{method:'PUT'});cargarPanel();cargarCitas();}catch(e){alert('Error: '+e.message);}}
+async function cancelarCita(id){if(!confirm('¿Cancelar esta cita?'))return;try{await api('/api/atencion/citas/'+id+'/cancelar',{method:'PUT'});cargarPanel();cargarCitas();}catch(e){alert('Error: '+e.message);}}
+function abrirEditarCita(id){document.getElementById('edit-cita-id').value=id;document.getElementById('edit-estado').value='';document.getElementById('edit-fecha').value='';abrirModal('modal-editar-cita');}
+async function editarCita(){
+    var id=document.getElementById('edit-cita-id').value,estado=document.getElementById('edit-estado').value,fecha=document.getElementById('edit-fecha').value,body={};
+    if(estado)body.estadoID=parseInt(estado);
+    if(fecha)body.nuevaFecha=fecha;
+    try{await api('/api/atencion/citas/'+id,{method:'PUT',body:JSON.stringify(body)});cerrarModal('modal-editar-cita');cargarPanel();cargarCitas();}catch(e){alert('Error: '+e.message);}
+}
+
+// ══ NUEVA CITA — múltiples servicios con opción paralela ═══
+var _citaServicios = [];
+
+async function abrirNuevaCita() {
+    _citaServicios = [];
+    try {
+        var clientes = await api('/api/atencion/clientes');
+        document.getElementById('mc-cliente').innerHTML = '<option value="">Seleccionar cliente...</option>' +
+            clientes.map(function(c){ return '<option value="'+c.ClienteID+'">'+c.Nombre+' '+c.Apellido+'</option>'; }).join('');
+
+        if (!_catalogoData.length) _catalogoData = await api('/api/atencion/catalogo');
+        var grouped = {};
+        _catalogoData.forEach(function(s){ if(!grouped[s.Categoria]) grouped[s.Categoria]=[]; grouped[s.Categoria].push(s); });
+        document.getElementById('mc-srv-sel').innerHTML = '<option value="">Agregar servicio...</option>' +
+            Object.keys(grouped).map(function(cat){
+                return '<optgroup label="'+cat+'">'+grouped[cat].map(function(s){
+                    return '<option value="'+s.ServicioID+'|'+s.Nombre+'|'+s.DuracionMin+'">'+s.Nombre+' ('+s.DuracionMin+' min)</option>';
+                }).join('')+'</optgroup>';
+            }).join('');
+
+        document.getElementById('mc-fecha-dia').value = new Date().toISOString().split('T')[0];
+        document.getElementById('mc-hora').value = '09:00';
+        document.getElementById('mc-notas').value = '';
+        renderServiciosCita();
+        actualizarDuracionCita();
+    } catch(e) { console.error(e); }
+    abrirModal('modal-nueva-cita');
+}
+
+async function agregarServicioCita() {
+    var sel = document.getElementById('mc-srv-sel');
+    var val = sel.value;
+    if (!val) return;
+    var p    = val.split('|');
+    var srvID = parseInt(p[0]), nombre = p[1], dur = parseInt(p[2]);
+
+    var fechaDia = document.getElementById('mc-fecha-dia').value;
+    var horaIni  = document.getElementById('mc-hora').value;
+    if (!fechaDia || !horaIni) { alert('Selecciona fecha y hora primero.'); return; }
+
+    try {
+        var empData = await api('/api/atencion/panel');
+        var emps    = empData.disponibilidad || [];
+
+        _citaServicios.push({
+            servicioID:    srvID,
+            nombre:        nombre,
+            duracion:      dur,
+            empleadoID:    null,
+            empleadoNombre:'',
+            paralelo:      false,
+            horaInicio:    '',
+            horaFin:       '',
+            emps:          emps
+        });
+        sel.value = '';
+        actualizarDuracionCita();
+    } catch(e) { console.error(e); }
+}
+
+function renderServiciosCita() {
+    var div = document.getElementById('mc-servicios-lista');
+    if (!_citaServicios.length) {
+        div.innerHTML = '<div style="font-size:0.78rem;color:var(--mink);padding:0.5rem 0">Sin servicios — agrega al menos uno</div>';
+        return;
+    }
+    div.innerHTML = _citaServicios.map(function(srv, i){
+        var optsEmp = '<option value="">Seleccionar personal...</option>' +
+            srv.emps.map(function(e){
+                return '<option value="'+e.EmpleadoID+'|'+e.Nombre+' '+e.Apellido+'"'
+                    +(srv.empleadoID===e.EmpleadoID?' selected':'')+'>'+e.Nombre+' '+e.Apellido
+                    +' ('+(e.EstadoActual==='Libre'?'Libre':'Ocupada')+')</option>';
+            }).join('');
+
+        var paraleloBadge = (i > 0 && srv.paralelo) ?
+            '<span style="font-size:0.6rem;background:var(--rose);color:white;border-radius:2px;padding:0.1rem 0.35rem;margin-left:4px">Simultáneo</span>' : '';
+
+        var checkParalelo = i > 0 ?
+            '<label style="display:flex;align-items:center;gap:0.3rem;font-size:0.68rem;color:var(--mink);cursor:pointer;white-space:nowrap">'+
+            '<input type="checkbox" '+(srv.paralelo?'checked':'')+' onchange="toggleParalelo('+i+',this.checked)" style="cursor:pointer">'+
+            'Simultáneo</label>' : '';
+
+        return '<div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem 0;border-bottom:1px solid var(--sand);flex-wrap:wrap">' +
+            '<div style="flex:1;min-width:140px">' +
+            '<div style="font-size:0.82rem;font-weight:400">'+srv.nombre+paraleloBadge+'</div>' +
+            '<div style="font-size:0.68rem;color:var(--mink)">'+srv.duracion+' min · '+srv.horaInicio+' – '+srv.horaFin+'</div>' +
+            '</div>' +
+            checkParalelo +
+            '<select style="font-size:0.72rem;padding:0.3rem 0.5rem;border:1px solid var(--sand);border-radius:2px;color:var(--espresso);background:var(--white);outline:none;min-width:150px" onchange="seleccionarEmpleadoCita('+i+',this.value)">'+optsEmp+'</select>' +
+            '<button class="item-del" onclick="eliminarServicioCita('+i+')">×</button>' +
+            '</div>';
+    }).join('');
+}
+
+function toggleParalelo(i, checked) {
+    _citaServicios[i].paralelo = checked;
+    actualizarDuracionCita();
+}
+
+function seleccionarEmpleadoCita(i, val) {
+    if (!val) { _citaServicios[i].empleadoID = null; _citaServicios[i].empleadoNombre = ''; return; }
+    var p = val.split('|');
+    _citaServicios[i].empleadoID     = parseInt(p[0]);
+    _citaServicios[i].empleadoNombre = p[1];
+}
+
+function eliminarServicioCita(i) {
+    _citaServicios.splice(i, 1);
+    // El primero nunca puede ser paralelo
+    if (_citaServicios.length > 0) _citaServicios[0].paralelo = false;
+    actualizarDuracionCita();
+}
+
+function recalcularHorariosCita() {
+    var fechaDia = document.getElementById('mc-fecha-dia').value;
+    var horaIni  = document.getElementById('mc-hora').value;
+    if (!fechaDia || !horaIni) return;
+    var base      = new Date(fechaDia + 'T' + horaIni + ':00');
+    var offset    = 0;
+    var iniAnt    = 0; // offset del inicio del servicio anterior
+    _citaServicios.forEach(function(srv, i){
+        var iniOffset = (i > 0 && srv.paralelo) ? iniAnt : offset;
+        var ini = new Date(base.getTime() + iniOffset * 60000);
+        var fin = new Date(ini.getTime() + srv.duracion * 60000);
+        srv.horaInicio = ini.toTimeString().substring(0,5);
+        srv.horaFin    = fin.toTimeString().substring(0,5);
+        if (i > 0 && srv.paralelo) {
+            // No avanza el offset, el siguiente servicio sigue desde donde estaba
+        } else {
+            iniAnt = offset;
+            offset += srv.duracion + 5;
+        }
+    });
+}
+
+function actualizarDuracionCita() {
+    recalcularHorariosCita();
+    // Calcular duración total real (tiempo desde inicio hasta el último fin)
+    var fechaDia = document.getElementById('mc-fecha-dia').value;
+    var horaIni  = document.getElementById('mc-hora').value;
+    var durTotal = 0;
+    if (_citaServicios.length && fechaDia && horaIni) {
+        var base    = new Date(fechaDia + 'T' + horaIni + ':00');
+        var maxFin  = base;
+        _citaServicios.forEach(function(srv){
+            var fin = new Date(fechaDia + 'T' + srv.horaFin + ':00');
+            if (fin > maxFin) maxFin = fin;
+        });
+        durTotal = Math.round((maxFin - base) / 60000);
+    }
+    document.getElementById('mc-duracion-total').value = _citaServicios.length ?
+        durTotal + ' min en total' : '';
+    renderServiciosCita();
+}
+
+async function crearCita() {
+    var clienteID = document.getElementById('mc-cliente').value;
+    var fechaDia  = document.getElementById('mc-fecha-dia').value;
+    var horaIni   = document.getElementById('mc-hora').value;
+    if (!clienteID)             { alert('Selecciona un cliente.'); return; }
+    if (!fechaDia || !horaIni)  { alert('Selecciona fecha y hora.'); return; }
+    if (!_citaServicios.length) { alert('Agrega al menos un servicio.'); return; }
+    for (var i = 0; i < _citaServicios.length; i++) {
+        if (!_citaServicios[i].empleadoID) {
+            alert('Selecciona personal para: ' + _citaServicios[i].nombre);
+            return;
+        }
+    }
+    // Formato: ServicioID:EmpleadoID:Paralelo
+    var servicios   = _citaServicios.map(function(s, i){
+        return s.servicioID + ':' + s.empleadoID + ':' + (i > 0 && s.paralelo ? '1' : '0');
+    }).join(',');
+    var fechaInicio = fechaDia + 'T' + horaIni + ':00.000';
+    try {
+        await api('/api/atencion/citas', { method:'POST', body:JSON.stringify({
+            clienteID:   parseInt(clienteID),
+            servicios:   servicios,
+            fechaInicio: fechaInicio,
+            estadoID:    parseInt(document.getElementById('mc-estado').value),
+            notas:       document.getElementById('mc-notas').value || null
+        })});
+        cerrarModal('modal-nueva-cita');
+        alert('Cita creada.');
+        cargarPanel(); cargarCitas();
+    } catch(e) { alert('Error: '+e.message); }
+}
+
+async function completarCita(id){
+    if(!confirm('¿Marcar esta cita como completada?'))return;
+    try{
+        await api('/api/atencion/citas/'+id,{method:'PUT',body:JSON.stringify({estadoID:11})});
+        cargarPanel();
+        cargarCitas();
+    }catch(e){alert('Error: '+e.message);}
+}
+
+// ══ COBRO ═══════════════
+async function cargarCobro(){
+    try{
+        var clientes=await api('/api/atencion/clientes');
+        document.getElementById('cobro-cliente').innerHTML='<option value="">Seleccionar cliente...</option>'+clientes.map(function(c){return'<option value="'+c.ClienteID+'">'+c.Nombre+' '+c.Apellido+'</option>';}).join('');
+        var empData=await api('/api/atencion/panel');_empsData=empData.disponibilidad||[];
+        if(!_catalogoData.length)_catalogoData=await api('/api/atencion/catalogo');
+        var productos=await api('/api/atencion/productos');
+        var grouped={};_catalogoData.forEach(function(s){if(!grouped[s.Categoria])grouped[s.Categoria]=[];grouped[s.Categoria].push(s);});
+        var optsS=Object.keys(grouped).map(function(cat){return'<optgroup label="'+cat+'">'+grouped[cat].map(function(s){return'<option value="srv|'+s.ServicioID+'|'+s.Precio+'|'+s.Nombre+'">'+s.Nombre+' — Bs '+s.Precio+'</option>';}).join('')+'</optgroup>';}).join('');
+        var optsP=productos.length?'<optgroup label="─── Productos ───">'+productos.map(function(p){return'<option value="prod|'+p.ProductoID+'|'+p.Precio+'|'+p.Nombre+'">'+p.Nombre+' — Bs '+p.Precio+'</option>';}).join('')+'</optgroup>':'';
+        document.getElementById('sel-item').innerHTML='<option value="">Seleccionar servicio o producto...</option>'+optsS+optsP;
+        var metodos=await api('/api/atencion/metodos-pago');
+        metodoSeleccionado=0;
+        document.getElementById('metodos-pago').innerHTML=metodos.map(function(m){return'<button class="metodo-btn" onclick="selMetodo('+m.MetodoPagoID+',this)">'+m.Nombre+'</button>';}).join('');
+        var promos=await api('/api/atencion/promociones-activas');
+        document.getElementById('sel-promo').innerHTML='<option value="0" data-servicios="" data-nombre="" data-promoid="">Sin promoción</option>'+
+            promos.map(function(p){return'<option value="'+p.Descuento+'" data-servicios="'+(p.ServicioIDs||[]).join(',')+'" data-nombre="'+p.Nombre+'" data-promoid="'+p.PromocionID+'">'+p.Nombre+' — '+p.Descuento+'% desc.</option>';}).join('');
+        itemsVenta=[];renderItems();actualizarResumen();
+    }catch(e){console.error(e);}
+}
+function selMetodo(id,btn){metodoSeleccionado=id;document.querySelectorAll('.metodo-btn').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');}
+var _empsData = [];
+function agregarItem(){
+    var sel=document.getElementById('sel-item'),val=sel.value;
+    if(!val)return;
+    var p=val.split('|');
+    itemsVenta.push({tipo:p[0],id:p[1],precio:parseFloat(p[2]),nombre:p[3],qty:1,empleadoID:null});
+    sel.value='';renderItems();actualizarResumen();
+}
+function renderItems(){
+    var optsEmp='<option value="">— Personal —</option>'+_empsData.map(function(e){
+        return'<option value="'+e.EmpleadoID+'">'+e.Nombre+' '+e.Apellido+'</option>';
+    }).join('');
+    document.getElementById('items-venta').innerHTML=itemsVenta.map(function(item,i){
+        if(item.tipo==='prod'){
+            return'<div class="item-venta"><div style="flex:1;font-size:0.82rem">'+item.nombre+
+                '<span style="font-size:0.6rem;background:var(--sand);border-radius:2px;padding:0.1rem 0.3rem;margin-left:4px">Producto</span></div>'+
+                '<input class="item-qty" type="number" value="'+item.qty+'" min="1" onchange="cambiarQty('+i+',this.value)">'+
+                '<div style="font-family:var(--serif);font-size:0.95rem;min-width:60px;text-align:right">Bs '+(item.precio*item.qty).toFixed(2)+'</div>'+
+                '<button class="item-del" onclick="eliminarItem('+i+')">×</button></div>';
+        }
+        return'<div class="item-venta" style="flex-wrap:wrap;gap:0.5rem">'+
+            '<div style="flex:1;min-width:120px;font-size:0.82rem">'+item.nombre+'</div>'+
+            '<select style="font-size:0.72rem;padding:0.2rem 0.4rem;border:1px solid var(--sand);border-radius:2px;color:var(--espresso);background:var(--white);outline:none" onchange="cambiarEmpleado('+i+',this.value)">'+
+            optsEmp.replace('value="'+(item.empleadoID||'')+'"','value="'+(item.empleadoID||'')+'" selected')+'</select>'+
+            '<input class="item-qty" type="number" value="'+item.qty+'" min="1" onchange="cambiarQty('+i+',this.value)">'+
+            '<div style="font-family:var(--serif);font-size:0.95rem;min-width:60px;text-align:right">Bs '+(item.precio*item.qty).toFixed(2)+'</div>'+
+            '<button class="item-del" onclick="eliminarItem('+i+')">×</button></div>';
+    }).join('')||'<div style="font-size:0.78rem;color:var(--mink);padding:0.5rem 0">No hay ítems</div>';
+}
+function cambiarQty(i,val){itemsVenta[i].qty=parseInt(val)||1;renderItems();actualizarResumen();}
+function cambiarEmpleado(i,val){itemsVenta[i].empleadoID=val?parseInt(val):null;}
+function eliminarItem(i){itemsVenta.splice(i,1);renderItems();actualizarResumen();}
+function actualizarResumen(){
+    var selPromo=document.getElementById('sel-promo'),opt=selPromo.options[selPromo.selectedIndex];
+    var descPct=parseFloat(selPromo.value)||0;
+    var serviciosPromo=(opt.getAttribute('data-servicios')||'').split(',').filter(Boolean).map(Number);
+    var nombrePromo=opt.getAttribute('data-nombre')||'';
+    if(descPct>0&&serviciosPromo.length>0){
+        var srvEnVenta=itemsVenta.filter(function(x){return x.tipo==='srv';}).map(function(x){return parseInt(x.id);});
+        if(srvEnVenta.length>0&&!srvEnVenta.some(function(id){return serviciosPromo.includes(id);})){
+            alert('⚠ La promoción "'+nombrePromo+'" no aplica a los servicios seleccionados.');
+            selPromo.value='0';descPct=0;
+        }
+    }
+    var sub=itemsVenta.reduce(function(s,x){return s+x.precio*x.qty;},0);
+    var esCumpleanos = (opt.getAttribute('data-nombre')||'').indexOf('🎂') >= 0;
+    var subSrvPromo;
+    if (esCumpleanos) {
+        // Descuento sobre todos los servicios
+        subSrvPromo = itemsVenta.filter(function(x){ return x.tipo==='srv'; })
+            .reduce(function(s,x){ return s+x.precio*x.qty; }, 0);
+    } else {
+        // Descuento solo sobre servicios incluidos en la promo
+        subSrvPromo = itemsVenta.filter(function(x){ return x.tipo==='srv'&&serviciosPromo.includes(parseInt(x.id)); })
+            .reduce(function(s,x){ return s+x.precio*x.qty; }, 0);
+    }
+    var desc=Math.round(subSrvPromo*descPct/100*100)/100;
+    var tot=sub-desc;
+    document.getElementById('cobro-subtotal').textContent='Bs '+sub.toFixed(2);
+    document.getElementById('cobro-total').textContent='Bs '+tot.toFixed(2);
+    var row=document.getElementById('cobro-descuento-row');
+    if(descPct>0&&desc>0){row.style.display='flex';document.getElementById('cobro-desc-label').textContent='Descuento '+descPct+'%';document.getElementById('cobro-desc-valor').textContent='− Bs '+desc.toFixed(2);}
+    else row.style.display='none';
+    document.getElementById('resumen-items').innerHTML=itemsVenta.map(function(x){return'<div style="display:flex;justify-content:space-between;font-size:0.78rem;color:rgba(255,255,255,0.7);padding:0.4rem 0;border-bottom:1px solid rgba(255,255,255,0.08)"><span>'+x.nombre+' ×'+x.qty+'</span><span>Bs '+(x.precio*x.qty).toFixed(2)+'</span></div>';}).join('');
+}
+
+async function registrarVenta(){
+    if(!itemsVenta.length){alert('Agrega al menos un ítem.');return;}
+    var clienteID=document.getElementById('cobro-cliente').value;
+    if(!clienteID){alert('Selecciona un cliente.');return;}
+    if(!metodoSeleccionado){alert('Selecciona un método de pago.');return;}
+
+    var selPromo=document.getElementById('sel-promo'),opt=selPromo.options[selPromo.selectedIndex];
+    var pct=parseFloat(selPromo.value)||0;
+    var srvPromo=(opt.getAttribute('data-servicios')||'').split(',').filter(Boolean).map(Number);
+    var promoID=opt.getAttribute('data-promoid')||null;
+    var esCumpleanos=(opt.getAttribute('data-nombre')||'').indexOf('🎂')>=0;
+
+    var sub=itemsVenta.reduce(function(s,x){return s+x.precio*x.qty;},0);
+    var subSrvPromo;
+    if(esCumpleanos){
+        subSrvPromo=itemsVenta.filter(function(x){return x.tipo==='srv';})
+            .reduce(function(s,x){return s+x.precio*x.qty;},0);
+    }else{
+        subSrvPromo=itemsVenta.filter(function(x){return x.tipo==='srv'&&srvPromo.includes(parseInt(x.id));})
+            .reduce(function(s,x){return s+x.precio*x.qty;},0);
+    }
+    var desc=Math.round(subSrvPromo*pct/100*100)/100;
+    var tot=sub-desc;
+
+    var srvItems=itemsVenta.filter(function(x){return x.tipo==='srv';});
+    for(var si=0;si<srvItems.length;si++){
+        if(!srvItems[si].empleadoID){alert('Asigna personal técnico a: '+srvItems[si].nombre);return;}
+    }
+
+    var servicios=srvItems.map(function(x){
+        var pf;
+        if(esCumpleanos){
+            pf=x.precio*(1-pct/100);
+        }else{
+            pf=(pct>0&&srvPromo.includes(parseInt(x.id)))?x.precio*(1-pct/100):x.precio;
+        }
+        return x.id+':'+x.qty+':'+pf.toFixed(2)+':'+(x.empleadoID||0);
+    }).join(',');
+
+    var productos=itemsVenta.filter(function(x){return x.tipo==='prod';})
+        .map(function(x){return x.id+':'+x.qty+':'+x.precio.toFixed(2);}).join(',');
+    var empID=srvItems.length>0?(srvItems[0].empleadoID||0):0;
+
+    try{
+        var res=await api('/api/atencion/ventas',{method:'POST',body:JSON.stringify({
+            clienteID:parseInt(clienteID),empleadoID:empID,metodoPagoID:metodoSeleccionado,
+            monto:tot,servicios:servicios||null,productos:productos||null,
+            descuentoPct:pct,descuentoMonto:desc,
+            promocionID:promoID?parseInt(promoID):null,
+            referencia:document.getElementById('cobro-referencia').value||null
+        })});
+        alert('Venta registrada. Factura: '+res.NumeroFactura);
+        itemsVenta=[];renderItems();actualizarResumen();metodoSeleccionado=0;
+        document.querySelectorAll('.metodo-btn').forEach(function(b){b.classList.remove('active');});
+        nav('facturas',null);
+    }catch(e){alert('Error: '+e.message);}
+}
+
+// ══ FACTURAS ═══════════
+function limpiarFiltrosFactura(){document.getElementById('filtro-factura-desde').value='';document.getElementById('filtro-factura-hasta').value='';cargarFacturas();}
+async function cargarFacturas(){
+    var desde=document.getElementById('filtro-factura-desde').value,hasta=document.getElementById('filtro-factura-hasta').value;
+    var url='/api/atencion/facturas?';
+    if(desde)url+='fechaDesde='+desde+'&';
+    if(hasta)url+='fechaHasta='+hasta+'&';
+    try{
+        var data=await api(url);
+        document.getElementById('tabla-facturas').innerHTML=data&&data.length?
+            '<table class="tabla"><thead><tr><th>N° Factura</th><th>Cliente</th><th>Personal</th><th>Fecha</th><th>Total</th><th>Estado</th><th>Acciones</th></tr></thead><tbody>'+
+            data.map(function(f){return'<tr><td>'+f.NumeroFactura+'</td><td>'+f.NombreCliente+' '+f.ApellidoCliente+'</td>'+
+                '<td style="color:var(--mink)">'+(f.NombreEmpleado||'—')+' '+(f.ApellidoEmpleado||'')+'</td>'+
+                '<td>'+fFecha(f.Fecha)+'</td><td>Bs '+parseFloat(f.Total).toFixed(2)+'</td>'+
+                '<td><span class="badge '+(f.Estado==='pagada'?'badge-green':f.Estado==='anulada'?'badge-error':'badge-amber')+'">'+f.Estado+'</span></td>'+
+                '<td><div style="display:flex;gap:4px"><button class="btn-sm outline" onclick="verFactura('+f.FacturaID+','+JSON.stringify(f).replace(/"/g,"&quot;")+')">Ver</button>'+
+                (f.Estado==='emitida'?'<button class="btn-sm success" onclick="pagarFacturaDirecta('+f.FacturaID+')">Pagar</button>':'')+
+                '</div></td></tr>';}).join('')+'</tbody></table>':'<div class="empty">No hay facturas</div>';
+    }catch(e){console.error(e);}
+}
+async function verFactura(id,f){
+    facturaSeleccionada=f;
+    document.getElementById('factura-placeholder').style.display='none';
+    document.getElementById('factura-detalle').style.display='block';
+    document.getElementById('btn-pagar-factura').style.display=f.Estado==='emitida'?'block':'none';
+    document.getElementById('btn-anular-factura').style.display=f.Estado==='emitida'?'block':'none';
+    document.getElementById('factura-preview-contenido').innerHTML='<div class="loading">Cargando...</div>';
+    try{
+        var d=await api('/api/atencion/facturas/'+id+'/detalle');
+        var cab=d.cabecera||{},srvs=d.servicios||[],prods=d.productos||[];
+        var totalItems=srvs.concat(prods).reduce(function(s,i){return s+parseFloat(i.Subtotal);},0);
+        var descPct=parseFloat(cab.DescuentoPct)||0,descMonto=parseFloat(cab.DescuentoMonto)||0;
+        var subtotal=descMonto>0 ? totalItems+descMonto : totalItems;
+        var items=srvs.map(function(i){return'<tr><td style="padding:0.5rem 0.25rem">'+i.Item+'<br><span style="font-size:0.65rem;color:var(--mink)">Servicio</span></td><td style="text-align:center;padding:0.5rem 0.25rem">'+i.Cantidad+'</td><td style="text-align:right;padding:0.5rem 0.25rem">Bs '+parseFloat(i.PrecioUnitario).toFixed(2)+'</td><td style="text-align:right;padding:0.5rem 0.25rem;font-family:var(--serif)">Bs '+parseFloat(i.Subtotal).toFixed(2)+'</td></tr>';})
+            .concat(prods.map(function(i){return'<tr><td style="padding:0.5rem 0.25rem">'+i.Item+'<br><span style="font-size:0.65rem;color:var(--mink)">Producto</span></td><td style="text-align:center;padding:0.5rem 0.25rem">'+i.Cantidad+'</td><td style="text-align:right;padding:0.5rem 0.25rem">Bs '+parseFloat(i.PrecioUnitario).toFixed(2)+'</td><td style="text-align:right;padding:0.5rem 0.25rem;font-family:var(--serif)">Bs '+parseFloat(i.Subtotal).toFixed(2)+'</td></tr>';})).join('');
+        document.getElementById('factura-preview-contenido').innerHTML=
+            '<div style="display:flex;justify-content:space-between;font-size:0.72rem;color:var(--mink);margin-bottom:1rem"><span><strong style="color:var(--espresso)">'+f.NumeroFactura+'</strong></span><span>'+fFecha(f.Fecha)+'</span></div>'+
+            '<div style="background:var(--cream);border-radius:4px;padding:0.75rem;margin-bottom:1rem;font-size:0.78rem">'+
+            '<div><strong>Cliente:</strong> '+f.NombreCliente+' '+f.ApellidoCliente+'</div>'+
+            (srvs.length>0?'<div style="margin-top:0.3rem;color:var(--mink)"><strong style="color:var(--espresso)">Atendió:</strong> '+[...new Set(srvs.filter(function(s){return s.NombreEmpleado;}).map(function(s){return s.NombreEmpleado+' '+s.ApellidoEmpleado;}))].join(', ')+'</div>':'')+
+            '</div>'+
+            '<table style="width:100%;border-collapse:collapse;font-size:0.75rem"><thead><tr style="border-bottom:1px solid var(--sand)">'+
+            '<th style="text-align:left;padding:0.4rem 0.25rem;color:var(--mink);font-size:0.62rem;text-transform:uppercase">Ítem</th>'+
+            '<th style="text-align:center;padding:0.4rem 0.25rem;color:var(--mink);font-size:0.62rem;text-transform:uppercase">Cant.</th>'+
+            '<th style="text-align:right;padding:0.4rem 0.25rem;color:var(--mink);font-size:0.62rem;text-transform:uppercase">Precio</th>'+
+            '<th style="text-align:right;padding:0.4rem 0.25rem;color:var(--mink);font-size:0.62rem;text-transform:uppercase">Total</th>'+
+            '</tr></thead><tbody>'+items+'</tbody></table>'+
+            '<div style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid var(--sand)">'+
+            '<div style="display:flex;justify-content:space-between;font-size:0.78rem;color:var(--mink);margin-bottom:0.3rem"><span>Subtotal</span><span>Bs '+subtotal.toFixed(2)+'</span></div>'+
+            (descPct>0&&descMonto>0?'<div style="display:flex;justify-content:space-between;font-size:0.78rem;color:var(--success);margin-bottom:0.3rem"><span>Descuento ('+descPct+'%)</span><span>− Bs '+descMonto.toFixed(2)+'</span></div>':'')+
+            '<div style="display:flex;justify-content:space-between;font-size:0.9rem;font-weight:500;padding-top:0.5rem;border-top:2px solid var(--espresso);margin-top:0.3rem">'+
+            '<span>TOTAL</span><span style="font-family:var(--serif);font-size:1.2rem">Bs '+parseFloat(f.Total).toFixed(2)+'</span></div></div>'+
+            '<div style="font-size:0.68rem;color:var(--mink);margin-top:0.75rem;text-align:right">'+
+            '<span class="badge '+(f.Estado==='pagada'?'badge-green':f.Estado==='anulada'?'badge-error':'badge-amber')+'">'+f.Estado+'</span> · '+(cab.MetodoPago||'—')+'</div>';
+    }catch(e){document.getElementById('factura-preview-contenido').innerHTML='<div class="empty">Error al cargar detalle</div>';}
+}
+async function pagarFactura(){if(!facturaSeleccionada)return;try{await api('/api/atencion/facturas/'+facturaSeleccionada.FacturaID+'/pagar',{method:'PUT'});alert('Factura pagada.');cargarFacturas();document.getElementById('factura-detalle').style.display='none';document.getElementById('factura-placeholder').style.display='block';}catch(e){alert('Error: '+e.message);}}
+async function pagarFacturaDirecta(id){try{await api('/api/atencion/facturas/'+id+'/pagar',{method:'PUT'});cargarFacturas();}catch(e){alert('Error: '+e.message);}}
+async function anularFactura(){if(!facturaSeleccionada||!confirm('¿Anular esta factura?'))return;try{await api('/api/atencion/facturas/'+facturaSeleccionada.FacturaID+'/anular',{method:'PUT'});alert('Factura anulada.');cargarFacturas();document.getElementById('factura-detalle').style.display='none';document.getElementById('factura-placeholder').style.display='block';}catch(e){alert('Error: '+e.message);}}
+
+// ══ SOLICITUDES ESPECIALES ═══════════════════════════
+async function cargarSolicitudes(){
+    var estado = document.getElementById('filtro-sol-estado').value;
+    try {
+        var data = await api('/api/atencion/solicitudes' + (estado ? '?estado='+estado : ''));
+        var badge = document.getElementById('badge-solicitudes');
+        var pendientes = data.filter(function(s){ return s.Estado === 'Pendiente'; }).length;
+        if (pendientes > 0) { badge.textContent = pendientes; badge.style.display = 'inline-block'; }
+        else badge.style.display = 'none';
+
+        var div = document.getElementById('tabla-solicitudes');
+        if (!data || !data.length) { div.innerHTML = '<div class="empty">No hay solicitudes</div>'; return; }
+
+        div.innerHTML = '<table class="tabla"><thead><tr>' +
+            '<th>Cliente</th><th>Teléfono</th><th>Tipo</th><th>Fecha solicitada</th><th>Motivo</th><th>Estado</th><th>Acciones</th>' +
+            '</tr></thead><tbody>' +
+            data.map(function(s){
+                var badgeCls = s.Estado==='Aprobada' ? 'badge-green' : s.Estado==='Rechazada' ? 'badge-error' : 'badge-amber';
+                var srvChips = s.NombresServicios ?
+                  '<div style="margin-top:0.3rem">' +
+                  s.NombresServicios.split(',').map(function(nom){
+                      return '<span style="font-size:0.6rem;background:var(--cream);border:1px solid var(--sand);border-radius:2px;padding:0.1rem 0.35rem;margin:1px;display:inline-block">'+nom.trim()+'</span>';
+                  }).join('') + '</div>' : '';
+                return '<tr>' +
+                    '<td style="font-weight:400">'+s.NombreCliente+' '+s.ApellidoCliente+'</td>' +
+                    '<td style="color:var(--mink)">'+s.Telefono+'</td>' +
+                    '<td><span class="badge badge-rose">'+(s.TipoSolicitud||'—')+'</span></td>' +
+                    '<td>'+fFecha(s.FechaSolicitada)+'<br><span style="font-size:0.65rem;color:var(--mink)">'+fHora(s.FechaSolicitada)+'</span>'+srvChips+'</td>' +
+                    '<td style="color:var(--mink);max-width:180px">'+(s.Motivo||'—')+'</td>' +
+                    '<td><span class="badge '+badgeCls+'">'+s.Estado+'</span>'+
+                    (s.MotivoRechazo ? '<div style="font-size:0.65rem;color:var(--error);margin-top:0.2rem">'+s.MotivoRechazo+'</div>' : '')+
+                    '</td>' +
+                    '<td><div style="display:flex;gap:4px;flex-wrap:wrap">' +
+                    (s.Estado==='Pendiente' ?
+                        '<button class="btn-sm success" onclick="abrirAprobarSolicitud('+s.SolicitudID+',\''+s.FechaSolicitada+'\')">Aprobar</button>' +
+                        '<button class="btn-sm danger" onclick="rechazarSolicitud('+s.SolicitudID+')">Rechazar</button>' :
+                        '<span style="font-size:0.72rem;color:var(--mink)">Resuelta</span>') +
+                    '</div></td></tr>';
+            }).join('') + '</tbody></table>';
+    } catch(e) { console.error(e); }
+}
+
+function abrirAprobarSolicitud(id, fechaSolicitada) {
+    var fecha = fechaSolicitada ? fechaSolicitada.substring(0,16) : '';
+    var nuevaFecha = prompt(
+        'Confirma o ajusta la fecha y hora para esta cita:\n(formato: AAAA-MM-DDTHH:MM)',
+        fecha
+    );
+    if (!nuevaFecha) return;
+    aprobarSolicitud(id, nuevaFecha);
+}
+
+async function aprobarSolicitud(id, fechaConfirmada) {
+    try {
+        await api('/api/atencion/solicitudes/'+id+'/aprobar', {
+            method: 'POST',
+            body: JSON.stringify({ fechaConfirmada: fechaConfirmada })
+        });
+        alert('Solicitud aprobada. La cita ha sido creada y el cliente ha sido notificado.');
+        cargarSolicitudes();
+        cargarPanel();
+    } catch(e) { alert('Error: '+e.message); }
+}
+
+async function rechazarSolicitud(id) {
+    var motivo = prompt('Motivo del rechazo (opcional):');
+    if (motivo === null) return; // canceló
+    try {
+        await api('/api/atencion/solicitudes/'+id+'/rechazar', {
+            method: 'POST',
+            body: JSON.stringify({ motivoRechazo: motivo || null })
+        });
+        alert('Solicitud rechazada. El cliente ha sido notificado.');
+        cargarSolicitudes();
+    } catch(e) { alert('Error: '+e.message); }
+}
+
+// ══ EXCEPCIONES ════════
+async function cargarExcepciones() {
+    try {
+        var data  = await api('/api/atencion/excepciones');
+        var badge = document.getElementById('badge-excepciones');
+        if (data && data.length) { badge.textContent = data.length; badge.style.display = 'inline-block'; }
+        else badge.style.display = 'none';
+
+        var div = document.getElementById('tabla-excepciones-rec');
+        if (!data || !data.length) { div.innerHTML = '<div class="empty">No hay solicitudes pendientes</div>'; return; }
+
+        div.innerHTML = '<table class="tabla"><thead><tr>' +
+            '<th>Empleada</th><th>Rol</th><th>Fecha</th><th>Solicitud</th><th>Motivo</th><th>Acciones</th>' +
+            '</tr></thead><tbody>' +
+            data.map(function(e) {
+                var esTurnoExtra = e.Disponible === 1 || e.Disponible === true;
+                var tipo = esTurnoExtra ? 'Turno extra' : 'Día libre';
+                var cls  = esTurnoExtra ? 'badge-green'  : 'badge-amber';
+                return '<tr>' +
+                    '<td style="font-weight:400">'+e.Nombre+' '+e.Apellido+'</td>' +
+                    '<td style="color:var(--mink)">'+e.NombreRol+'</td>' +
+                    '<td>'+fFecha(e.Fecha)+'</td>' +
+                    '<td><span class="badge '+cls+'">'+tipo+'</span></td>' +
+                    '<td style="color:var(--mink)">'+(e.Motivo||'—')+'</td>' +
+                    '<td><div style="display:flex;gap:4px">' +
+                    '<button class="btn-sm success" onclick="resolverExcepcion('+e.ExcepcionID+',true,\''+fISODate(e.Fecha)+'\','+!!esTurnoExtra+')">Aprobar</button>' +
+                    '<button class="btn-sm danger" onclick="resolverExcepcion('+e.ExcepcionID+',false,\''+fISODate(e.Fecha)+'\','+!!esTurnoExtra+')">Rechazar</button>' +
+                    '</div></td>' +
+                    '</tr>';
+            }).join('') +
+            '</tbody></table>';
+    } catch(e) { console.error(e); }
+}
+
+async function resolverExcepcion(id,aprobado,fecha,esTurnoExtra){
+    if(!confirm('¿'+(aprobado?'Aprobar':'Rechazar')+' esta solicitud?'))return;
+    try{
+        await api('/api/atencion/excepciones/'+id+'/aprobar',{method:'PUT',body:JSON.stringify({aprobado:aprobado})});
+        if(aprobado)alert('Solicitud aprobada. La empleada queda '+(esTurnoExtra?'disponible (turno extra)':'no disponible (día libre)')+' el '+fecha+'.');
+        else alert('Solicitud rechazada.');
+        cargarExcepciones();
+    }catch(e){alert('Error: '+e.message);}
+}
+
+// ══ CLIENTES ══════════
+async function cargarClientes(){try{var data=await api('/api/atencion/clientes');renderClientes(data);}catch(e){console.error(e);}}
+async function buscarClienteEnLista(val){if(val.length<2){cargarClientes();return;}try{var data=await api('/api/atencion/clientes?busqueda='+encodeURIComponent(val));renderClientes(data);}catch(e){console.error(e);}}
+function buscarClienteTopbar(val){if(val.length>=2){nav('clientes',null);setTimeout(function(){document.getElementById('busqueda-clientes').value=val;buscarClienteEnLista(val);},100);}}
+function renderClientes(data){
+    document.getElementById('lista-clientes').innerHTML=data&&data.length?data.map(function(c){
+        var ini=(c.Nombre||'').charAt(0)+(c.Apellido||'').charAt(0);
+        return'<div class="cliente-card" onclick="verDetalleCliente('+c.ClienteID+')">'+
+            '<div class="cli-avatar" style="background:'+COLORES[c.ClienteID%COLORES.length]+'">'+ini.toUpperCase()+'</div>'+
+            '<div style="flex:1"><div style="font-size:0.88rem;font-weight:400">'+c.Nombre+' '+c.Apellido+'</div>'+
+            '<div style="font-size:0.68rem;color:var(--mink)">'+c.Telefono+' · '+(c.TotalVisitas||0)+' visitas</div>'+
+            '<div style="margin-top:0.3rem">'+(c.Alergias?'<span class="badge badge-error">⚠ Alergia</span>':'')+'</div></div></div>';
+    }).join(''):'<div class="empty">No se encontraron clientes</div>';
+}
+async function verDetalleCliente(id){
+    document.getElementById('detalle-cliente-placeholder').style.display='none';
+    document.getElementById('detalle-cliente').style.display='block';
+    try{
+        var data=await api('/api/atencion/clientes/'+id);
+        var c=data.cliente||{},hist=data.historial||[];
+        var ini=(c.Nombre||'').charAt(0)+(c.Apellido||'').charAt(0);
+        document.getElementById('detalle-cliente-contenido').innerHTML=
+            '<div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem">'+
+            '<div style="width:60px;height:60px;border-radius:50%;background:'+COLORES[id%COLORES.length]+';display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:1.4rem;color:white">'+ini.toUpperCase()+'</div>'+
+            '<div><div style="font-family:var(--serif);font-size:1.3rem;font-weight:300">'+c.Nombre+' '+c.Apellido+'</div>'+
+            '<div style="font-size:0.72rem;color:var(--mink)">'+c.Telefono+'</div>'+
+            '<div style="display:flex;gap:0.5rem;margin-top:0.5rem"><button class="btn-sm solid" onclick="abrirNuevaCita()">+ Cita</button><button class="btn-sm outline" onclick="nav(\'cobro\',null)">Cobrar</button></div></div></div>'+
+            (c.Alergias?'<div style="background:var(--blush);border-left:3px solid var(--rose-deep);border-radius:4px;padding:1rem;margin-bottom:1rem"><div style="font-size:0.68rem;font-weight:500;text-transform:uppercase;color:var(--rose-dark);margin-bottom:0.3rem">⚠ Alertas médicas</div><div style="font-size:0.75rem"><strong>Alergias:</strong> '+c.Alergias+'</div></div>':'')+
+            (c.NotasTecnicas?'<div style="background:var(--cream);border-radius:4px;padding:1rem;margin-bottom:1rem"><div style="font-size:0.62rem;text-transform:uppercase;color:var(--mink);margin-bottom:0.3rem">Notas técnicas</div><div style="font-size:0.75rem">'+c.NotasTecnicas+'</div></div>':'')+
+            '<div style="font-size:0.62rem;text-transform:uppercase;color:var(--mink);margin-bottom:0.5rem">Últimas citas</div>'+
+            (hist.length?'<table class="tabla"><thead><tr><th>Fecha</th><th>Servicio</th><th>Personal</th></tr></thead><tbody>'+hist.map(function(h){return'<tr><td>'+fFecha(h.FechaInicio)+'</td><td>'+h.Servicio+'</td><td>'+h.Empleado+'</td></tr>';}).join('')+'</tbody></table>':'<div class="empty" style="padding:1rem">Sin historial</div>');
+    }catch(e){console.error(e);}
+}
+async function registrarCliente(){
+    var nombre=document.getElementById('nc-nombre').value,apellido=document.getElementById('nc-apellido').value;
+    var telefono=document.getElementById('nc-telefono').value,email=document.getElementById('nc-email').value;
+    if(!nombre||!apellido||!telefono||!email){alert('Completa los campos obligatorios.');return;}
+    try{
+        var res=await api('/api/atencion/clientes',{method:'POST',body:JSON.stringify({nombre:nombre,apellido:apellido,telefono:telefono,email:email,alergias:document.getElementById('nc-alergias').value||null,contraindicaciones:document.getElementById('nc-contraindicaciones').value||null,notasTecnicas:document.getElementById('nc-notas').value||null})});
+        alert('Cliente registrado.\n\nContraseña temporal: '+res.contrasenaTemp);
+        ['nc-nombre','nc-apellido','nc-telefono','nc-email','nc-alergias','nc-contraindicaciones','nc-notas'].forEach(function(id){document.getElementById(id).value='';});
+        nav('clientes',null);
+    }catch(e){alert('Error: '+e.message);}
+}
+
+// ══ PERFIL ═════════════
+async function cargarPerfil(){
+    try{
+        var raw=await api('/api/atencion/perfil'),d=Array.isArray(raw)?raw[0]:raw;
+        if(!d)return;
+        document.getElementById('perfil-avatar').textContent=(d.Nombre||'?').charAt(0).toUpperCase();
+        document.getElementById('perfil-nombre-display').textContent=(d.Nombre||'')+' '+(d.Apellido||'');
+        document.getElementById('perfil-email-display').textContent=d.Email||'';
+        document.getElementById('p-nombre').value=d.Nombre||'';document.getElementById('p-apellido').value=d.Apellido||'';
+        document.getElementById('p-telefono').value=d.Telefono||'';document.getElementById('p-email').value=d.Email||'';
+        document.getElementById('p-nacimiento').value=fISODate(d.FechaNacimiento);
+    }catch(e){console.error(e);}
+}
+async function guardarPerfil(){
+    try{
+        await api('/api/atencion/perfil',{method:'PUT',body:JSON.stringify({nombre:document.getElementById('p-nombre').value,apellido:document.getElementById('p-apellido').value,telefono:document.getElementById('p-telefono').value,email:document.getElementById('p-email').value,fechaNacimiento:document.getElementById('p-nacimiento').value||null})});
+        alert('Perfil actualizado.');cargarPerfil();
+    }catch(e){alert('Error: '+e.message);}
+}
+
+// ══ NOTIFICACIONES ═════
+async function cargarNotificaciones(){
+    try{
+        var data=await api('/api/atencion/notificaciones');
+        var div=document.getElementById('lista-notificaciones');
+        if(!data||!data.length){div.innerHTML='<div class="empty">Sin notificaciones</div>';return;}
+        var noLeidas=data.filter(function(n){return!n.Leido;}).length;
+        var badge=document.getElementById('badge-notif');
+        if(noLeidas>0){badge.textContent=noLeidas;badge.style.display='inline-block';}else badge.style.display='none';
+        div.innerHTML=data.map(function(n){return'<div class="notif-item '+(n.Leido?'leida':'')+'" onclick="marcarLeida('+n.NotificacionID+',this)"><div class="notif-dot '+(n.Leido?'gray':'rose')+'"></div><div style="flex:1"><div style="font-size:0.82rem;font-weight:400">'+n.TipoNotificacion+'</div><div style="font-size:0.75rem;color:var(--mink)">'+n.Mensaje+'</div><div style="font-size:0.65rem;color:var(--sand);margin-top:0.2rem">'+fFecha(n.Fecha)+' · '+fHora(n.Fecha)+'</div></div></div>';}).join('');
+    }catch(e){console.error(e);}
+}
+async function marcarLeida(id,el){if(el.classList.contains('leida'))return;try{await api('/api/atencion/notificaciones/'+id+'/leer',{method:'PUT'});el.classList.add('leida');el.querySelector('.notif-dot').className='notif-dot gray';}catch(e){console.error(e);}}
+
+cargarPanel();
+cargarExcepciones();
+cargarSolicitudes();
+</script>
+</body>
+</html>
