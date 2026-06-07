@@ -28,11 +28,11 @@ router.get('/agenda', verificarToken, async (req, res) => {
             .input('EmpleadoID', sql.Int, req.usuario.personaID)
             .execute('Agenda.SP_AgendaDelDia');
         res.json({
-            estadisticas: result.recordsets[0][0] || {},
-            timeline:     result.recordsets[1]    || [],
-            semana:       result.recordsets[2][0] || {},
-            semanaGrid:   result.recordsets[3]    || []
-        });
+    estadisticas: (result.recordsets[0] && result.recordsets[0][0]) || {},
+    timeline:     result.recordsets[1]    || [],
+    semana:       (result.recordsets[2] && result.recordsets[2][0]) || {},
+    semanaGrid:   result.recordsets[3]    || []
+});
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -104,7 +104,7 @@ router.get('/clientes', verificarToken, async (req, res) => {
         res.json({
             clientes:     result.recordsets[0] || [],
             distribucion: result.recordsets[1] || [],
-            retencion:    result.recordsets[2][0] || {}
+            retencion:    (result.recordsets[2] && result.recordsets[2][0]) || {}
         });
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -143,6 +143,7 @@ router.put('/clientes/:id/notas', verificarToken, async (req, res) => {
 
 // ══ 7. COMPLETAR CITA ═════════════════════════════════
 // PUT /api/personal/citas/:id/completar
+
 router.put('/citas/:id/completar', verificarToken, async (req, res) => {
     try {
         const pool   = await poolPromise;
@@ -150,9 +151,47 @@ router.put('/citas/:id/completar', verificarToken, async (req, res) => {
             .input('CitaID',     sql.Int, parseInt(req.params.id))
             .input('EmpleadoID', sql.Int, req.usuario.personaID)
             .execute('Agenda.SP_CompletarCita');
+
+        try {
+            const { getMongo } = require('../mongodb');
+            const db = getMongo();
+            const cita = result.recordset[0];
+            if (cita) {
+                await db.collection('historial_clientes').updateOne(
+                    { clienteId: cita.ClienteID },
+                    {
+                        $set: {
+                            clienteId:         cita.ClienteID,
+                            nombre:            cita.NombreCliente || '',
+                            apellido:          cita.ApellidoCliente || '',
+                            email:             cita.EmailCliente || '',
+                            sucursal:          'Cochabamba',
+                            fechaUltimaVisita: new Date()
+                        },
+                        $inc: { totalVisitas: 1, totalGastado: parseFloat(cita.Total || 0) },
+                        $push: {
+                            historial: {
+                                fecha:               new Date(),
+                                servicio:            cita.Servicio || '',
+                                empleado:            cita.NombreEmpleado || '',
+                                duracionMin:         cita.DuracionMin || 0,
+                                precio:              parseFloat(cita.Total || 0),
+                                productosUsados:     [],
+                                notasTecnicas:       cita.NotasTecnicas || '',
+                                reaccionesAlergicas: [],
+                                satisfaccion:        null
+                            }
+                        }
+                    },
+                    { upsert: true }
+                );
+            }
+        } catch(mongoErr) { console.error('MongoDB historial:', mongoErr.message); }
+
         res.json(result.recordset[0]);
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
+
 
 // ══ 8. SUELDO Y COMISIONES ════════════════════════════
 // GET /api/personal/sueldo

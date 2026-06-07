@@ -338,7 +338,7 @@ body { font-family:var(--sans); background:var(--cream); color:var(--espresso); 
           <div class="factura-preview" id="factura-detalle" style="display:none">
             <div style="text-align:center;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--sand)">
               <div style="font-family:var(--serif);font-size:1.6rem;font-weight:300;color:var(--espresso)">COCO</div>
-              <div style="font-size:0.68rem;color:var(--mink)">Salón de Belleza · Santa Cruz, Bolivia</div>
+              <div style="font-size:0.68rem;color:var(--mink)">Salón de Belleza · Cochabamba, Bolivia</div>
             </div>
             <div id="factura-preview-contenido"></div>
             <div style="display:flex;gap:0.5rem;margin-top:1.25rem">
@@ -1169,22 +1169,38 @@ async function cargarSolicitudes(){
     } catch(e) { console.error(e); }
 }
 
-function abrirAprobarSolicitud(id, fechaSolicitada) {
-    var fecha = fechaSolicitada ? fechaSolicitada.substring(0,16) : '';
-    var nuevaFecha = prompt(
-        'Confirma o ajusta la fecha y hora para esta cita:\n(formato: AAAA-MM-DDTHH:MM)',
-        fecha
-    );
-    if (!nuevaFecha) return;
-    aprobarSolicitud(id, nuevaFecha);
+var _solID = null, _solFecha = null;
+
+async function abrirAprobarSolicitud(id, fechaSolicitada) {
+    _solID    = id;
+    _solFecha = fechaSolicitada ? fechaSolicitada.substring(0,16) : '';
+    try {
+        var empData = await api('/api/atencion/panel');
+        var emps    = empData.disponibilidad || [];
+        var optsEmp = '<option value="">Asignación automática</option>' +
+            emps.map(function(e){
+                return '<option value="'+e.EmpleadoID+'">'+e.Nombre+' '+e.Apellido+
+                    ' ('+( e.EstadoActual==='Libre'?'Libre':'Ocupada')+')</option>';
+            }).join('');
+        document.getElementById('sol-empleado-select').innerHTML = optsEmp;
+        document.getElementById('sol-fecha-input').value = _solFecha;
+        abrirModal('modal-aprobar-solicitud');
+    } catch(e) { console.error(e); }
 }
 
-async function aprobarSolicitud(id, fechaConfirmada) {
+async function aprobarSolicitud() {
+    var fechaConfirmada = document.getElementById('sol-fecha-input').value;
+    var empleadoID      = document.getElementById('sol-empleado-select').value;
+    if (!fechaConfirmada) { alert('Ingresa la fecha y hora.'); return; }
     try {
-        await api('/api/atencion/solicitudes/'+id+'/aprobar', {
+        await api('/api/atencion/solicitudes/'+_solID+'/aprobar', {
             method: 'POST',
-            body: JSON.stringify({ fechaConfirmada: fechaConfirmada })
+            body: JSON.stringify({
+                fechaConfirmada: fechaConfirmada,
+                empleadoID: empleadoID ? parseInt(empleadoID) : null
+            })
         });
+        cerrarModal('modal-aprobar-solicitud');
         alert('Solicitud aprobada. La cita ha sido creada y el cliente ha sido notificado.');
         cargarSolicitudes();
         cargarPanel();
@@ -1331,5 +1347,24 @@ cargarPanel();
 cargarExcepciones();
 cargarSolicitudes();
 </script>
+<div class="modal-overlay" id="modal-aprobar-solicitud">
+  <div class="modal-box">
+    <div class="modal-title">Aprobar solicitud especial</div>
+    <div class="form-grid">
+      <div class="form-field full">
+        <label>Fecha y hora confirmada *</label>
+        <input type="datetime-local" id="sol-fecha-input">
+      </div>
+      <div class="form-field full">
+        <label>Asignar empleada</label>
+        <select id="sol-empleado-select"></select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="aprobarSolicitud()">Confirmar aprobación</button>
+      <button class="btn-secondary" onclick="cerrarModal('modal-aprobar-solicitud')">Cancelar</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>

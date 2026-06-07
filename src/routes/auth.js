@@ -90,6 +90,7 @@ router.post('/login', async (req, res) => {
     );
 
     const rutas = {
+
       'Dueño/a':            '/pages/dashboard-duena.html',
       'Administrador':      '/pages/dashboard-admin.html',
       'Cliente':            '/pages/dashboard-cliente.html',
@@ -160,6 +161,21 @@ router.post('/elegir-rol', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+
+    // Log de auditoría en MongoDB
+    try {
+        const { getMongo } = require('../mongodb');
+        const db = getMongo();
+        await db.collection('logs_auditoria').insertOne({
+            fecha:    new Date(),
+            accion:   'login',
+            usuario:  email,
+            rol:      rolPrincipal,
+            sucursal: 'Cochabamba',
+            ip:       req.headers['x-forwarded-for'] || req.socket.remoteAddress,
+            detalle:  'Inicio de sesión exitoso'
+        });
+    } catch(mongoErr) { console.error('MongoDB log:', mongoErr.message); }
 
     // Un solo rol → redirigir directo
     res.json({

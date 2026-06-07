@@ -25,12 +25,18 @@ app.use('/api/atencion', atencionRoutes);
 const adminRoutes = require('./src/routes/admin');
 app.use('/api/admin', adminRoutes);
 
+const mongoRoutes = require('./src/routes/mongo');
+app.use('/api/mongo', mongoRoutes);
+
 const duenaRoutes = require('./src/routes/duena');
 app.use('/api/duena', duenaRoutes);
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'coco-auth.html'));
 });
+
+const { connectMongo } = require('./src/mongodb');
+connectMongo().catch(err => console.error('❌ MongoDB:', err.message));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {

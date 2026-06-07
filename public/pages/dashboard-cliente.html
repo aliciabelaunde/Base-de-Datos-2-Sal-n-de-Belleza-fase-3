@@ -242,6 +242,15 @@ body { font-family: var(--sans); background: var(--cream); color: var(--espresso
       <svg viewBox="0 0 24 24"><polyline points="21 15 21 21 15 21"/><path d="M21 21L9 9"/><polyline points="3 9 3 3 9 3"/></svg>
       <span>Promociones</span>
     </div>
+    <div class="nav-group-label">Mi experiencia</div>
+    <div class="nav-item" onclick="nav('resenas',this)">
+      <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      <span>Mis reseñas</span>
+    </div>
+    <div class="nav-item" onclick="nav('preferencias',this)">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      <span>Mis preferencias</span>
+    </div>
     <div class="nav-item" onclick="nav('notificaciones',this)">
       <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
       <span>Notificaciones</span>
@@ -472,7 +481,7 @@ body { font-family: var(--sans); background: var(--cream); color: var(--espresso
           <div class="factura-preview" id="factura-detalle" style="display:none">
             <div style="text-align:center;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:1px solid var(--sand)">
               <div style="font-family:var(--serif);font-size:1.6rem;font-weight:300;color:var(--espresso)">COCO</div>
-              <div style="font-size:0.68rem;color:var(--mink)">Salón de Belleza · Santa Cruz, Bolivia</div>
+              <div style="font-size:0.68rem;color:var(--mink)">Salón de Belleza · Cochabamba, Bolivia</div>
             </div>
             <div id="factura-preview-contenido"></div>
           </div>
@@ -533,6 +542,75 @@ body { font-family: var(--sans); background: var(--cream); color: var(--espresso
         <div class="loading">Cargando...</div>
       </div>
     </div>
+
+<!-- RESEÑAS -->
+<div class="section" id="sec-resenas">
+  <div class="section-header"><h2>Mis <em style="font-style:italic;color:var(--rose-deep)">reseñas</em></h2><p>Califica los servicios recibidos</p></div>
+  <div class="card">
+    <div class="card-title">Nueva reseña</div>
+    <div class="form-grid">
+      <div class="form-field full">
+        <label>Servicio *</label>
+        <input type="text" id="res-servicio" placeholder="Ej: Corte de cabello">
+      </div>
+      <div class="form-field full">
+        <label>Calificación *</label>
+        <div id="res-estrellas" style="display:flex;gap:0.5rem;margin-top:0.5rem">
+          <span onclick="setEstrellas(1)" style="font-size:1.8rem;cursor:pointer;color:var(--sand)">★</span>
+          <span onclick="setEstrellas(2)" style="font-size:1.8rem;cursor:pointer;color:var(--sand)">★</span>
+          <span onclick="setEstrellas(3)" style="font-size:1.8rem;cursor:pointer;color:var(--sand)">★</span>
+          <span onclick="setEstrellas(4)" style="font-size:1.8rem;cursor:pointer;color:var(--sand)">★</span>
+          <span onclick="setEstrellas(5)" style="font-size:1.8rem;cursor:pointer;color:var(--sand)">★</span>
+        </div>
+      </div>
+      <div class="form-field full">
+        <label>Comentario</label>
+        <textarea id="res-comentario" rows="3" placeholder="Cuéntanos tu experiencia..."></textarea>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-primary" onclick="enviarResena()">Enviar reseña</button>
+    </div>
+  </div>
+  <div class="card" style="margin-top:1.25rem">
+    <div class="card-title">Mis reseñas anteriores</div>
+    <div id="lista-resenas"><div class="loading">Cargando...</div></div>
+  </div>
+</div>
+
+<!-- PREFERENCIAS -->
+<div class="section" id="sec-preferencias">
+  <div class="section-header"><h2>Mis <em style="font-style:italic;color:var(--rose-deep)">preferencias</em></h2><p>Personaliza tu experiencia en COCO</p></div>
+  <div class="card">
+    <div class="card-title">Configurar preferencias</div>
+    <div class="form-grid">
+      <div class="form-field">
+        <label>Estilista favorita</label>
+        <input type="text" id="pref-estilista" placeholder="Nombre de tu estilista favorita">
+      </div>
+      <div class="form-field">
+        <label>Horario preferido</label>
+        <select id="pref-horario">
+          <option value="">Seleccionar...</option>
+          <option value="mañana">Mañana (9:00 - 12:00)</option>
+          <option value="mediodia">Mediodía (12:00 - 15:00)</option>
+          <option value="tarde">Tarde (15:00 - 19:00)</option>
+        </select>
+      </div>
+      <div class="form-field full">
+        <label>Servicios frecuentes</label>
+        <input type="text" id="pref-servicios" placeholder="Ej: Corte, tinte, manicure">
+      </div>
+      <div class="form-field full">
+        <label>Notas adicionales</label>
+        <textarea id="pref-notas" rows="2" placeholder="Alergias, preferencias especiales..."></textarea>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-primary" onclick="guardarPreferencias()">Guardar preferencias</button>
+    </div>
+  </div>
+</div>
 
     <!-- ═══ NOTIFICACIONES ═══ -->
     <div class="section" id="sec-notificaciones">
@@ -620,7 +698,7 @@ var DIAS  = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado
 var MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 document.getElementById('topbar-sub').textContent = DIAS[hoy.getDay()] + ', ' + hoy.getDate() + ' de ' + MESES[hoy.getMonth()] + ' de ' + hoy.getFullYear();
 
-var manana = new Date(); manana.setDate(manana.getDate() + 1);
+var manana = new Date();
 var rfecha = document.getElementById('r-fecha');
 if (rfecha) rfecha.min = manana.toISOString().split('T')[0];
 
@@ -659,10 +737,12 @@ function badgeEstado(e) {
 }
 
 // ── NAVEGACIÓN ────────────────────────────────────────
+
 var SECS = {
     inicio:'Inicio', perfil:'Mi perfil', reservar:'Reservar cita',
     citas:'Mis citas', compras:'Mis compras', facturas:'Mis facturas',
     pagos:'Mis pagos', catalogo:'Catálogo', promociones:'Promociones',
+    resenas:'Mis reseñas', preferencias:'Mis preferencias',
     notificaciones:'Notificaciones'
 };
 
@@ -680,6 +760,7 @@ function nav(id, el) {
         inicio:cargarInicio, perfil:cargarPerfil, reservar:iniciarWizard,
         citas:cargarCitas, compras:cargarCompras, facturas:cargarFacturas,
         pagos:cargarPagos, catalogo:cargarCatalogo, promociones:cargarPromociones,
+        resenas:cargarResenas, preferencias:cargarPreferencias,
         notificaciones:cargarNotificaciones
     };
     if (fns[id]) fns[id]();
@@ -1486,6 +1567,92 @@ async function cargarPromociones() {
         div.innerHTML = '<div class="empty" style="grid-column:1/-1">Error al cargar promociones</div>';
         console.error(e);
     }
+}
+
+// ── RESEÑAS ───────────────────────────────────────────
+var _calificacion = 0;
+function setEstrellas(n) {
+    _calificacion = n;
+    var estrellas = document.getElementById('res-estrellas').children;
+    for (var i = 0; i < 5; i++) {
+        estrellas[i].style.color = i < n ? 'var(--warning)' : 'var(--sand)';
+    }
+}
+async function enviarResena() {
+    var servicio      = document.getElementById('res-servicio').value;
+    var comentario    = document.getElementById('res-comentario').value;
+    var personaID     = localStorage.getItem('personaID') || '';
+    var nombreCliente = ((localStorage.getItem('nombre') || '') + ' ' + (localStorage.getItem('apellido') || '')).trim();
+    if (!servicio)      { alert('Ingresa el servicio.'); return; }
+    if (!_calificacion) { alert('Selecciona una calificación.'); return; }
+    try {
+        await api('/api/mongo/resenas', { method:'POST', body: JSON.stringify({
+            nombreCliente: nombreCliente,
+            personaID:     personaID,
+            servicio:      servicio,
+            calificacion:  _calificacion,
+            comentario:    comentario || '',
+            sucursal:      'Cochabamba',
+            fecha:         new Date()
+        })});
+        alert('¡Gracias por tu reseña!');
+        document.getElementById('res-servicio').value   = '';
+        document.getElementById('res-comentario').value = '';
+        setEstrellas(0);
+        cargarResenas();
+    } catch(e) { alert('Error: ' + e.message); }
+}
+async function cargarResenas() {
+    try {
+        var personaID = localStorage.getItem('personaID') || '';
+        var data      = await api('/api/mongo/resenas');
+        var mias      = data.filter(function(r){ return r.personaID === personaID; });
+        var div       = document.getElementById('lista-resenas');
+        if (!mias.length) { div.innerHTML = '<div class="empty">Aún no has dejado reseñas</div>'; return; }
+        div.innerHTML = mias.map(function(r){
+            var estrellas = '';
+            for(var i=1;i<=5;i++) estrellas += i<=(r.calificacion||0)?'★':'☆';
+            return '<div style="padding:0.75rem 0;border-bottom:1px solid var(--sand)">' +
+                '<div style="display:flex;justify-content:space-between;margin-bottom:0.3rem">' +
+                '<span style="font-weight:400">' + (r.servicio||'—') + '</span>' +
+                '<span style="color:var(--warning)">' + estrellas + '</span>' +
+                '</div>' +
+                '<div style="font-size:0.75rem;color:var(--mink)">' + (r.comentario||'') + '</div>' +
+                '<div style="font-size:0.65rem;color:var(--sand);margin-top:0.2rem">' + fFecha(r.fecha) + '</div>' +
+                '</div>';
+        }).join('');
+    } catch(e) { console.error(e); }
+}
+
+// ── PREFERENCIAS ──────────────────────────────────────
+async function cargarPreferencias() {
+    var personaID = localStorage.getItem('personaID') || '';
+    if (!personaID) return;
+    try {
+        var data = await api('/api/mongo/preferencias/' + encodeURIComponent(personaID));
+        if (data && data.personaID) {
+            document.getElementById('pref-estilista').value  = data.estilistaFavorita    || '';
+            document.getElementById('pref-horario').value    = data.horarioPreferido     || '';
+            document.getElementById('pref-servicios').value  = data.serviciosFrecuentes  || '';
+            document.getElementById('pref-notas').value      = data.notas                || '';
+        }
+    } catch(e) { console.error(e); }
+}
+async function guardarPreferencias() {
+    var personaID = localStorage.getItem('personaID') || '';
+    if (!personaID) { alert('Inicia sesión nuevamente.'); return; }
+    try {
+        await api('/api/mongo/preferencias', { method:'POST', body: JSON.stringify({
+            personaID:           personaID,
+            nombreCliente:       ((localStorage.getItem('nombre') || '') + ' ' + (localStorage.getItem('apellido') || '')).trim(),
+            estilistaFavorita:   document.getElementById('pref-estilista').value  || '',
+            horarioPreferido:    document.getElementById('pref-horario').value    || '',
+            serviciosFrecuentes: document.getElementById('pref-servicios').value  || '',
+            notas:               document.getElementById('pref-notas').value      || '',
+            sucursal:            'Cochabamba'
+        })});
+        alert('Preferencias guardadas.');
+    } catch(e) { alert('Error: ' + e.message); }
 }
 
 // ── NOTIFICACIONES ────────────────────────────────────

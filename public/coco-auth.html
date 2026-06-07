@@ -591,7 +591,7 @@
 
     <div class="divider-line"><div class="diamond"></div></div>
 
-    <p class="panel-sub" style="font-size:0.65rem; opacity:0.7;">Santa Cruz · Bolivia</p>
+    <p class="panel-sub" style="font-size:0.65rem; opacity:0.7;">Cochabamba · Bolivia</p>
   </div>
 </div>
 
@@ -801,6 +801,7 @@
     } else {
       localStorage.setItem('token',     data.token);
       localStorage.setItem('nombre',    data.nombre);
+      localStorage.setItem('apellido',  data.apellido || '');
       localStorage.setItem('rol',       data.rol);
       localStorage.setItem('personaID', data.personaID);
       window.location.href = data.ruta;

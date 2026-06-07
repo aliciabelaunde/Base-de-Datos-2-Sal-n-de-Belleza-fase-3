@@ -1,9 +1,8 @@
 const sql = require('mssql');
 require('dotenv').config();
-
 const config = {
-  server:   'localhost',
-  database: 'SalonBelleza_DB',
+  server:   process.env.DB_SERVER,
+  database: process.env.DB_DATABASE,
   user:     process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   options: {
@@ -12,7 +11,6 @@ const config = {
     enableArithAbort:       true
   }
 };
-
 const poolPromise = new sql.ConnectionPool(config)
   .connect()
   .then(pool => {
@@ -23,5 +21,4 @@ const poolPromise = new sql.ConnectionPool(config)
     console.error('❌ Error de conexión:', err.message);
     process.exit(1);
   });
-
 module.exports = { sql, poolPromise };
