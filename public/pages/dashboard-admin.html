@@ -201,6 +201,19 @@ body { font-family:var(--sans); background:var(--cream); color:var(--espresso); 
       <svg viewBox="0 0 24 24"><polyline points="21 15 21 21 15 21"/><path d="M21 21L9 9"/><polyline points="3 9 3 3 9 3"/></svg>
       <span>Promociones</span>
     </div>
+    <div class="nav-group-label">Experiencia del cliente</div>
+<div class="nav-item" onclick="nav('historial',this)">
+  <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+  <span>Historial clientes</span>
+</div>
+<div class="nav-item" onclick="nav('resenas',this)">
+  <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+  <span>Reseñas</span>
+</div>
+<div class="nav-item" onclick="nav('preferencias',this)">
+  <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+  <span>Preferencias</span>
+</div>
     <div class="nav-group-label">Personal</div>
     <div class="nav-item" onclick="nav('perfil',this)">
       <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -374,6 +387,48 @@ body { font-family:var(--sans); background:var(--cream); color:var(--espresso); 
       </div>
       <div class="card"><div class="tabla-scroll" id="tabla-promociones"><div class="loading">Cargando...</div></div></div>
     </div>
+
+    <!-- HISTORIAL CLIENTES -->
+<div class="section" id="sec-historial">
+  <div class="section-header"><h2>Historial <em style="font-style:italic;color:var(--rose-deep)">clientes</em></h2><p>Historial de visitas de los clientes</p></div>
+  <div class="toolbar">
+    <div class="search-box"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="hist-buscar" placeholder="Buscar por nombre o email..." oninput="filtrarHistorial()"></div>
+    <span class="results-count" id="hist-count"></span>
+  </div>
+  <div class="card"><div class="tabla-scroll" id="tabla-historial"><div class="loading">Cargando...</div></div></div>
+</div>
+
+<!-- RESEÑAS -->
+<div class="section" id="sec-resenas">
+  <div class="section-header"><h2>Reseñas <em style="font-style:italic;color:var(--rose-deep)">y calificaciones</em></h2><p>Opiniones de clientes</p></div>
+  <div class="card"><div class="tabla-scroll" id="tabla-resenas"><div class="loading">Cargando...</div></div></div>
+</div>
+
+
+<!-- Modal responder reseña -->
+<div class="modal-overlay" id="modal-responder-resena">
+  <div class="modal-box">
+    <div class="modal-title">Responder reseña</div>
+    <div class="form-field full">
+      <label>Respuesta *</label>
+      <textarea id="modal-respuesta-texto" rows="4" placeholder="Escribe tu respuesta al cliente..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="enviarRespuestaResena()">Enviar respuesta</button>
+      <button class="btn-secondary" onclick="cerrarModal('modal-responder-resena')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- PREFERENCIAS -->
+<div class="section" id="sec-preferencias">
+  <div class="section-header"><h2>Preferencias <em style="font-style:italic;color:var(--rose-deep)">clientes</em></h2><p>Favoritos de nuestras clientas</p></div>
+  <div class="toolbar">
+    <div class="search-box"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="pref-buscar" placeholder="Buscar cliente..." oninput="filtrarPreferencias()"></div>
+    <span class="results-count" id="pref-count"></span>
+  </div>
+  <div class="card"><div class="tabla-scroll" id="tabla-preferencias"><div class="loading">Cargando...</div></div></div>
+</div>
 
     <!-- MI PERFIL -->
     <div class="section" id="sec-perfil">
@@ -622,10 +677,19 @@ function buscar(arr, q, campos) {
 }
 
 var SECCIONES = {
-    panel:'Panel general', reportes:'Reportes', empleados:'Empleados',
-    nomina:'Nómina', servicios:'Servicios', inventario:'Inventario',
-    proveedores:'Proveedores', promociones:'Promociones',
-    perfil:'Mi perfil', notificaciones:'Notificaciones'
+    panel:'Panel general',
+    reportes:'Reportes',
+    empleados:'Empleados',
+    nomina:'Nómina',
+    servicios:'Servicios',
+    inventario:'Inventario',
+    proveedores:'Proveedores',
+    promociones:'Promociones',
+    historial:'Historial clientes',
+    resenas:'Reseñas',
+    preferencias:'Preferencias clientes',
+    perfil:'Mi perfil',
+    notificaciones:'Notificaciones'
 };
 
 function nav(id, el) {
@@ -640,6 +704,7 @@ function nav(id, el) {
     var fns = { panel:cargarPanel, reportes:function(){}, empleados:cargarEmpleados,
         nomina:cargarNomina, servicios:cargarServicios, inventario:cargarInventario,
         proveedores:cargarProveedores, promociones:cargarPromociones,
+        historial:cargarHistorial, resenas:cargarResenas, preferencias:cargarPreferencias,
         perfil:cargarPerfil, notificaciones:cargarNotificaciones };
     if (fns[id]) fns[id]();
 }
@@ -1228,6 +1293,109 @@ async function guardarPromocion() {
         }
         cerrarModal('modal-promo'); await cargarPromociones();
     } catch(e){ alert('Error: '+e.message); }
+}
+
+// ══ MONGODB — HISTORIAL ═══════════════════════════════
+var _historialData = [];
+async function cargarHistorial() {
+    try {
+        _historialData = await api('/api/mongo/historial');
+        filtrarHistorial();
+    } catch(e) { console.error(e); }
+}
+function filtrarHistorial() {
+    var q = (document.getElementById('hist-buscar').value || '').toLowerCase();
+    var data = _historialData.filter(function(c){
+        return !q || (c.nombre + ' ' + c.apellido + ' ' + (c.email||'')).toLowerCase().includes(q);
+    });
+    document.getElementById('hist-count').textContent = data.length + ' cliente' + (data.length !== 1 ? 's' : '');
+    document.getElementById('tabla-historial').innerHTML = data.length ?
+        '<table class="tabla"><thead><tr><th>Cliente</th><th>Sucursal</th><th>Visitas</th><th>Total gastado</th><th>Última visita</th></tr></thead><tbody>' +
+        data.map(function(c){
+            var ultima = c.historial && c.historial.length ? c.historial[c.historial.length - 1] : null;
+            return '<tr>' +
+                '<td style="font-weight:400">' + (c.nombre||'') + ' ' + (c.apellido||'') + '</td>' +
+                '<td><span class="badge ' + (c.sucursal==='Cochabamba'?'badge-amber':'badge-green') + '">' + (c.sucursal||'—') + '</span></td>' +
+                '<td>' + (c.totalVisitas||0) + '</td>' +
+                '<td style="font-family:var(--serif)">Bs ' + parseFloat(c.totalGastado||0).toFixed(2) + '</td>' +
+                '<td>' + (c.fechaUltimaVisita ? fFecha(c.fechaUltimaVisita) : '—') + '</td>' +
+                
+                '</tr>';
+        }).join('') + '</tbody></table>' : '<div class="empty">Sin datos — completa una cita para ver el historial</div>';
+}
+
+// ══ MONGODB — RESEÑAS ═════════════════════════════════
+var _resenasAdmin = [];
+async function cargarResenas() {
+    try {
+        _resenasAdmin = await api('/api/mongo/resenas');
+        renderResenas();
+    } catch(e) { console.error(e); }
+}
+function renderResenas() {
+    var data = _resenasAdmin;
+    document.getElementById('tabla-resenas').innerHTML = data.length ?
+        '<table class="tabla"><thead><tr><th>Fecha</th><th>Cliente</th><th>Servicio</th><th>Calificación</th><th>Comentario</th><th>Respuesta</th><th>Acción</th></tr></thead><tbody>' +
+        data.map(function(r){
+            var estrellas = '';
+            for(var i=1;i<=5;i++) estrellas += i<=(r.calificacion||0)?'★':'☆';
+            return '<tr>' +
+                '<td style="font-size:0.7rem;color:var(--mink)">' + fFecha(r.fecha) + '</td>' +
+                '<td style="font-weight:400">' + (r.nombreCliente||'—') + '</td>' +
+                '<td>' + (r.servicio||'—') + '</td>' +
+                '<td style="color:var(--warning);font-size:1rem">' + estrellas + '</td>' +
+                '<td style="color:var(--mink)">' + (r.comentario||'—') + '</td>' +
+                '<td style="color:var(--success);font-size:0.72rem">' + (r.respuesta || '<span style="color:var(--sand)">Sin respuesta</span>') + '</td>' +
+                '<td><button class="btn-sm solid" onclick="abrirResponderResena(\'' + r._id + '\',\'' + (r.respuesta||'').replace(/'/g,"\\'") + '\')">Responder</button></td>' +
+                '</tr>';
+        }).join('') + '</tbody></table>' : '<div class="empty">Sin reseñas aún</div>';
+}
+
+var _resenaIDActual = null;
+function abrirResponderResena(id, respuestaActual) {
+    _resenaIDActual = id;
+    document.getElementById('modal-respuesta-texto').value = respuestaActual || '';
+    abrirModal('modal-responder-resena');
+}
+async function enviarRespuestaResena() {
+    var texto = document.getElementById('modal-respuesta-texto').value;
+    if (!texto) { alert('Escribe una respuesta.'); return; }
+    try {
+        await api('/api/mongo/resenas/' + _resenaIDActual + '/responder', {
+            method: 'PUT',
+            body: JSON.stringify({ respuesta: texto })
+        });
+        cerrarModal('modal-responder-resena');
+        alert('Respuesta enviada.');
+        cargarResenas();
+    } catch(e) { alert('Error: ' + e.message); }
+}
+
+// ══ MONGODB — PREFERENCIAS ════════════════════════════
+var _prefData = [];
+async function cargarPreferencias() {
+    try {
+        _prefData = await api('/api/mongo/preferencias/todos');
+        filtrarPreferencias();
+    } catch(e) { console.error(e); }
+}
+function filtrarPreferencias() {
+    var q = (document.getElementById('pref-buscar').value || '').toLowerCase();
+    var data = _prefData.filter(function(p){
+        return !q || (p.nombreCliente || '').toLowerCase().includes(q);
+    });
+    document.getElementById('pref-count').textContent = data.length + ' cliente' + (data.length !== 1 ? 's' : '');
+    document.getElementById('tabla-preferencias').innerHTML = data.length ?
+        '<table class="tabla"><thead><tr><th>Cliente</th><th>Estilista favorita</th><th>Horario preferido</th><th>Servicios frecuentes</th><th>Notas</th></tr></thead><tbody>' +
+        data.map(function(p){
+            return '<tr>' +
+                '<td style="font-weight:400">' + (p.nombreCliente||'—') + '</td>' +
+                '<td>' + (p.estilistaFavorita||'—') + '</td>' +
+                '<td>' + (p.horarioPreferido||'—') + '</td>' +
+                '<td style="color:var(--mink)">' + (p.serviciosFrecuentes||'—') + '</td>' +
+                '<td style="color:var(--mink);font-size:0.72rem">' + (p.notas||'—') + '</td>' +
+                '</tr>';
+        }).join('') + '</tbody></table>' : '<div class="empty">Sin preferencias guardadas aún</div>';
 }
 
 // ══ MI PERFIL ═════════════════════════════════════════

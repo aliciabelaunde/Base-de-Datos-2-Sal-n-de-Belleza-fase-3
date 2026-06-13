@@ -95,6 +95,66 @@ router.put('/citas/:id', verificarToken, async (req, res) => {
             .input('EstadoID',   sql.Int,      estadoID   ? parseInt(estadoID)   : null)
             .input('NuevaFecha', sql.NVarChar(30), nuevaFecha ? nuevaFecha.replace('T',' ').substring(0,19) : null)
             .execute('Agenda.SP_EditarCitaRecepcion');
+
+        // Si se está completando la cita, guardar en MongoDB
+        if (parseInt(estadoID) === 11) {
+            try {
+                const { getMongo } = require('../mongodb');
+                const db   = getMongo();
+                const pool2 = await poolPromise;
+                const citaData = await pool2.request()
+                    .input('CitaID', sql.Int, parseInt(req.params.id))
+                    .query(`
+                        SELECT cl.ClienteID, p.Nombre AS NombreCliente, p.Apellido AS ApellidoCliente,
+                               p.Email AS EmailCliente, s.Nombre AS Servicio, s.DuracionMin,
+                               pe.Nombre AS NombreEmpleado, pe.Apellido AS ApellidoEmpleado,
+                               sp.Precio AS Total, cd.NotasTecnicas
+                        FROM Agenda.Cita c
+                        JOIN Ventas.Cliente cl ON cl.ClienteID = c.ClienteID
+                        JOIN Personas.Persona p ON p.PersonaID = cl.ClienteID
+                        JOIN Agenda.CitaServicio cs ON cs.CitaID = c.CitaID
+                        JOIN Servicios.Servicio s ON s.ServicioID = cs.ServicioID
+                        JOIN Personas.Persona pe ON pe.PersonaID = cs.EmpleadoID
+                        LEFT JOIN Servicios.ServicioPrecio sp ON sp.ServicioID = s.ServicioID AND sp.FechaFin IS NULL
+                        LEFT JOIN Ventas.ClienteDetalle cd ON cd.ClienteID = cl.ClienteID
+                        LEFT JOIN Agenda.Cita ci ON ci.CitaID = @CitaID
+                        WHERE c.CitaID = @CitaID
+                    `);
+                const cita = citaData.recordset[0];
+                
+                if (cita) {
+                    await db.collection('historial_clientes').updateOne(
+                        { clienteId: cita.ClienteID },
+                        {
+                            $set: {
+                                clienteId:         cita.ClienteID,
+                                nombre:            cita.NombreCliente || '',
+                                apellido:          cita.ApellidoCliente || '',
+                                email:             cita.EmailCliente || '',
+                                sucursal:          'Santa Cruz',
+                                fechaUltimaVisita: new Date()
+                            },
+                            $inc: { totalVisitas: 1, totalGastado: parseFloat(cita.Total || 0) },
+                            $push: {
+                                historial: {
+                                    fecha:               new Date(),
+                                    servicio:            cita.Servicio || '',
+                                    empleado:            cita.NombreEmpleado + ' ' + cita.ApellidoEmpleado,
+                                    duracionMin:         cita.DuracionMin || 0,
+                                    precio:              parseFloat(cita.Total || 0),
+                                    productosUsados:     [],
+                                    notasTecnicas:       cita.NotasTecnicas || '',
+                                    reaccionesAlergicas: [],
+                                    satisfaccion:        null
+                                }
+                            }
+                        },
+                        { upsert: true }
+                    );
+                }
+            } catch(mongoErr) { console.error('MongoDB historial:', mongoErr.message); }
+        }
+
         res.json(result.recordset[0]);
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -430,13 +490,14 @@ router.get('/solicitudes', verificarToken, async (req, res) => {
 });
 
 router.post('/solicitudes/:id/aprobar', verificarToken, async (req, res) => {
-    const { fechaConfirmada } = req.body;
+    const { fechaConfirmada, empleadoID } = req.body;
     if (!fechaConfirmada) return res.status(400).json({ error: 'fechaConfirmada es requerida' });
     try {
         const pool   = await poolPromise;
         const result = await pool.request()
             .input('SolicitudID',     sql.Int,          parseInt(req.params.id))
             .input('FechaConfirmada', sql.NVarChar(30),  fechaConfirmada.replace('T',' ').substring(0,19))
+            .input('EmpleadoID',      sql.Int,           empleadoID ? parseInt(empleadoID) : null)
             .execute('Agenda.SP_AprobarSolicitud');
         res.json(result.recordset[0]);
     } catch (err) { res.status(500).json({ error: err.message }); }

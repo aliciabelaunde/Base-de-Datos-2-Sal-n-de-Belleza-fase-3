@@ -150,6 +150,45 @@ router.put('/citas/:id/completar', verificarToken, async (req, res) => {
             .input('CitaID',     sql.Int, parseInt(req.params.id))
             .input('EmpleadoID', sql.Int, req.usuario.personaID)
             .execute('Agenda.SP_CompletarCita');
+
+        // Guardar en MongoDB historial
+        try {
+            const { getMongo } = require('../mongodb');
+            const db = getMongo();
+            const cita = (result.recordsets && result.recordsets[0] && result.recordsets[0][0]) || result.recordset[0];
+            console.log('Cita completada:', JSON.stringify(cita));
+            if (cita) {
+                await db.collection('historial_clientes').updateOne(
+                    { clienteId: cita.ClienteID },
+                    {
+                        $set: {
+                            clienteId:          cita.ClienteID,
+                            nombre:             cita.NombreCliente || '',
+                            apellido:           cita.ApellidoCliente || '',
+                            email:              cita.EmailCliente || '',
+                            sucursal:           'Santa Cruz',
+                            fechaUltimaVisita:  new Date()
+                        },
+                        $inc: { totalVisitas: 1, totalGastado: parseFloat(cita.Total || 0) },
+                        $push: {
+                            historial: {
+                                fecha:              new Date(),
+                                servicio:           cita.Servicio || '',
+                                empleado:           cita.NombreEmpleado || '',
+                                duracionMin:        cita.DuracionMin || 0,
+                                precio:             parseFloat(cita.Total || 0),
+                                productosUsados:    [],
+                                notasTecnicas:      cita.NotasTecnicas || '',
+                                reaccionesAlergicas:[],
+                                satisfaccion:       null
+                            }
+                        }
+                    },
+                    { upsert: true }
+                );
+            }
+        } catch(mongoErr) { console.error('MongoDB historial:', mongoErr.message); }
+
         res.json(result.recordset[0]);
     } catch (err) { res.status(500).json({ error: err.message }); }
 });

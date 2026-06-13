@@ -801,8 +801,10 @@
     } else {
       localStorage.setItem('token',     data.token);
       localStorage.setItem('nombre',    data.nombre);
+      localStorage.setItem('apellido',  data.apellido || '');
       localStorage.setItem('rol',       data.rol);
       localStorage.setItem('personaID', data.personaID);
+      localStorage.setItem('email',     data.email || '');
       window.location.href = data.ruta;
     }
   } catch(e) {

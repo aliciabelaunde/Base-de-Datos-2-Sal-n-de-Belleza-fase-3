@@ -161,6 +161,21 @@ router.post('/elegir-rol', async (req, res) => {
     }
 });
 
+    // Log de auditoría en MongoDB
+    try {
+        const { getMongo } = require('../mongodb');
+        const db = getMongo();
+        await db.collection('logs_auditoria').insertOne({
+            fecha:    new Date(),
+            accion:   'login',
+            usuario:  email,
+            rol:      rolPrincipal,
+            sucursal: 'Santa Cruz',
+            ip:       req.headers['x-forwarded-for'] || req.socket.remoteAddress,
+            detalle:  'Inicio de sesión exitoso'
+        });
+    } catch(mongoErr) { console.error('MongoDB log:', mongoErr.message); }
+
     // Un solo rol → redirigir directo
     res.json({
       token,
@@ -168,6 +183,7 @@ router.post('/elegir-rol', async (req, res) => {
       nombre:    user.Nombre,
       apellido:  user.Apellido,
       personaID: user.PersonaID,
+      email:     email,
       ruta:      rutas[rolPrincipal] || '/pages/dashboard-cliente.html'
     });
 

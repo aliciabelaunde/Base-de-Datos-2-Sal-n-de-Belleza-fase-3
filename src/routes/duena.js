@@ -467,4 +467,35 @@ router.put('/notificaciones/:id/leer', verificarToken, async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// ══ 16. CLIENTES GLOBAL ═══════════════════════════════
+router.get('/clientes', verificarToken, async (req, res) => {
+    try {
+        const pool   = await poolPromise;
+        const result = await pool.request().execute('Duena.SP_ListarClientes');
+        res.json(result.recordset);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ══ 17. CITAS DEL DÍA GLOBAL ═════════════════════════
+router.get('/citas', verificarToken, async (req, res) => {
+    try {
+        const pool   = await poolPromise;
+        const result = await pool.request().execute('Duena.SP_CitasDelDia');
+        res.json(result.recordset);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ══ 18. FACTURAS GLOBAL ═══════════════════════════════
+router.get('/facturas', verificarToken, async (req, res) => {
+    const { fechaInicio, fechaFin } = req.query;
+    try {
+        const pool   = await poolPromise;
+        const result = await pool.request()
+            .input('FechaInicio', sql.Date, fechaInicio ? new Date(fechaInicio) : null)
+            .input('FechaFin',    sql.Date, fechaFin    ? new Date(fechaFin)    : null)
+            .execute('Duena.SP_ListarFacturas');
+        res.json(result.recordset);
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
 module.exports = router;

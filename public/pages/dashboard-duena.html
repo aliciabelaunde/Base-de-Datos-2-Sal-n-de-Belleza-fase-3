@@ -235,6 +235,23 @@ body { font-family: var(--sans); background: var(--cream); color: var(--espresso
       <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
       <span>Mi equipo</span>
     </div>
+        <div class="nav-group-label">Operaciones globales</div>
+    <div class="nav-item" onclick="nav('clientes',this)">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      <span>Clientes</span>
+    </div>
+    <div class="nav-item" onclick="nav('citas',this)">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span>Citas del día</span>
+    </div>
+    <div class="nav-item" onclick="nav('facturas',this)">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <span>Facturas</span>
+    </div>
+    <div class="nav-item" onclick="nav('resenas',this)">
+  <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+  <span>Reseñas</span>
+</div>
         <div class="nav-group-label">Personal</div>
     <div class="nav-item" onclick="nav('perfil',this)">
       <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -423,6 +440,86 @@ body { font-family: var(--sans); background: var(--cream); color: var(--espresso
       </div>
       <div class="card"><div class="tabla-scroll" id="tabla-promociones"><div class="loading">Cargando...</div></div></div>
     </div>
+
+      <!-- CLIENTES -->
+  <div class="section" id="sec-clientes">
+    <div class="section-header"><h2>Clientes <em style="font-style:italic;color:var(--rose-deep)">globales</em></h2><p>Clientes de ambas sucursales</p></div>
+    <div class="toolbar">
+      <div class="search-box"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="cli-buscar" placeholder="Buscar cliente..." oninput="filtrarClientes()"></div>
+      <select class="filter-select" id="cli-filtro-sucursal" onchange="filtrarClientes()">
+        <option value="">Todas las sucursales</option>
+        <option value="Santa Cruz">Santa Cruz</option>
+        <option value="Cochabamba">Cochabamba</option>
+      </select>
+      <span class="results-count" id="cli-count"></span>
+    </div>
+    <div class="card"><div class="tabla-scroll" id="tabla-clientes"><div class="loading">Cargando...</div></div></div>
+  </div>
+
+  <!-- CITAS DEL DÍA -->
+  <div class="section" id="sec-citas">
+    <div class="section-header"><h2>Citas <em style="font-style:italic;color:var(--rose-deep)">del día</em></h2><p>Agenda global de hoy</p></div>
+    <div class="toolbar">
+      <select class="filter-select" id="citas-filtro-sucursal" onchange="filtrarCitas()">
+        <option value="">Todas las sucursales</option>
+        <option value="Santa Cruz">Santa Cruz</option>
+        <option value="Cochabamba">Cochabamba</option>
+      </select>
+      <span class="results-count" id="citas-count"></span>
+    </div>
+    <div class="card"><div class="tabla-scroll" id="tabla-citas"><div class="loading">Cargando...</div></div></div>
+  </div>
+
+  <!-- FACTURAS -->
+  <div class="section" id="sec-facturas">
+    <div class="section-header"><h2>Facturas <em style="font-style:italic;color:var(--rose-deep)">globales</em></h2><p>Facturación de ambas sucursales</p></div>
+    <div class="toolbar">
+      <div style="display:flex;align-items:center;gap:0.5rem">
+        <label style="font-size:0.65rem;color:var(--mink);letter-spacing:0.1em;text-transform:uppercase">Desde</label>
+        <input type="date" class="filter-select" id="fact-desde">
+      </div>
+      <div style="display:flex;align-items:center;gap:0.5rem">
+        <label style="font-size:0.65rem;color:var(--mink);letter-spacing:0.1em;text-transform:uppercase">Hasta</label>
+        <input type="date" class="filter-select" id="fact-hasta">
+      </div>
+      <select class="filter-select" id="fact-filtro-sucursal" onchange="filtrarFacturas()">
+        <option value="">Todas las sucursales</option>
+        <option value="Santa Cruz">Santa Cruz</option>
+        <option value="Cochabamba">Cochabamba</option>
+      </select>
+      <button class="btn primary" onclick="cargarFacturas()">Buscar</button>
+      <span class="results-count" id="fact-count"></span>
+    </div>
+    <div class="card"><div class="tabla-scroll" id="tabla-facturas"><div class="loading">Cargando...</div></div></div>
+  </div>
+
+    <!-- RESEÑAS GLOBALES -->
+<div class="section" id="sec-resenas">
+  <div class="section-header"><h2>Reseñas <em style="font-style:italic;color:var(--rose-deep)">globales</em></h2><p>Opiniones de clientes de ambas sucursales</p></div>
+  <div class="toolbar">
+    <select class="filter-select" id="res-filtro-sucursal" onchange="filtrarResenasDuena()">
+      <option value="">Todas las sucursales</option>
+      <option value="Santa Cruz">Santa Cruz</option>
+      <option value="Cochabamba">Cochabamba</option>
+    </select>
+    <span class="results-count" id="res-count"></span>
+  </div>
+  <div class="card"><div class="tabla-scroll" id="tabla-resenas-duena"><div class="loading">Cargando...</div></div></div>
+</div>
+
+<div class="modal-overlay" id="modal-responder-resena-duena">
+  <div class="modal-box">
+    <div class="modal-title">Responder reseña</div>
+    <div class="form-field full">
+      <label>Respuesta *</label>
+      <textarea id="modal-respuesta-duena-texto" rows="4" placeholder="Escribe tu respuesta al cliente..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="enviarRespuestaResenaDuena()">Enviar respuesta</button>
+      <button class="btn-secondary" onclick="cerrarModal('modal-responder-resena-duena')">Cancelar</button>
+    </div>
+  </div>
+</div>
 
     <!-- MI PERFIL -->
     <div class="section" id="sec-perfil">
@@ -683,7 +780,16 @@ async function api(url, opts) {
     return res.json();
 }
 function fFecha(f) { if(!f) return '—'; var d=new Date(f); return d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear(); }
-function fHora(f)  { var d=new Date(f); return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0'); }
+function fHora(f)  {
+    if (!f) return '—';
+    var s = typeof f === 'string' ? f : '';
+    if (s.indexOf('T') >= 0) {
+        var t = s.split('T')[1] || '';
+        return t.substring(0, 5);
+    }
+    var d = new Date(f);
+    return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');
+}
 function fISODate(f) { if(!f) return ''; return f.split('T')[0]; }
 function fDelta(a, b) {
     if (!b || b===0) return '';
@@ -702,6 +808,7 @@ var SECCIONES = {
     panel:'Panel ejecutivo', rentabilidad:'Rentabilidad', reportes:'Reportes',
     nomina:'Nómina completa', equipo:'Mi equipo', servicios:'Servicios',
     inventario:'Inventario', proveedores:'Proveedores', promociones:'Promociones',
+    clientes:'Clientes', citas:'Citas del día', facturas:'Facturas', resenas:'Reseñas',
     perfil:'Mi perfil', notificaciones:'Notificaciones'
 };
 
@@ -717,7 +824,9 @@ function nav(id, el) {
     var fns = { panel:cargarPanel, rentabilidad:cargarRentabilidad, reportes:cargarReportes,
         nomina:cargarNomina, equipo:cargarEquipo, servicios:cargarServicios,
         inventario:cargarInventario, proveedores:cargarProveedores,
-        promociones:cargarPromociones, perfil:cargarPerfil, notificaciones:cargarNotificaciones };
+        promociones:cargarPromociones, clientes:cargarClientes, citas:cargarCitas, facturas:cargarFacturas, resenas:cargarResenasDuena,
+        perfil:cargarPerfil, notificaciones:cargarNotificaciones
+    };
     if (fns[id]) fns[id]();
 }
 
@@ -846,6 +955,7 @@ function renderNomina() {
     var data=_nominaData.filter(function(e){
         var matchQ=!q||(e.Nombre+' '+e.Apellido).toLowerCase().includes(q);
         var matchF=!filtro||e.Sucursal===filtro;
+        var eD=e.PagadoPorDuena===1;
         return matchQ&&matchF;
     });
     var div=document.getElementById('lista-nomina');
@@ -853,7 +963,7 @@ function renderNomina() {
     var ts=0,tc=0,tn=0;
     div.innerHTML=data.map(function(e,i){
         ts+=parseFloat(e.SueldoBase)||0; tc+=parseFloat(e.TotalComision)||0; tn+=parseFloat(e.TotalNomina)||0;
-        var ini=(e.Nombre||'').charAt(0)+(e.Apellido||'').charAt(0), col=COLORES[i%COLORES.length], eD=e.Sucursal==='Santa Cruz';
+        var ini=(e.Nombre||'').charAt(0)+(e.Apellido||'').charAt(0), col=COLORES[i%COLORES.length], eD=e.PagadoPorDuena===1;
         return '<div class="nomina-row"><div class="nomina-av" style="background:'+col+'">'+ini.toUpperCase()+'</div>'+
             '<div style="flex:1"><div style="font-size:0.85rem;font-weight:400">'+e.Nombre+' '+e.Apellido+'<span class="nomina-tag '+(eD?'duena':'admin')+'">'+(eD?'Paga dueña':'Paga admin')+'</span></div>'+
             '<div style="font-size:0.68rem;color:var(--mink)">'+e.Sucursal+'</div></div>'+
@@ -1349,6 +1459,132 @@ async function guardarPromocion() {
         }
         cerrarModal('modal-promo'); await cargarPromociones();
     } catch(e){ alert('Error: '+e.message); }
+}
+
+// ══ CLIENTES ══════════════════════════════════════════
+var _clientesData = [];
+async function cargarClientes() {
+    try {
+        _clientesData = await api('/api/duena/clientes');
+        filtrarClientes();
+    } catch(e){ console.error(e); }
+}
+function filtrarClientes() {
+    var q=(document.getElementById('cli-buscar').value||'').toLowerCase();
+    var fSuc=document.getElementById('cli-filtro-sucursal').value;
+    var data=_clientesData.filter(function(c){
+        var mQ=!q||(c.Nombre+' '+c.Apellido+' '+c.Email).toLowerCase().includes(q);
+        var mS=!fSuc||c.Sucursal===fSuc;
+        return mQ&&mS;
+    });
+    document.getElementById('cli-count').textContent=data.length+' cliente'+(data.length!==1?'s':'');
+    document.getElementById('tabla-clientes').innerHTML=data.length?
+        '<table class="tabla"><thead><tr><th>Nombre</th><th>Email</th><th>Teléfono</th><th>Sucursal</th></tr></thead><tbody>'+
+        data.map(function(c){
+            return '<tr><td style="font-weight:400">'+c.Nombre+' '+c.Apellido+'</td><td style="color:var(--mink)">'+c.Email+'</td><td style="color:var(--mink)">'+(c.Telefono||'—')+'</td><td><span class="badge '+(c.Sucursal==='Cochabamba'?'badge-amber':'badge-rose')+'">'+c.Sucursal+'</span></td></tr>';
+        }).join('')+'</tbody></table>' : '<div class="empty">Sin resultados</div>';
+}
+
+// ══ CITAS DEL DÍA ═════════════════════════════════════
+var _citasData = [];
+async function cargarCitas() {
+    try {
+        _citasData = await api('/api/duena/citas');
+        filtrarCitas();
+    } catch(e){ console.error(e); }
+}
+function filtrarCitas() {
+    var fSuc=document.getElementById('citas-filtro-sucursal').value;
+    var data=_citasData.filter(function(c){
+        return !fSuc||c.Sucursal===fSuc;
+    });
+    document.getElementById('citas-count').textContent=data.length+' cita'+(data.length!==1?'s':'');
+    document.getElementById('tabla-citas').innerHTML=data.length?
+        '<table class="tabla"><thead><tr><th>Cliente</th><th>Servicio</th><th>Empleada</th><th>Hora</th><th>Estado</th><th>Sucursal</th></tr></thead><tbody>'+
+        data.map(function(c){
+            return '<tr><td style="font-weight:400">'+c.NombreCliente+' '+c.ApellidoCliente+'</td><td>'+c.Servicio+'</td><td>'+(c.NombreEmpleado ? c.NombreEmpleado+' '+c.ApellidoEmpleado : '<span style="color:var(--mink)">Sin asignar</span>')+'</td><td>'+fHora(c.FechaInicio)+'</td><td><span class="badge badge-green">'+c.Estado+'</span></td><td><span class="badge '+(c.Sucursal==='Cochabamba'?'badge-amber':'badge-rose')+'">'+c.Sucursal+'</span></td></tr>';
+        }).join('')+'</tbody></table>' : '<div class="empty">Sin citas para hoy</div>';
+}
+
+// ══ FACTURAS ══════════════════════════════════════════
+var _facturasData = [];
+async function cargarFacturas() {
+    var desde=document.getElementById('fact-desde').value;
+    var hasta=document.getElementById('fact-hasta').value;
+    try {
+        var url='/api/duena/facturas';
+        if(desde||hasta) url+='?fechaInicio='+desde+'&fechaFin='+hasta;
+        _facturasData = await api(url);
+        filtrarFacturas();
+    } catch(e){ console.error(e); }
+}
+function filtrarFacturas() {
+    var fSuc=document.getElementById('fact-filtro-sucursal').value;
+    var data=_facturasData.filter(function(f){
+        return !fSuc||f.Sucursal===fSuc;
+    });
+    document.getElementById('fact-count').textContent=data.length+' factura'+(data.length!==1?'s':'');
+    document.getElementById('tabla-facturas').innerHTML=data.length?
+        '<table class="tabla"><thead><tr><th>N° Factura</th><th>Cliente</th><th>Fecha</th><th>Total</th><th>Estado</th><th>Sucursal</th></tr></thead><tbody>'+
+        data.map(function(f){
+            return '<tr><td style="font-weight:400">'+f.NumeroFactura+'</td><td>'+f.NombreCliente+' '+f.ApellidoCliente+'</td><td>'+fFecha(f.Fecha)+'</td><td style="font-family:var(--serif);font-size:1rem">Bs '+parseFloat(f.Total).toFixed(2)+'</td><td><span class="badge badge-green">'+f.Estado+'</span></td><td><span class="badge '+(f.Sucursal==='Cochabamba'?'badge-amber':'badge-rose')+'">'+f.Sucursal+'</span></td></tr>';
+        }).join('')+'</tbody></table>' : '<div class="empty">Sin resultados</div>';
+}
+
+// ══ RESEÑAS GLOBALES ══════════════════════════════════
+var _resenasData = [];
+async function cargarResenasDuena() {
+    try {
+        _resenasData = await api('/api/mongo/resenas/global');
+        filtrarResenasDuena();
+    } catch(e) { console.error(e); }
+}
+function filtrarResenasDuena() {
+    var fSuc = document.getElementById('res-filtro-sucursal').value;
+    var data = _resenasData.filter(function(r){
+        return !fSuc || r.sucursal === fSuc;
+    });
+    document.getElementById('res-count').textContent = data.length + ' reseña' + (data.length !== 1 ? 's' : '');
+    document.getElementById('tabla-resenas-duena').innerHTML = data.length ?
+        '<table class="tabla"><thead><tr><th>Fecha</th><th>Cliente</th><th>Servicio</th><th>Calificación</th><th>Comentario</th><th>Respuesta</th><th>Sucursal</th><th>Acción</th></tr></thead><tbody>' +
+        data.map(function(r){
+            var estrellas = '';
+            for(var i=1;i<=5;i++) estrellas += i<=(r.calificacion||0)?'★':'☆';
+            return '<tr>' +
+                '<td style="font-size:0.7rem;color:var(--mink)">' + fFecha(r.fecha) + '</td>' +
+                '<td style="font-weight:400">' + (r.nombreCliente||'—') + '</td>' +
+                '<td>' + (r.servicio||'—') + '</td>' +
+                '<td style="color:var(--warning);font-size:1rem">' + estrellas + '</td>' +
+                '<td style="color:var(--mink)">' + (r.comentario||'—') + '</td>' +
+                '<td style="color:var(--success);font-size:0.72rem">' + (r.respuesta || '<span style="color:var(--sand)">Sin respuesta</span>') + '</td>' +
+                '<td><span class="badge ' + (r.sucursal==='Cochabamba'?'badge-amber':'badge-rose') + '">' + (r.sucursal||'—') + '</span></td>' +
+                '<td><button class="btn-sm solid" onclick="abrirResponderResenaDuena(\'' + r._id + '\',\'' + r.sucursal + '\',\'' + (r.respuesta||'').replace(/'/g,"\\'") + '\')">Responder</button></td>' +
+                '</tr>';
+        }).join('') + '</tbody></table>' : '<div class="empty">Sin reseñas aún</div>';
+}
+
+var _resenaIDDuena = null, _resenaSucursal = null;
+function abrirResponderResenaDuena(id, sucursal, respuestaActual) {
+    _resenaIDDuena  = id;
+    _resenaSucursal = sucursal;
+    document.getElementById('modal-respuesta-duena-texto').value = respuestaActual || '';
+    abrirModal('modal-responder-resena-duena');
+}
+async function enviarRespuestaResenaDuena() {
+    var texto = document.getElementById('modal-respuesta-duena-texto').value;
+    if (!texto) { alert('Escribe una respuesta.'); return; }
+    try {
+        var url = _resenaSucursal === 'Cochabamba'
+            ? '/api/mongo/resenas/' + _resenaIDDuena + '/responder/cbb'
+            : '/api/mongo/resenas/' + _resenaIDDuena + '/responder';
+        await api(url, {
+            method: 'PUT',
+            body: JSON.stringify({ respuesta: texto })
+        });
+        cerrarModal('modal-responder-resena-duena');
+        alert('Respuesta enviada.');
+        cargarResenasDuena();
+    } catch(e) { alert('Error: ' + e.message); }
 }
 
 // ══ MI PERFIL ═════════════════════════════════════════
