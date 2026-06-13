@@ -91,4 +91,41 @@ router.post('/preferencias', verificarToken, async (req, res) => {
     } catch(err) { res.status(500).json({ error: err.message }); }
 });
 
+// ══ RESPONDER RESEÑA ═════════════════════════════════
+router.put('/resenas/:id/responder', verificarToken, async (req, res) => {
+    try {
+        const { ObjectId } = require('mongodb');
+        const db     = getMongo();
+        const result = await db.collection('resenas').updateOne(
+            { _id: new ObjectId(req.params.id) },
+            { $set: {
+                respuesta:      req.body.respuesta,
+                fechaRespuesta: new Date(),
+                respondidoPor:  req.usuario.rol
+            }}
+        );
+        res.json({ ok: true });
+    } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── COMENTAR RESEÑA CBB ──────────────────────────────
+router.post('/resenas/:id/comentar/cbb', verificarToken, async (req, res) => {
+    try {
+        const { ObjectId } = require('mongodb');
+        const db = getMongo();
+        await db.collection('resenas').updateOne(
+            { _id: new ObjectId(req.params.id) },
+            { $push: {
+                comentarios: {
+                    personaID:     req.usuario.personaID ? req.usuario.personaID.toString() : '',
+                    nombreCliente: req.body.nombreCliente,
+                    texto:         req.body.texto,
+                    fecha:         new Date()
+                }
+            }}
+        );
+        res.json({ ok: true });
+    } catch(err) { res.status(500).json({ error: err.message }); }
+});
+
 module.exports = router;

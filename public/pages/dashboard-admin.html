@@ -1244,23 +1244,50 @@ function filtrarHistorial() {
 }
 
 // ══ MONGODB — RESEÑAS ═════════════════════════════════
+var _resenasAdmin = [];
 async function cargarResenas() {
     try {
-        var data = await api('/api/mongo/resenas');
-        document.getElementById('tabla-resenas').innerHTML = data.length ?
-            '<table class="tabla"><thead><tr><th>Fecha</th><th>Cliente</th><th>Servicio</th><th>Calificación</th><th>Comentario</th></tr></thead><tbody>' +
-            data.map(function(r){
-                var estrellas = '';
-                for(var i=1;i<=5;i++) estrellas += i<=(r.calificacion||0)?'★':'☆';
-                return '<tr>' +
-                    '<td style="font-size:0.7rem;color:var(--mink)">' + fFecha(r.fecha) + '</td>' +
-                    '<td style="font-weight:400">' + (r.nombreCliente||'—') + '</td>' +
-                    '<td>' + (r.servicio||'—') + '</td>' +
-                    '<td style="color:var(--warning);font-size:1rem">' + estrellas + '</td>' +
-                    '<td style="color:var(--mink)">' + (r.comentario||'—') + '</td>' +
-                    '</tr>';
-            }).join('') + '</tbody></table>' : '<div class="empty">Sin reseñas aún</div>';
+        _resenasAdmin = await api('/api/mongo/resenas');
+        renderResenas();
     } catch(e) { console.error(e); }
+}
+function renderResenas() {
+    var data = _resenasAdmin;
+    document.getElementById('tabla-resenas').innerHTML = data.length ?
+        '<table class="tabla"><thead><tr><th>Fecha</th><th>Cliente</th><th>Servicio</th><th>Calificación</th><th>Comentario</th><th>Respuesta</th><th>Acción</th></tr></thead><tbody>' +
+        data.map(function(r){
+            var estrellas = '';
+            for(var i=1;i<=5;i++) estrellas += i<=(r.calificacion||0)?'★':'☆';
+            return '<tr>' +
+                '<td style="font-size:0.7rem;color:var(--mink)">' + fFecha(r.fecha) + '</td>' +
+                '<td style="font-weight:400">' + (r.nombreCliente||'—') + '</td>' +
+                '<td>' + (r.servicio||'—') + '</td>' +
+                '<td style="color:var(--warning);font-size:1rem">' + estrellas + '</td>' +
+                '<td style="color:var(--mink)">' + (r.comentario||'—') + '</td>' +
+                '<td style="color:var(--success);font-size:0.72rem">' + (r.respuesta || '<span style="color:var(--sand)">Sin respuesta</span>') + '</td>' +
+                '<td><button class="btn-sm solid" onclick="abrirResponderResena(\'' + r._id + '\',\'' + (r.respuesta||'').replace(/'/g,"\\'") + '\')">Responder</button></td>' +
+                '</tr>';
+        }).join('') + '</tbody></table>' : '<div class="empty">Sin reseñas aún</div>';
+}
+
+var _resenaIDActual = null;
+function abrirResponderResena(id, respuestaActual) {
+    _resenaIDActual = id;
+    document.getElementById('modal-respuesta-texto').value = respuestaActual || '';
+    abrirModal('modal-responder-resena');
+}
+async function enviarRespuestaResena() {
+    var texto = document.getElementById('modal-respuesta-texto').value;
+    if (!texto) { alert('Escribe una respuesta.'); return; }
+    try {
+        await api('/api/mongo/resenas/' + _resenaIDActual + '/responder', {
+            method: 'PUT',
+            body: JSON.stringify({ respuesta: texto })
+        });
+        cerrarModal('modal-responder-resena');
+        alert('Respuesta enviada.');
+        cargarResenas();
+    } catch(e) { alert('Error: ' + e.message); }
 }
 
 // ══ MONGODB — PREFERENCIAS ════════════════════════════
@@ -1355,5 +1382,18 @@ async function marcarLeida(id,el) {
 
 cargarPanel();
 </script>
+<div class="modal-overlay" id="modal-responder-resena">
+  <div class="modal-box">
+    <div class="modal-title">Responder reseña</div>
+    <div class="form-field full">
+      <label>Respuesta *</label>
+      <textarea id="modal-respuesta-texto" rows="4" placeholder="Escribe tu respuesta al cliente..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="enviarRespuestaResena()">Enviar respuesta</button>
+      <button class="btn-secondary" onclick="cerrarModal('modal-responder-resena')">Cancelar</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>

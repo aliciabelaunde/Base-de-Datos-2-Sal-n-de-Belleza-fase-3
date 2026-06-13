@@ -572,10 +572,14 @@ body { font-family: var(--sans); background: var(--cream); color: var(--espresso
       <button class="btn-primary" onclick="enviarResena()">Enviar reseña</button>
     </div>
   </div>
-  <div class="card" style="margin-top:1.25rem">
+<div class="card" style="margin-top:1.25rem">
     <div class="card-title">Mis reseñas anteriores</div>
     <div id="lista-resenas"><div class="loading">Cargando...</div></div>
-  </div>
+</div>
+<div class="card" style="margin-top:1.25rem">
+    <div class="card-title">Reseñas de otros clientes</div>
+    <div id="lista-resenas-todas"><div class="loading">Cargando...</div></div>
+</div>
 </div>
 
 <!-- PREFERENCIAS -->
@@ -1603,27 +1607,91 @@ async function enviarResena() {
     } catch(e) { alert('Error: ' + e.message); }
 }
 async function cargarResenas() {
+    var personaID = localStorage.getItem('personaID') || '';
+    var data = [];
     try {
-        var personaID = localStorage.getItem('personaID') || '';
-        var data      = await api('/api/mongo/resenas');
-        var mias      = data.filter(function(r){ return r.personaID === personaID; });
-        var div       = document.getElementById('lista-resenas');
-        if (!mias.length) { div.innerHTML = '<div class="empty">Aún no has dejado reseñas</div>'; return; }
-        div.innerHTML = mias.map(function(r){
-            var estrellas = '';
-            for(var i=1;i<=5;i++) estrellas += i<=(r.calificacion||0)?'★':'☆';
-            return '<div style="padding:0.75rem 0;border-bottom:1px solid var(--sand)">' +
-                '<div style="display:flex;justify-content:space-between;margin-bottom:0.3rem">' +
-                '<span style="font-weight:400">' + (r.servicio||'—') + '</span>' +
-                '<span style="color:var(--warning)">' + estrellas + '</span>' +
-                '</div>' +
-                '<div style="font-size:0.75rem;color:var(--mink)">' + (r.comentario||'') + '</div>' +
-                '<div style="font-size:0.65rem;color:var(--sand);margin-top:0.2rem">' + fFecha(r.fecha) + '</div>' +
-                '</div>';
-        }).join('');
+        data = await api('/api/mongo/resenas');
     } catch(e) { console.error(e); }
+
+    // Mis reseñas
+    var mias = data.filter(function(r){ return r.personaID === personaID; });
+    var div = document.getElementById('lista-resenas');
+    if (!mias.length) { div.innerHTML = '<div class="empty">Aún no has dejado reseñas</div>'; }
+    else { div.innerHTML = mias.map(renderResena).join(''); }
+
+    // Reseñas de otros clientes
+    var otras = data.filter(function(r){ return r.personaID !== personaID; });
+    var divOtras = document.getElementById('lista-resenas-todas');
+    if (!divOtras) return;
+    if (!otras.length) { divOtras.innerHTML = '<div class="empty">Sin reseñas de otros clientes aún</div>'; return; }
+    divOtras.innerHTML = otras.map(renderResena).join('');
 }
 
+function renderResena(r) {
+    var estrellas = '';
+    for (var i = 1; i <= 5; i++) estrellas += i <= (r.calificacion || 0) ? '★' : '☆';
+
+    // Comentarios existentes
+    var comentariosHTML = '';
+    if (r.comentarios && r.comentarios.length) {
+        comentariosHTML = '<div style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid var(--sand)">' +
+            '<div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--mink);margin-bottom:0.5rem">Comentarios</div>' +
+            r.comentarios.map(function(c){
+                return '<div style="display:flex;gap:0.5rem;margin-bottom:0.5rem">' +
+                    '<div style="width:24px;height:24px;border-radius:50%;background:var(--rose);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:0.7rem;color:white;flex-shrink:0">' +
+                    (c.nombreCliente||'?').charAt(0).toUpperCase() + '</div>' +
+                    '<div><div style="font-size:0.72rem;font-weight:400;color:var(--espresso)">' + (c.nombreCliente||'—') + '</div>' +
+                    '<div style="font-size:0.72rem;color:var(--mink)">' + (c.texto||'') + '</div>' +
+                    '<div style="font-size:0.62rem;color:var(--sand)">' + fFecha(c.fecha) + '</div></div>' +
+                    '</div>';
+            }).join('') +
+            '</div>';
+    }
+
+    // Form para comentar
+    var resenaID  = r._id ? r._id.toString() : '';
+    var sucursal  = r.sucursal || 'Santa Cruz';
+    var formHTML  = '<div style="margin-top:0.75rem;display:flex;gap:0.5rem;align-items:center">' +
+        '<input type="text" id="com-' + resenaID + '" placeholder="Escribe un comentario..." ' +
+        'style="flex:1;border:none;border-bottom:1px solid var(--sand);font-family:var(--sans);font-size:0.75rem;color:var(--espresso);outline:none;padding:0.3rem 0;background:none">' +
+        '<button class="btn-sm outline" onclick="enviarComentario(\'' + resenaID + '\',\'' + sucursal + '\')">Enviar</button>' +
+        '</div>';
+
+    return '<div style="padding:0.75rem 0;border-bottom:1px solid var(--sand)">' +
+        '<div style="display:flex;justify-content:space-between;margin-bottom:0.3rem">' +
+        '<span style="font-weight:400">' + (r.servicio || '—') + '</span>' +
+        '<span style="color:var(--warning)">' + estrellas + '</span>' +
+        '</div>' +
+        (r.nombreCliente ? '<div style="font-size:0.68rem;color:var(--mink);margin-bottom:0.2rem">— ' + r.nombreCliente + '</div>' : '') +
+        '<div style="font-size:0.75rem;color:var(--mink)">' + (r.comentario || '') + '</div>' +
+        '<div style="font-size:0.65rem;color:var(--sand);margin-top:0.2rem">' + fFecha(r.fecha) + '</div>' +
+        (r.respuesta ?
+            '<div style="margin-top:0.5rem;padding:0.5rem 0.75rem;background:var(--cream);border-left:3px solid var(--rose-deep);border-radius:2px">' +
+            '<div style="font-size:0.65rem;font-weight:500;color:var(--rose-deep);margin-bottom:0.2rem">Respuesta del salón</div>' +
+            '<div style="font-size:0.75rem;color:var(--espresso)">' + r.respuesta + '</div>' +
+            '</div>' : '') +
+        comentariosHTML +
+        formHTML +
+        '</div>';
+}
+
+async function enviarComentario(resenaID, sucursal) {
+    var input  = document.getElementById('com-' + resenaID);
+    var texto  = input ? input.value.trim() : '';
+    if (!texto) return;
+    var nombre = localStorage.getItem('nombre') || 'Cliente';
+    var url    = sucursal === 'Cochabamba'
+        ? '/api/mongo/resenas/' + resenaID + '/comentar/cbb'
+        : '/api/mongo/resenas/' + resenaID + '/comentar';
+    try {
+        await api(url, { method: 'POST', body: JSON.stringify({
+            nombreCliente: nombre,
+            texto:         texto
+        })});
+        input.value = '';
+        cargarResenas(); // recargar para mostrar el comentario nuevo
+    } catch(e) { alert('Error: ' + e.message); }
+}
 // ── PREFERENCIAS ──────────────────────────────────────
 async function cargarPreferencias() {
     var personaID = localStorage.getItem('personaID') || '';
